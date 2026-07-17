@@ -13,14 +13,16 @@ const COLUMNS = [
   },
   {
     title: "Kontakt",
-    links: [
-      "kontakt@selmir-suljkanovic.de",
-      "+49 000 0000000",
-      "Musterstraße 00",
-      "40000 Düsseldorf",
-    ],
+    links: ["info@sh-wachstum.de", "0201 - 498 692 20"],
   },
 ];
+
+/** mailto: for emails, tel: for phone numbers, otherwise a plain anchor. */
+function linkHref(label: string): string {
+  if (label.includes("@")) return `mailto:${label}`;
+  if (/\d{3,}/.test(label)) return `tel:${label.replace(/[^\d+]/g, "")}`;
+  return "#";
+}
 
 // SVGs that already include their own white card background
 const FULL_CARD = [
@@ -111,7 +113,7 @@ export default function FooterSection() {
                 {col.links.map((l) => (
                   <a
                     key={l}
-                    href="#"
+                    href={linkHref(l)}
                     className="font-body text-[15px] tracking-[-0.2px] text-white/[0.52] transition-colors hover:text-white/80"
                   >
                     {l}
