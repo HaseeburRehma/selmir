@@ -34,7 +34,7 @@ export default function UeberPage() {
             {/* centered portrait band */}
             <div className="absolute inset-y-0 left-1/2 w-full max-w-[1040px] -translate-x-1/2">
               <Image
-                src="/aboutus.jpg"
+                src="/figma/about/aboutus.jpg"
                 alt=""
                 fill
                 priority
@@ -157,7 +157,7 @@ export default function UeberPage() {
               {/* interview photo backdrop */}
               <div className="absolute inset-0">
                 <Image
-                  src="/interview.jpg"
+                  src="/figma/about/interview.jpg"
                   alt="Selmir Suljkanovic im Interview"
                   fill
                   sizes="(max-width: 1024px) 100vw, 1200px"
