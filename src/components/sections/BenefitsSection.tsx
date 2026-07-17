@@ -54,12 +54,12 @@ export default function BenefitsSection() {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {BENEFITS.map((b, i) => (
             <Reveal key={b.title} delay={(i % 3) * 0.08}>
-              <article className="group h-full rounded-2xl border border-white/10 bg-white/[0.02] p-7 transition-colors duration-300 hover:border-purple-2/40 hover:bg-white/[0.04]">
+              <article className="group h-full rounded-2xl border border-white/10 bg-white/[0.02] px-7 pb-8 pt-6 transition-colors duration-300 hover:border-purple-2/40 hover:bg-white/[0.04]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={b.icon}
                   alt=""
-                  className="mb-4 -ml-2 h-[84px] w-auto transition-transform duration-300 group-hover:scale-105"
+                  className="mx-auto mb-6 h-[180px] w-auto transition-transform duration-300 group-hover:scale-105"
                 />
                 <h3 className="mb-3 font-serif text-[20px] leading-[1.3] text-white">
                   {b.title}

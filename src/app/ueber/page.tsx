@@ -73,7 +73,7 @@ export default function UeberPage() {
               className="flex w-full flex-col items-center gap-4 sm:w-auto sm:flex-row"
             >
               <Button href="/#tickets" icon={<ArrowUpRight className="size-5" />}>
-                Jetzt Ticket sichern
+                 Ticket sichern
               </Button>
               <Button
                 href="/#event"
@@ -194,7 +194,7 @@ export default function UeberPage() {
                       className="h-11 px-5 text-[11px]"
                       icon={<ArrowUpRight className="size-4" />}
                     >
-                      Jetzt Ticket sichern
+                      Ticket sichern
                     </Button>
                   </div>
                 </div>
@@ -259,7 +259,7 @@ export default function UeberPage() {
               </p>
 
               <div className="relative z-10 pt-2">
-                <Button href="/#tickets">Jetzt Ticket sichern</Button>
+                <Button href="/#tickets"> Ticket sichern</Button>
               </div>
             </div>
           </Reveal>
