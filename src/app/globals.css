@@ -133,6 +133,14 @@ body {
   }
 }
 
+/* Marquee track animations (plain classes — theme vars get tree-shaken) */
+.marquee-anim {
+  animation: marquee 40s linear infinite;
+}
+.marquee-anim-slow {
+  animation: marquee 60s linear infinite;
+}
+
 /* Pause any marquee on hover of its track */
 .marquee-track:hover {
   animation-play-state: paused;

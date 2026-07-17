@@ -26,10 +26,11 @@ export function Marquee({
   return (
     <div className={`fade-x w-full overflow-hidden ${className}`}>
       <div
-        className={`flex w-max ${pauseOnHover ? "marquee-track" : ""}`}
+        className={`flex w-max ${
+          speed === "marquee-slow" ? "marquee-anim-slow" : "marquee-anim"
+        } ${pauseOnHover ? "marquee-track" : ""}`}
         style={{
           gap: `${gap}px`,
-          animation: `var(--animate-${speed})`,
           animationDirection: reverse ? "reverse" : "normal",
         }}
       >
