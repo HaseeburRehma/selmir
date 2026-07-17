@@ -66,9 +66,9 @@ function WhiteChip({ children }: { children: React.ReactNode }) {
 
 export default function FooterSection() {
   return (
-    <footer id="footer" className="relative overflow-hidden bg-[#07050e] px-6 pt-24 md:px-12 lg:px-[120px]">
-      <div className="mx-auto flex max-w-[1440px] flex-col gap-14">
-        <div className="flex flex-col justify-between gap-14 lg:flex-row">
+    <footer id="footer" className="relative overflow-hidden bg-[#07050e] px-6 pt-16 md:px-12 md:pt-24 lg:px-[120px]">
+      <div className="mx-auto flex max-w-[1440px] flex-col gap-10 md:gap-14">
+        <div className="flex flex-col justify-between gap-10 md:gap-14 lg:flex-row">
           {/* Brand + socials */}
           <div className="flex w-full max-w-[360px] flex-col gap-7">
             <Logo className="items-start" />
@@ -117,10 +117,10 @@ export default function FooterSection() {
             </div>
           </div>
 
-          {/* Link columns */}
-          <div className="flex flex-wrap gap-x-16 gap-y-10 md:gap-x-[88px]">
+          {/* Link columns — stacked on mobile, row on larger screens */}
+          <div className="flex flex-col gap-10 sm:flex-row sm:flex-wrap sm:gap-x-16 sm:gap-y-10 md:gap-x-[88px]">
             {COLUMNS.map((col) => (
-              <div key={col.title} className="flex flex-col gap-[18px]">
+              <div key={col.title} className="flex flex-col gap-3.5 md:gap-[18px]">
                 <p className="font-body text-[15px] font-semibold tracking-[-0.2px] text-white">
                   {col.title}
                 </p>

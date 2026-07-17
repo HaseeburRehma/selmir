@@ -86,7 +86,7 @@ export default function AboutSection() {
             </div>
 
             <div className="pt-2">
-              <Button href="#tickets">Basic Ticket ab 99€ sichern!</Button>
+              <Button href="#tickets">Basic Ticket ab 69€ sichern!</Button>
             </div>
           </div>
         </Reveal>
