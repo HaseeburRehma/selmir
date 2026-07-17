@@ -37,10 +37,36 @@ const greatVibes = Great_Vibes({
   display: "swap",
 });
 
+const SITE_TITLE = "Sales Mastery Days 2026 — Selmir Suljkanovic";
+const SITE_DESCRIPTION =
+  "Das wichtigste Event im Jahr 2026 für Selbstständige und Unternehmer. Zwei Tage, die deinen Vertrieb neu aufstellen. Live in Düsseldorf mit Selmir Suljkanovic.";
+
 export const metadata: Metadata = {
-  title: "Sales Mastery Days 2026 — Selmir Suljkanovic",
-  description:
-    "Das wichtigste Event im Jahr 2026 für Selbstständige und Unternehmer. Zwei Tage, die deinen Vertrieb neu aufstellen. Live in Düsseldorf mit Selmir Suljkanovic.",
+  metadataBase: new URL("https://selmir-suljkanovic.de"),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: "https://selmir-suljkanovic.de",
+    siteName: "Selmir Suljkanovic",
+    locale: "de_DE",
+    type: "website",
+    images: [
+      {
+        url: "/og.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Sales Mastery Days 2026 — Selmir Suljkanovic, 21.11 & 22.11.2026, Düsseldorf",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: ["/og.jpg"],
+  },
 };
 
 export default function RootLayout({

@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/Button";
 import { Marquee } from "@/components/ui/Marquee";
 import { YouTubeLite } from "@/components/ui/YouTubeLite";
 
+// Order matters: e.optimum directly next to Hörmann; Profina further back
 const PARTNER_LOGOS = [
-  "/figma/hero/logo-eoptimum.png",
-  "/figma/hero/logo-2.png",
-  "/figma/hero/logo-3.png",
-  "/figma/hero/logo-4.png",
-  "/figma/hero/logo-5.png",
-  "/figma/hero/logo-6.png",
+  "/figma/hero/logo-eoptimum.png", // e.optimum
+  "/figma/hero/logo-3.png", // Hörmann
+  "/figma/hero/logo-4.png", // Geerkens GmbH
+  "/figma/hero/logo-5.png", // Pattberg
+  "/figma/hero/logo-2.png", // Profina
+  "/figma/hero/logo-6.png", // Jürgen Hohnen
 ];
 
 export default function HeroSection() {
@@ -53,14 +54,14 @@ export default function HeroSection() {
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <Button href="#tickets" icon={<ArrowUpRight className="size-5" />}>
-              Jetzt Ticket sichern
+              Ticket sichern
             </Button>
             <Button
-              href="#tickets"
+              href="#event"
               variant="secondary"
               icon={<ArrowRight className="size-5" />}
             >
-              Ticket sichern
+              Infos zum Event
             </Button>
           </div>
         </div>

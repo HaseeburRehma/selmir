@@ -52,7 +52,7 @@ export default function Navbar() {
 
         <div className="hidden lg:block">
           <Button href="#tickets" className="h-12 px-6 text-[13px]">
-            Potenzialanalyse sichern
+            TICKET SICHERN
           </Button>
         </div>
 
@@ -83,7 +83,7 @@ export default function Navbar() {
             ))}
             <li className="pt-2">
               <Button href="#tickets" full icon={<CalendarDays className="size-5" />}>
-                Potenzialanalyse sichern
+                Ticket sichern
               </Button>
             </li>
           </ul>
