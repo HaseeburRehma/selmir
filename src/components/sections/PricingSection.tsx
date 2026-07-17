@@ -35,7 +35,7 @@ const TIERS: Tier[] = [
     features: [
       "Fast Lane Zugang",
       "Sitzplätze in der ersten Reihe",
-      "Wachstum bedeutet mehr Chaos statt mehr Freiheit.",
+      
       "Mittag- und Abendessen mit First Class Teilnehmern und Selmir Suljkanovic",
       "Goodiebag mit exklusiven Seminarunterlagen",
       "Roundtable und Q&A mit Selmir Suljkanovic",
