@@ -21,17 +21,27 @@ export default function UeberPage() {
       <main>
         {/* Hero */}
         <section className="relative overflow-hidden bg-bg pt-[96px]">
-          {/* dimmed background photo */}
+          {/* dimmed background portrait + grid pattern */}
           <div aria-hidden className="absolute inset-0">
-            <Image
-              src="/gallery/g1.jpg"
-              alt=""
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover object-[center_20%] opacity-30"
+            <div className="absolute left-1/2 top-0 h-[130%] w-[900px] max-w-none -translate-x-1/2">
+              <Image
+                src="/about-hero.jpg"
+                alt=""
+                fill
+                priority
+                sizes="900px"
+                className="object-cover object-top opacity-45"
+              />
+            </div>
+            {/* subtle grid lines */}
+            <div
+              className="absolute inset-0 opacity-[0.5]"
+              style={{
+                backgroundImage:
+                  "repeating-linear-gradient(to right, rgba(255,255,255,0.045) 0 1px, transparent 1px 96px), repeating-linear-gradient(to bottom, rgba(255,255,255,0.045) 0 1px, transparent 1px 96px)",
+              }}
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-bg/60 via-bg/40 to-bg" />
+            <div className="absolute inset-0 bg-gradient-to-b from-bg/70 via-bg/35 to-bg" />
           </div>
 
           <div className="container-page relative z-10 flex flex-col items-center gap-8 py-20 text-center md:py-28">
