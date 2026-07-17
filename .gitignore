@@ -47,4 +47,4 @@ next-env.d.ts
 /public/*.jpg
 /public/*.webp
 /public/hf_*.webp
-/public/Selmir Logo*.png
+/public/Selmir Logo*

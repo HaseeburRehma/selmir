@@ -17,8 +17,11 @@ const COLUMNS = [
   },
 ];
 
-/** mailto: for emails, tel: for phone numbers, otherwise a plain anchor. */
+/** Route legal links, mailto: for emails, tel: for phone numbers. */
 function linkHref(label: string): string {
+  const l = label.toLowerCase();
+  if (l.includes("impressum")) return "/impressum";
+  if (l.includes("datenschutz")) return "/datenschutz";
   if (label.includes("@")) return `mailto:${label}`;
   if (/\d{3,}/.test(label)) return `tel:${label.replace(/[^\d+]/g, "")}`;
   return "#";
@@ -137,8 +140,8 @@ export default function FooterSection() {
         <div className="flex flex-col items-start justify-between gap-4 font-body text-[14px] tracking-[-0.2px] text-white/45 sm:flex-row sm:items-center">
           <p>© 2026 Selmir Suljkanovic. Alle Rechte vorbehalten.</p>
           <div className="flex gap-7">
-            <a href="#" className="transition-colors hover:text-white/70">Impressum</a>
-            <a href="#" className="transition-colors hover:text-white/70">Datenschutz</a>
+            <a href="/impressum" className="transition-colors hover:text-white/70">Impressum</a>
+            <a href="/datenschutz" className="transition-colors hover:text-white/70">Datenschutz</a>
           </div>
         </div>
       </div>

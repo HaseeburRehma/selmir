@@ -150,16 +150,17 @@ export default function PricingSection() {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`${tier.name} Ticket sichern`}
-                      className={`group/ticket relative block aspect-[2000/850] w-full overflow-hidden rounded-lg transition-transform duration-300 hover:-translate-y-1 ${
+                      className={`group/ticket block w-full overflow-hidden rounded-lg transition-transform duration-300 hover:-translate-y-1 ${
                         gold ? "max-w-[372px]" : ""
                       }`}
                     >
                       <Image
                         src={tier.ticket}
                         alt={`${tier.name} Ticket — Sales Mastery Days`}
-                        fill
-                        sizes="400px"
-                        className="object-contain transition-transform duration-500 group-hover/ticket:scale-[1.03]"
+                        width={2000}
+                        height={860}
+                        sizes="(max-width: 768px) 90vw, 400px"
+                        className="h-auto w-full transition-transform duration-500 group-hover/ticket:scale-[1.03]"
                       />
                     </a>
 
