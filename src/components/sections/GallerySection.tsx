@@ -10,7 +10,7 @@ const PHOTOS = [
 
 function Photo({ src }: { src: string }) {
   return (
-    <div className="h-[260px] w-[400px] shrink-0 overflow-hidden rounded-2xl md:h-[320px] md:w-[520px]">
+    <div className="h-[170px] w-[260px] shrink-0 overflow-hidden rounded-xl sm:h-[230px] sm:w-[360px] sm:rounded-2xl md:h-[320px] md:w-[520px]">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}

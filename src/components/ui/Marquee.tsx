@@ -30,16 +30,19 @@ export function Marquee({
           speed === "marquee-slow" ? "marquee-anim-slow" : "marquee-anim"
         } ${pauseOnHover ? "marquee-track" : ""}`}
         style={{
-          gap: `${gap}px`,
+          gap: `clamp(20px, 6vw, ${gap}px)`,
           animationDirection: reverse ? "reverse" : "normal",
         }}
       >
-        <div className="flex shrink-0 items-center" style={{ gap: `${gap}px` }}>
+        <div
+          className="flex shrink-0 items-center"
+          style={{ gap: `clamp(20px, 6vw, ${gap}px)` }}
+        >
           {children}
         </div>
         <div
           className="flex shrink-0 items-center"
-          style={{ gap: `${gap}px` }}
+          style={{ gap: `clamp(20px, 6vw, ${gap}px)` }}
           aria-hidden
         >
           {children}

@@ -39,7 +39,7 @@ export default function BenefitsSection() {
       <div className="container-page">
         <Reveal className="mx-auto mb-14 flex max-w-[760px] flex-col items-center text-center md:mb-20">
           <span className="mb-6 inline-flex items-center rounded-full border border-purple-1/40 bg-purple-1/10 px-4 py-1.5 font-label text-[11px] uppercase tracking-[0.2em] text-purple-2">
-            Über Event
+           INFOS ZUM EVENT
           </span>
           <h2 className="font-serif text-[34px] leading-[1.15] tracking-[-0.5px] text-white md:text-[48px]">
             Warum du dieses Event auf keinen Fall verpassen solltest
