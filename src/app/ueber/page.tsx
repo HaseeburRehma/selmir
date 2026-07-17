@@ -25,7 +25,7 @@ export default function UeberPage() {
           <div aria-hidden className="absolute inset-0">
             <div className="absolute left-1/2 top-0 h-[130%] w-[900px] max-w-none -translate-x-1/2">
               <Image
-                src="/about-hero.jpg"
+                src="/aboutus.jpg"
                 alt=""
                 fill
                 priority
@@ -146,35 +146,48 @@ export default function UeberPage() {
           </div>
         </section>
 
-        {/* Leidenschaft für Entwicklung — feature banner */}
+        {/* Leidenschaft für Entwicklung — interview banner */}
         <section className="bg-bg px-6 pb-20 md:px-12 md:pb-28 lg:px-[120px]">
           <Reveal className="mx-auto max-w-[1440px]">
-            <div className="relative overflow-hidden rounded-[24px] border border-white/10">
-              {/* backdrop photo */}
+            <div className="relative overflow-hidden rounded-[20px]">
+              {/* interview photo backdrop */}
               <div className="absolute inset-0">
                 <Image
-                  src="/gallery/g2.jpg"
-                  alt=""
+                  src="/interview.jpg"
+                  alt="Selmir Suljkanovic im Interview"
                   fill
                   sizes="(max-width: 1024px) 100vw, 1200px"
-                  className="object-cover object-center opacity-90"
+                  className="object-cover object-[center_30%]"
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/25 to-black/85" />
+                {/* scrims for text legibility */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/25 to-black/20" />
+                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
               </div>
 
-              <div className="relative z-10 flex min-h-[420px] flex-col justify-between gap-12 p-7 md:min-h-[520px] md:p-12">
-                <div className="max-w-[560px]">
-                  <h2 className="font-serif text-[28px] leading-[1.25] tracking-[-0.8px] text-white md:text-[40px] md:tracking-[-1.2px]">
-                    Leidenschaft für Entwicklung: Menschen und{" "}
-                    <span className="rounded-md bg-purple-1 px-2 font-display text-white">
-                      Organisationen
+              {/* thin white inset frame */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-3 z-20 rounded-[10px] border border-white/60 md:inset-5"
+              />
+
+              <div className="relative z-10 flex min-h-[440px] flex-col justify-between gap-12 p-8 md:min-h-[560px] md:p-14">
+                <div className="max-w-[560px] pt-2 md:pt-4">
+                  <h2 className="text-[26px] leading-[1.3] tracking-[-0.5px] text-white md:text-[36px] md:tracking-[-0.8px]">
+                    <span className="font-serif">
+                      Leidenschaft für Entwicklung:
                     </span>{" "}
-                    wachsen lassen
+                    <span className="font-display">
+                      Menschen und{" "}
+                      <span className="rounded-md bg-purple-1 px-2">
+                        Organisationen
+                      </span>{" "}
+                      wachsen lassen
+                    </span>
                   </h2>
                   <div className="mt-6">
                     <Button
                       href="/#tickets"
-                      className="h-12 px-5 text-[12px]"
+                      className="h-11 px-5 text-[11px]"
                       icon={<ArrowUpRight className="size-4" />}
                     >
                       Jetzt Ticket sichern
@@ -183,7 +196,7 @@ export default function UeberPage() {
                 </div>
 
                 <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between md:gap-16">
-                  <p className="max-w-[440px] font-body text-[13px] leading-[1.6] text-white/75 md:text-[14px]">
+                  <p className="max-w-[420px] font-body text-[12px] leading-[1.6] text-white/75 md:text-[13px]">
                     Nichts erfüllt Selmir mehr als das Wachstum der Menschen um
                     ihn herum. Sein Engagement in der persönlichen und
                     professionellen Entwicklung seiner Klienten und Mitarbeiter
@@ -192,11 +205,11 @@ export default function UeberPage() {
                     Einzelpersonen und Teams, ihr volles Potenzial zu entfalten
                     und herausragende Ergebnisse zu erzielen.
                   </p>
-                  <div className="max-w-[400px]">
-                    <h3 className="font-body text-[17px] font-semibold leading-[1.35] text-white md:text-[19px]">
+                  <div className="max-w-[420px]">
+                    <h3 className="font-serif text-[20px] leading-[1.3] tracking-[-0.3px] text-white md:text-[24px]">
                       Deine Reise zum Erfolg sollte nicht länger warten.
                     </h3>
-                    <p className="mt-3 font-body text-[13px] leading-[1.6] text-white/70 md:text-[14px]">
+                    <p className="mt-3 font-body text-[12px] leading-[1.6] text-white/75 md:text-[13px]">
                       Entdecke gemeinsam mit Selmirs Team, welches aus erfahrenen
                       Unternehmensberatern und Experten besteht, ein
                       unvergessliches Erstgespräch und beginne den Weg zu einem
