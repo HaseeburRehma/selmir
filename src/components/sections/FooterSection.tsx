@@ -139,10 +139,15 @@ export default function FooterSection() {
         </div>
 
         {/* Press logos */}
-        <div className="flex flex-wrap items-center gap-8 opacity-50">
+        <div className="flex flex-nowrap items-center justify-center gap-5 opacity-50 sm:justify-start sm:gap-8">
           {PRESS.map((p) => (
             // eslint-disable-next-line @next/next/no-img-element
-            <img key={p} src={`/figma/footer/${p}`} alt="" className="h-[26px] w-auto object-contain" />
+            <img
+              key={p}
+              src={`/figma/footer/${p}`}
+              alt=""
+              className="h-[18px] w-auto shrink-0 object-contain sm:h-[26px]"
+            />
           ))}
         </div>
 

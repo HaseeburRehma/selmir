@@ -42,8 +42,9 @@ export function VideoCarousel({ videoIds, interval = 4500 }: VideoCarouselProps)
     const leave = () => (pausedRef.current = false);
     el.addEventListener("mouseenter", enter);
     el.addEventListener("mouseleave", leave);
+    const isSliderLayout = () => window.matchMedia("(min-width: 640px)").matches;
     const id = setInterval(() => {
-      if (pausedRef.current || stoppedRef.current) return;
+      if (pausedRef.current || stoppedRef.current || !isSliderLayout()) return;
       step(1);
     }, interval);
     return () => {
@@ -57,13 +58,13 @@ export function VideoCarousel({ videoIds, interval = 4500 }: VideoCarouselProps)
     <div className="relative w-full">
       <div
         ref={trackRef}
-        className="scrollbar-hide flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth pb-2"
+        className="scrollbar-hide flex flex-col gap-5 pb-2 sm:flex-row sm:snap-x sm:snap-mandatory sm:gap-6 sm:overflow-x-auto sm:scroll-smooth"
       >
         {videoIds.map((id, i) => (
           <div
             key={id}
             data-card
-            className="w-full shrink-0 snap-center sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]"
+            className="w-full shrink-0 sm:w-[calc(50%-12px)] sm:snap-center lg:w-[calc(33.333%-16px)]"
           >
             <div className="rounded-2xl border border-purple-2/50 bg-purple-2/10 p-2.5 transition-colors hover:border-purple-2/80">
               <YouTubeLite

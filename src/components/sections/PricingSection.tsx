@@ -72,17 +72,17 @@ function PriceHeading({
 }) {
   return (
     <div
-      className={`flex flex-col gap-2 ${
-        dark ? "items-center text-center text-[#0e101c]" : "items-start text-white"
+      className={`flex w-full flex-col items-start gap-2 text-left ${
+        dark ? "text-[#0e101c]" : "text-white"
       }`}
     >
-      <div className="flex items-baseline gap-3">
+      <div className="flex flex-wrap items-baseline justify-start gap-2 sm:gap-3">
         <p className="tracking-[-0.5px]">
-          <span className="font-serif text-[34px]">{name} </span>
-          <span className="font-display text-[34px]">{price}</span>
+          <span className="font-serif text-[24px] sm:text-[28px] lg:text-[34px]">{name} </span>
+          <span className="font-display text-[24px] sm:text-[28px] lg:text-[34px]">{price}</span>
         </p>
         <span
-          className={`font-serif text-[20px] line-through ${
+          className={`font-serif text-[15px] line-through sm:text-[17px] lg:text-[20px] ${
             dark ? "text-[#0e101c]/45" : "text-white/40"
           }`}
         >
@@ -105,7 +105,7 @@ function PriceHeading({
 
 export default function PricingSection() {
   return (
-    <section id="tickets" className="bg-bg px-6 py-24 md:px-12 md:py-32 lg:px-[120px] lg:py-[140px]">
+    <section id="tickets" className="bg-bg px-4 py-16 sm:px-6 sm:py-20 md:px-12 md:py-32 lg:px-[120px] lg:py-[140px]">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-12 lg:gap-[72px]">
         <Reveal className="flex flex-col gap-6">
           <div className="flex items-center gap-3.5">
@@ -136,22 +136,20 @@ export default function PricingSection() {
                 className={`flex-1 ${gold ? "lg:order-2" : i === 0 ? "lg:order-1" : "lg:order-3"}`}
               >
                 <div
-                  className={`flex h-full flex-col justify-between overflow-hidden rounded-[20px] p-9 ${
+                  className={`flex h-full flex-col justify-between overflow-hidden rounded-2xl p-5 sm:rounded-[20px] sm:p-7 lg:p-9 ${
                     gold
                       ? "border-[1.5px] border-[#ffeaac] bg-[#ffbf00] lg:h-[894px]"
                       : "border border-white/[0.09] bg-white/[0.02] lg:h-[858px]"
                   }`}
                 >
-                  <div
-                    className={`flex flex-col gap-7 ${gold ? "items-center text-center" : "items-start"}`}
-                  >
+                  <div className="flex flex-col items-center gap-5 text-center sm:gap-7 lg:items-start lg:text-left">
                     <a
                       href={tier.checkout}
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`${tier.name} Ticket sichern`}
-                      className={`group/ticket block w-full overflow-hidden rounded-lg transition-transform duration-300 hover:-translate-y-1 ${
-                        gold ? "max-w-[372px]" : ""
+                      className={`group/ticket mx-auto block w-full max-w-[320px] overflow-hidden rounded-lg transition-transform duration-300 hover:-translate-y-1 sm:max-w-[360px] ${
+                        gold ? "lg:max-w-[372px]" : "lg:max-w-none"
                       }`}
                     >
                       <Image
@@ -159,7 +157,7 @@ export default function PricingSection() {
                         alt={`${tier.name} Ticket — Sales Mastery Days`}
                         width={2000}
                         height={860}
-                        sizes="(max-width: 768px) 90vw, 400px"
+                        sizes="(max-width: 640px) 85vw, (max-width: 1024px) 360px, 400px"
                         className="h-auto w-full transition-transform duration-500 group-hover/ticket:scale-[1.03]"
                       />
                     </a>
@@ -171,9 +169,9 @@ export default function PricingSection() {
                       dark={gold}
                     />
                     <p
-                      className={`text-[17px] leading-[1.55] tracking-[-0.3px] ${
+                      className={`w-full text-center text-[13px] leading-[1.55] tracking-[-0.3px] sm:text-[15px] lg:text-left lg:text-[17px] ${
                         gold ? "text-[#0e101c]/65" : "text-white/65"
-                      } ${gold ? "text-center" : "text-left"} w-full`}
+                      }`}
                     >
                       zzgl.&nbsp; MwSt.
                     </p>
@@ -182,7 +180,7 @@ export default function PricingSection() {
                       {tier.features.map((f) => (
                         <li
                           key={f}
-                          className={`flex items-center gap-3.5 border-t py-4 text-left ${
+                          className={`flex items-center justify-start gap-3.5 border-t py-3.5 text-left sm:py-4 ${
                             gold ? "border-[#0e101c]/[0.08]" : "border-white/[0.08]"
                           }`}
                         >
@@ -192,7 +190,7 @@ export default function PricingSection() {
                             }`}
                           />
                           <span
-                            className={`text-[15px] leading-[1.4] tracking-[-0.2px] ${
+                            className={`text-[13px] leading-[1.4] tracking-[-0.2px] sm:text-[14px] lg:text-[15px] ${
                               gold ? "text-[#0e101c]/[0.82]" : "text-white/[0.78]"
                             }`}
                           >
@@ -203,11 +201,11 @@ export default function PricingSection() {
                     </ul>
                   </div>
 
-                  <div className="mt-8 w-full">
+                  <div className="mt-6 w-full sm:mt-8">
                     <Button
                       href={tier.checkout}
                       full
-                      className="mx-auto w-full max-w-[328px] px-4 text-[13px]"
+                      className="mx-auto h-14 w-full max-w-[328px] px-4 text-[12px] sm:h-16 sm:text-[13px]"
                     >
                       {tier.cta}
                     </Button>

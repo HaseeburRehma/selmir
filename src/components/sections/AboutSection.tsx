@@ -72,11 +72,13 @@ export default function AboutSection() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-x-12 gap-y-6 pt-2">
+            <div className="grid grid-cols-3 gap-x-4 gap-y-2 pt-2 sm:gap-x-8 lg:gap-x-12">
               {STATS.map((s) => (
-                <div key={s.value} className="flex max-w-[190px] flex-col gap-1.5">
-                  <p className="font-display text-[26px] text-white">{s.value}</p>
-                  <p className="text-[13px] leading-[1.3] tracking-[-0.3px] text-white/55">
+                <div key={s.value} className="flex flex-col gap-1 sm:gap-1.5">
+                  <p className="font-display text-[16px] text-white sm:text-[20px] lg:text-[26px]">
+                    {s.value}
+                  </p>
+                  <p className="text-[10px] leading-[1.3] tracking-[-0.2px] text-white/55 sm:text-[12px] lg:text-[13px] lg:tracking-[-0.3px]">
                     {s.label}
                   </p>
                 </div>
