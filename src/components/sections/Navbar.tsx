@@ -7,12 +7,12 @@ import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/Button";
 
 const LINKS = [
-  { label: "Leistungen", href: "#event" },
-  { label: "Methode", href: "#stories" },
-  { label: "Case Studies", href: "#cases" },
-  { label: "Über", href: "#about" },
-  { label: "Karriere", href: "#footer" },
-  { label: "Kontakt", href: "#footer" },
+  { label: "Leistungen", href: "/#event" },
+  { label: "Methode", href: "/#stories" },
+  { label: "Case Studies", href: "/#cases" },
+  { label: "Über", href: "/ueber" },
+  { label: "Karriere", href: "/#footer" },
+  { label: "Kontakt", href: "/#footer" },
 ];
 
 export default function Navbar() {
@@ -51,7 +51,7 @@ export default function Navbar() {
         </ul>
 
         <div className="hidden lg:block">
-          <Button href="#tickets" className="h-12 px-6 text-[13px]">
+          <Button href="/#tickets" className="h-12 px-6 text-[13px]">
             TICKET SICHERN
           </Button>
         </div>
@@ -82,7 +82,7 @@ export default function Navbar() {
               </li>
             ))}
             <li className="pt-2">
-              <Button href="#tickets" full icon={<CalendarDays className="size-5" />}>
+              <Button href="/#tickets" full icon={<CalendarDays className="size-5" />}>
                 Ticket sichern
               </Button>
             </li>

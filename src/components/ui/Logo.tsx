@@ -4,7 +4,7 @@ import Link from "next/link";
 export function Logo({ className = "" }: { className?: string }) {
   return (
     <Link
-      href="#top"
+      href="/"
       aria-label="Selmir Suljkanovic — Startseite"
       className={`inline-flex select-none items-center ${className}`}
     >
