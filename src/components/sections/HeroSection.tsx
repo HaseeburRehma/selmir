@@ -4,12 +4,12 @@ import { Marquee } from "@/components/ui/Marquee";
 import { YouTubeLite } from "@/components/ui/YouTubeLite";
 
 const PARTNER_LOGOS = [
+  "/figma/hero/logo-eoptimum.png",
   "/figma/hero/logo-2.png",
   "/figma/hero/logo-3.png",
   "/figma/hero/logo-4.png",
   "/figma/hero/logo-5.png",
   "/figma/hero/logo-6.png",
-  "/figma/hero/logo-1.png",
 ];
 
 export default function HeroSection() {
@@ -56,11 +56,11 @@ export default function HeroSection() {
               Jetzt Ticket sichern
             </Button>
             <Button
-              href="#event"
+              href="#tickets"
               variant="secondary"
               icon={<ArrowRight className="size-5" />}
             >
-              Infos zum Event
+              Ticket sichern
             </Button>
           </div>
         </div>
@@ -80,17 +80,19 @@ export default function HeroSection() {
         <p className="text-center font-label text-[18px] font-bold uppercase tracking-wide text-white lg:text-[20px]">
           Vertraut von führenden Unternehmen
         </p>
-        <Marquee gap={96} className="max-w-full opacity-50">
+        <Marquee gap={88} className="max-w-full opacity-60">
           {PARTNER_LOGOS.map((src, i) => (
             <div
               key={i}
-              className="flex h-14 items-center justify-center px-3"
+              className="flex h-16 items-center justify-center px-3"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={src}
                 alt=""
-                className="max-h-9 w-auto object-contain"
+                className={`w-auto object-contain ${
+                  src.includes("eoptimum") ? "max-h-14" : "max-h-9"
+                }`}
               />
             </div>
           ))}

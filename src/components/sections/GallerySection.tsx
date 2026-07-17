@@ -10,13 +10,12 @@ const PHOTOS = [
 
 function Photo({ src }: { src: string }) {
   return (
-    <div className="h-[240px] shrink-0 overflow-hidden rounded-2xl md:h-[300px]">
+    <div className="h-[260px] w-[400px] shrink-0 overflow-hidden rounded-2xl md:h-[320px] md:w-[520px]">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
         alt="Sales Mastery Days — Impressionen"
-        loading="lazy"
-        className="h-full w-auto max-w-none object-cover"
+        className="h-full w-full object-cover"
       />
     </div>
   );
