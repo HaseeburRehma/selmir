@@ -1,7 +1,7 @@
-import Image from "next/image";
 import { ArrowUpRight, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Marquee } from "@/components/ui/Marquee";
+import { YouTubeLite } from "@/components/ui/YouTubeLite";
 
 const PARTNER_LOGOS = [
   "/figma/hero/logo-2.png",
@@ -67,17 +67,11 @@ export default function HeroSection() {
 
         {/* RIGHT: video panel */}
         <div className="relative w-full rounded-2xl border border-purple-2/50 bg-purple-2/10 p-2.5">
-          <div className="relative aspect-[640/360] w-full overflow-hidden rounded-lg">
-            <Image
-              src="/figma/hero/road-frame.png"
-              alt="Sales Mastery Days — Live in Düsseldorf"
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 720px"
-              className="scale-105 animate-[kenburns_16s_ease-in-out_infinite_alternate] object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-          </div>
+          <YouTubeLite
+            videoId="oNulnavbtTM"
+            title="Sales Mastery Days — Selmir Suljkanovic"
+            className="rounded-lg"
+          />
         </div>
       </div>
 

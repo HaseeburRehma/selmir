@@ -43,3 +43,7 @@ next-env.d.ts
 
 # stray generated images (not part of project)
 /public/hf_*.webp
+# raw source image dumps at public root (clean copies live in /public/gallery and /public/figma)
+/public/*.jpg
+/public/*.webp
+/public/hf_*.webp

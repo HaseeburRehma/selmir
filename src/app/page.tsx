@@ -6,6 +6,7 @@ import StoriesSection from "@/components/sections/StoriesSection";
 import PricingSection from "@/components/sections/PricingSection";
 import CaseStudiesSection from "@/components/sections/CaseStudiesSection";
 import AboutSection from "@/components/sections/AboutSection";
+import GallerySection from "@/components/sections/GallerySection";
 import TestimonialsSection from "@/components/sections/TestimonialsSection";
 import FaqSection from "@/components/sections/FaqSection";
 import FinalCtaSection from "@/components/sections/FinalCtaSection";
@@ -23,6 +24,7 @@ export default function Home() {
         <PricingSection />
         <CaseStudiesSection />
         <AboutSection />
+        <GallerySection />
         <TestimonialsSection />
         <FaqSection />
         <FinalCtaSection />
