@@ -23,17 +23,7 @@ export default function UeberPage() {
         <section className="relative overflow-hidden bg-bg pt-[96px]">
           {/* dimmed background portrait + grid pattern */}
           <div aria-hidden className="absolute inset-0">
-            <div className="absolute left-1/2 top-0 h-[130%] w-[900px] max-w-none -translate-x-1/2">
-              <Image
-                src="/aboutus.jpg"
-                alt=""
-                fill
-                priority
-                sizes="900px"
-                className="object-cover object-top opacity-45"
-              />
-            </div>
-            {/* subtle grid lines */}
+            {/* subtle grid lines behind everything */}
             <div
               className="absolute inset-0 opacity-[0.5]"
               style={{
@@ -41,7 +31,21 @@ export default function UeberPage() {
                   "repeating-linear-gradient(to right, rgba(255,255,255,0.045) 0 1px, transparent 1px 96px), repeating-linear-gradient(to bottom, rgba(255,255,255,0.045) 0 1px, transparent 1px 96px)",
               }}
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-bg/70 via-bg/35 to-bg" />
+            {/* centered portrait band */}
+            <div className="absolute inset-y-0 left-1/2 w-full max-w-[1040px] -translate-x-1/2">
+              <Image
+                src="/aboutus.jpg"
+                alt=""
+                fill
+                priority
+                sizes="1040px"
+                className="object-cover object-[42%_28%] opacity-40"
+              />
+              {/* fade the photo's side edges into the grid */}
+              <div className="absolute inset-0 bg-gradient-to-r from-bg via-transparent to-bg" />
+            </div>
+            {/* top + bottom vignette into the page */}
+            <div className="absolute inset-0 bg-gradient-to-b from-bg/75 via-bg/30 to-bg" />
           </div>
 
           <div className="container-page relative z-10 flex flex-col items-center gap-8 py-20 text-center md:py-28">
