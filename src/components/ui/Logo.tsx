@@ -10,9 +10,9 @@ export function Logo({ className = "" }: { className?: string }) {
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/logo.png"
+        src="/logo-red-dark.svg"
         alt="Selmir Suljkanovic"
-        className="h-10 w-auto md:h-11"
+        className="h-12 w-auto md:h-14"
       />
     </Link>
   );

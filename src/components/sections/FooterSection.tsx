@@ -1,6 +1,14 @@
 import { Logo } from "@/components/ui/Logo";
 
-const SOCIALS = ["IG", "IN", "X", "YT"];
+const SOCIALS: { label: string; href: string }[] = [
+  {
+    label: "IG",
+    href: "https://www.instagram.com/selmir.suljkanovic_official/",
+  },
+  { label: "IN", href: "#" },
+  { label: "X", href: "#" },
+  { label: "YT", href: "#" },
+];
 
 const COLUMNS = [
   {
@@ -67,12 +75,15 @@ export default function FooterSection() {
             <div className="flex gap-3">
               {SOCIALS.map((s) => (
                 <a
-                  key={s}
-                  href="#"
-                  aria-label={s}
+                  key={s.label}
+                  href={s.href}
+                  aria-label={s.label}
+                  {...(s.href.startsWith("http")
+                    ? { target: "_blank", rel: "noopener noreferrer" }
+                    : {})}
                   className="grid size-10 place-items-center rounded-full border border-purple-2/[0.22] bg-white/5 font-body text-[11px] font-semibold tracking-[0.5px] text-white/80 transition-colors hover:bg-white/10"
                 >
-                  {s}
+                  {s.label}
                 </a>
               ))}
             </div>
