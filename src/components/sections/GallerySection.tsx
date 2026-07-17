@@ -8,12 +8,9 @@ const PHOTOS = [
   "/gallery/g5.jpg",
 ];
 
-const ROW_A = [...PHOTOS, ...PHOTOS];
-const ROW_B = [...[...PHOTOS].reverse(), ...[...PHOTOS].reverse()];
-
 function Photo({ src }: { src: string }) {
   return (
-    <div className="h-[200px] shrink-0 overflow-hidden rounded-2xl md:h-[260px]">
+    <div className="h-[240px] shrink-0 overflow-hidden rounded-2xl md:h-[300px]">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
@@ -28,18 +25,11 @@ function Photo({ src }: { src: string }) {
 export default function GallerySection() {
   return (
     <section id="gallery" className="overflow-hidden bg-bg py-16 md:py-24">
-      <div className="flex flex-col gap-4 md:gap-6">
-        <Marquee gap={24} speed="marquee-slow">
-          {ROW_A.map((src, i) => (
-            <Photo key={`a-${i}`} src={src} />
-          ))}
-        </Marquee>
-        <Marquee gap={24} speed="marquee-slow" reverse>
-          {ROW_B.map((src, i) => (
-            <Photo key={`b-${i}`} src={src} />
-          ))}
-        </Marquee>
-      </div>
+      <Marquee gap={24} speed="marquee-slow">
+        {PHOTOS.map((src, i) => (
+          <Photo key={i} src={src} />
+        ))}
+      </Marquee>
     </section>
   );
 }

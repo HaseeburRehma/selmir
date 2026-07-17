@@ -145,15 +145,23 @@ export default function PricingSection() {
                   <div
                     className={`flex flex-col gap-7 ${gold ? "items-center text-center" : "items-start"}`}
                   >
-                    <div className={`relative aspect-[390/184] w-full ${gold ? "max-w-[372px]" : ""}`}>
+                    <a
+                      href={tier.checkout}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${tier.name} Ticket sichern`}
+                      className={`group/ticket relative block aspect-[2000/850] w-full overflow-hidden rounded-lg transition-transform duration-300 hover:-translate-y-1 ${
+                        gold ? "max-w-[372px]" : ""
+                      }`}
+                    >
                       <Image
                         src={tier.ticket}
                         alt={`${tier.name} Ticket — Sales Mastery Days`}
                         fill
                         sizes="400px"
-                        className="object-cover"
+                        className="object-contain transition-transform duration-500 group-hover/ticket:scale-[1.03]"
                       />
-                    </div>
+                    </a>
 
                     <PriceHeading
                       name={tier.name}

@@ -1,19 +1,19 @@
 import Link from "next/link";
 
-/** "Selmir" signature wordmark with SULJKANOVIC underline label. */
+/** Selmir Suljkanovic brand logo (white wordmark). */
 export function Logo({ className = "" }: { className?: string }) {
   return (
     <Link
       href="#top"
       aria-label="Selmir Suljkanovic — Startseite"
-      className={`inline-flex select-none flex-col items-center leading-none ${className}`}
+      className={`inline-flex select-none items-center ${className}`}
     >
-      <span className="font-[family-name:var(--font-script)] text-[34px] leading-[0.8] text-white">
-        Selmir
-      </span>
-      <span className="mt-0.5 font-label text-[9px] font-semibold uppercase tracking-[0.42em] text-white/80">
-        Suljkanovic
-      </span>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/logo.png"
+        alt="Selmir Suljkanovic"
+        className="h-10 w-auto md:h-11"
+      />
     </Link>
   );
 }
