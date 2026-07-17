@@ -135,19 +135,10 @@ body {
 
 /* Marquee track animations (plain classes — theme vars get tree-shaken) */
 .marquee-anim {
-  animation: marquee 16s linear infinite;
+  animation: marquee 18s linear infinite;
 }
 .marquee-anim-slow {
-  animation: marquee 24s linear infinite;
-}
-
-@media (max-width: 640px) {
-  .marquee-anim {
-    animation-duration: 12s;
-  }
-  .marquee-anim-slow {
-    animation-duration: 18s;
-  }
+  animation: marquee 18s linear infinite;
 }
 
 /* Pause any marquee on hover of its track */
