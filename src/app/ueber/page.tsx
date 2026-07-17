@@ -3,6 +3,8 @@ import Image from "next/image";
 import { ArrowUpRight, ArrowRight } from "lucide-react";
 import Navbar from "@/components/sections/Navbar";
 import FooterSection from "@/components/sections/FooterSection";
+import TestimonialsSection from "@/components/sections/TestimonialsSection";
+import FaqSection from "@/components/sections/FaqSection";
 import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
 
@@ -132,6 +134,108 @@ export default function UeberPage() {
               </div>
             </Reveal>
           </div>
+        </section>
+
+        {/* Leidenschaft für Entwicklung — feature banner */}
+        <section className="bg-bg px-6 pb-20 md:px-12 md:pb-28 lg:px-[120px]">
+          <Reveal className="mx-auto max-w-[1440px]">
+            <div className="relative overflow-hidden rounded-[24px] border border-white/10">
+              {/* backdrop photo */}
+              <div className="absolute inset-0">
+                <Image
+                  src="/gallery/g2.jpg"
+                  alt=""
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 1200px"
+                  className="object-cover object-center opacity-90"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/25 to-black/85" />
+              </div>
+
+              <div className="relative z-10 flex min-h-[420px] flex-col justify-between gap-12 p-7 md:min-h-[520px] md:p-12">
+                <div className="max-w-[560px]">
+                  <h2 className="font-serif text-[28px] leading-[1.25] tracking-[-0.8px] text-white md:text-[40px] md:tracking-[-1.2px]">
+                    Leidenschaft für Entwicklung: Menschen und{" "}
+                    <span className="rounded-md bg-purple-1 px-2 font-display text-white">
+                      Organisationen
+                    </span>{" "}
+                    wachsen lassen
+                  </h2>
+                  <div className="mt-6">
+                    <Button
+                      href="/#tickets"
+                      className="h-12 px-5 text-[12px]"
+                      icon={<ArrowUpRight className="size-4" />}
+                    >
+                      Jetzt Ticket sichern
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between md:gap-16">
+                  <p className="max-w-[440px] font-body text-[13px] leading-[1.6] text-white/75 md:text-[14px]">
+                    Nichts erfüllt Selmir mehr als das Wachstum der Menschen um
+                    ihn herum. Sein Engagement in der persönlichen und
+                    professionellen Entwicklung seiner Klienten und Mitarbeiter
+                    bildet den Kern seiner Philosophie. Mit maßgeschneiderten
+                    Coachings und intensiven Trainingsprogrammen hilft er
+                    Einzelpersonen und Teams, ihr volles Potenzial zu entfalten
+                    und herausragende Ergebnisse zu erzielen.
+                  </p>
+                  <div className="max-w-[400px]">
+                    <h3 className="font-body text-[17px] font-semibold leading-[1.35] text-white md:text-[19px]">
+                      Deine Reise zum Erfolg sollte nicht länger warten.
+                    </h3>
+                    <p className="mt-3 font-body text-[13px] leading-[1.6] text-white/70 md:text-[14px]">
+                      Entdecke gemeinsam mit Selmirs Team, welches aus erfahrenen
+                      Unternehmensberatern und Experten besteht, ein
+                      unvergessliches Erstgespräch und beginne den Weg zu einem
+                      erfüllten und erfolgreichen beruflichen Leben.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        </section>
+
+        {/* Stimmen + FAQ (wie auf der Startseite) */}
+        <TestimonialsSection />
+        <FaqSection />
+
+        {/* Sprich mit Selmir — CTA */}
+        <section className="bg-bg px-6 pb-24 pt-4 md:px-12 md:pb-[120px] lg:px-[120px]">
+          <Reveal className="mx-auto max-w-[1440px]">
+            <div className="relative flex flex-col items-center gap-7 overflow-hidden rounded-[28px] border border-purple-2/[0.18] bg-[#0e0b19] px-6 py-16 text-center md:px-20 md:py-20">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -top-40 left-1/2 h-[620px] w-[1000px] -translate-x-1/2 rounded-full bg-purple-1/25 blur-[130px]"
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -top-24 left-1/2 h-[360px] w-[560px] -translate-x-1/2 rounded-full bg-purple-2/20 blur-[100px]"
+              />
+
+              <div className="relative z-10 flex items-center gap-2.5 rounded-full border border-purple-2/30 bg-white/5 py-2.5 pl-3 pr-4.5">
+                <span className="size-2 animate-pulse rounded-full bg-purple-2" />
+                <span className="font-body text-[14px] font-semibold tracking-[-0.2px] text-white/90">
+                  Werde Teil davon
+                </span>
+              </div>
+
+              <h2 className="relative z-10 font-serif text-[34px] leading-[1.16] tracking-[-1px] text-white md:text-[52px] md:tracking-[-1.8px]">
+                Sprich mit <span className="font-display">Selmir!</span>
+              </h2>
+
+              <p className="relative z-10 max-w-[560px] font-body text-[15px] leading-[1.55] tracking-[-0.3px] text-white/60 md:text-[17px]">
+                Buche dir jetzt ein kostenloses Expertengespräch
+              </p>
+
+              <div className="relative z-10 pt-2">
+                <Button href="/#tickets">Jetzt Ticket sichern</Button>
+              </div>
+            </div>
+          </Reveal>
         </section>
       </main>
       <FooterSection />
