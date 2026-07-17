@@ -7,7 +7,7 @@ const SOCIALS: { label: string; href: string }[] = [
   },
   { label: "IN", href: "#" },
   { label: "X", href: "#" },
-  { label: "YT", href: "#" },
+  { label: "YT", href: "https://www.youtube.com/@SelmirSuljkanovic" },
 ];
 
 const COLUMNS = [
