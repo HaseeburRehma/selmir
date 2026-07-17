@@ -1,21 +1,15 @@
 import { Marquee } from "@/components/ui/Marquee";
 
-const ROW_A = [
+// Curated event photos (removed: bearded-networking + red-room mic shots)
+const PHOTOS = [
   "/gallery/g1.jpg",
   "/gallery/g2.jpg",
-  "/gallery/g3.jpg",
   "/gallery/g4.jpg",
   "/gallery/g5.jpg",
-  "/gallery/g6.jpg",
 ];
-const ROW_B = [
-  "/gallery/g4.jpg",
-  "/gallery/g6.jpg",
-  "/gallery/g2.jpg",
-  "/gallery/g5.jpg",
-  "/gallery/g1.jpg",
-  "/gallery/g3.jpg",
-];
+
+const ROW_A = [...PHOTOS, ...PHOTOS];
+const ROW_B = [...[...PHOTOS].reverse(), ...[...PHOTOS].reverse()];
 
 function Photo({ src }: { src: string }) {
   return (
