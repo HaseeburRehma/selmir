@@ -1,26 +1,137 @@
 @import "tailwindcss";
 
+@theme {
+  /* Brand palette (exact values from the Figma file) */
+  --color-bg: #090711;
+  --color-ink: #ffffff;
+  --color-grey: #d9d9d9;
+  --color-purple-1: #7454f3;
+  --color-purple-2: #b089ff;
+  --color-purple-3: #e9e5ff;
+  --color-gold: #f5c518;
+
+  /* Typography */
+  --font-serif: var(--font-prata), Georgia, serif;
+  --font-display: var(--font-daysone), system-ui, sans-serif;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+  --font-label: var(--font-archivo), system-ui, sans-serif;
+  --font-script: var(--font-script), cursive;
+
+  /* Motion */
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-marquee-slow: marquee 60s linear infinite;
+  --animate-shine: shine 3.2s ease-in-out infinite;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #090711;
+  --foreground: #ffffff;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-purple-1);
+  color: #fff;
+}
+
+/* ---- Keyframes ---- */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes kenburns {
+  from {
+    transform: scale(1.05) translate(0, 0);
+  }
+  to {
+    transform: scale(1.15) translate(-1.5%, -1%);
+  }
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-120%) rotate(23.77deg);
+  }
+  60%,
+  100% {
+    transform: translateX(320%) rotate(23.77deg);
+  }
+}
+
+/* Pause any marquee on hover of its track */
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Reusable utility helpers */
+@layer components {
+  .container-page {
+    width: 100%;
+    max-width: 1440px;
+    margin-inline: auto;
+    padding-inline: 24px;
+  }
+  @media (min-width: 768px) {
+    .container-page {
+      padding-inline: 48px;
+    }
+  }
+
+  /* Purple gradient used on the primary CTA */
+  .btn-gradient {
+    background-image: linear-gradient(
+      77.85deg,
+      #7454f3 0%,
+      #b089ff 25%,
+      #e9e5ff 50%,
+      #b089ff 75%,
+      #7454f3 100%
+    );
+  }
+
+  /* Edge fade masks for marquees */
+  .fade-x {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 9%,
+      #000 91%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 9%,
+      #000 91%,
+      transparent
+    );
+  }
 }

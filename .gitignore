@@ -35,7 +35,11 @@ yarn-error.log*
 
 # vercel
 .vercel
-
+CLAUDE.md
+AGENTS.md
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# stray generated images (not part of project)
+/public/hf_*.webp
