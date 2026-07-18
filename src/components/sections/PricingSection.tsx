@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Sparkles, Clock } from "lucide-react";
+import { Sparkles, Clock, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
 
@@ -161,6 +161,21 @@ export default function PricingSection() {
                         className="h-auto w-full transition-transform duration-500 group-hover/ticket:scale-[1.03]"
                       />
                     </a>
+
+                    <div
+                      className={`flex items-center gap-2 ${gold ? "justify-center" : "justify-start"}`}
+                    >
+                      <CalendarDays
+                        className={`size-4 ${gold ? "text-[#0e101c]/70" : "text-purple-2"}`}
+                      />
+                      <span
+                        className={`font-body text-[14px] font-semibold tracking-[-0.2px] ${
+                          gold ? "text-[#0e101c]/80" : "text-white/80"
+                        }`}
+                      >
+                        21.11 – 22.11.2026
+                      </span>
+                    </div>
 
                     <PriceHeading
                       name={tier.name}
