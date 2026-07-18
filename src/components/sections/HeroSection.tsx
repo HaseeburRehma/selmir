@@ -35,6 +35,9 @@ export default function HeroSection() {
             <h1 className="text-[44px] leading-[1.2] tracking-[-1.5px] text-white sm:text-[56px] lg:text-[64px] lg:tracking-[-2.5px]">
               <span className="font-serif">Sales </span>
               <span className="font-display">Mastery Days</span>
+              <span className="mt-3 block font-body text-[18px] font-semibold tracking-[0.5px] text-purple-2 sm:text-[22px] lg:text-[26px]">
+                21.11 – 22.11.2026
+              </span>
             </h1>
             <p className="max-w-[560px] font-serif text-[24px] leading-[1.2] tracking-[-0.5px] text-white sm:text-[28px] lg:text-[32px]">
               Das wichtigste Event im Jahr 2026 für Selbstständige und
