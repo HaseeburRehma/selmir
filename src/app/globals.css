@@ -93,6 +93,21 @@ body {
   margin-bottom: 1rem;
 }
 
+/* Blinking caret for the Tylotech typewriter credit */
+@keyframes tylo-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+.tylo-caret {
+  animation: tylo-blink 1s step-end infinite;
+}
+
 /* Hide scrollbars on carousels */
 .scrollbar-hide {
   -ms-overflow-style: none;

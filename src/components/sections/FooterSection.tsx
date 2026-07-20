@@ -1,4 +1,5 @@
 import { Logo } from "@/components/ui/Logo";
+import TylotechCredit from "@/components/ui/TylotechCredit";
 
 const SOCIALS: { label: string; href: string }[] = [
   {
@@ -149,6 +150,10 @@ export default function FooterSection() {
               className="h-[18px] w-auto shrink-0 object-contain sm:h-[26px]"
             />
           ))}
+        </div>
+
+        <div className="flex justify-center">
+          <TylotechCredit />
         </div>
 
         <div className="h-px w-full bg-white/10" />
