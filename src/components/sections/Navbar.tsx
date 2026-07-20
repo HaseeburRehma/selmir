@@ -7,6 +7,7 @@ import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/Button";
 
 const LINKS = [
+  { label: "Sales Mastery", href: "/sales-mastery" },
   { label: "Leistungen", href: "/#event" },
   { label: "Methode", href: "/#stories" },
   { label: "Case Studies", href: "/#cases" },
@@ -37,7 +38,7 @@ export default function Navbar() {
       <nav className="container-page flex h-[80px] items-center justify-between md:h-[96px]">
         <Logo />
 
-        <ul className="hidden items-center gap-8 lg:flex">
+        <ul className="hidden items-center gap-5 lg:flex xl:gap-8">
           {LINKS.map((l) => (
             <li key={l.label}>
               <Link
