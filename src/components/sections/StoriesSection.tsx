@@ -3,12 +3,12 @@ import { VideoCarousel } from "@/components/ui/VideoCarousel";
 
 // 6 review / success-story videos
 const REVIEW_VIDEOS = [
-  "9_OKA9X5D4Y",
-  "NIbQDPuY7nw",
-  "Xl7wb2rs_FI",
-  "w44_J-GGM7g",
-  "4Th7wYBG-PQ",
-  "VxM1rK2rK_o",
+  "kMeN9SY_Ld4",
+  "PDgj_f7vJu8",
+  "89Mzx7TPlzQ",
+  "Ok2j8LeBYW0",
+  "3fLDRD6aezg",
+  "cGuRQYDw_u4",
 ];
 
 export default function StoriesSection() {
