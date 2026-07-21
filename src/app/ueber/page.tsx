@@ -21,42 +21,30 @@ export default function UeberPage() {
       <main>
         {/* Hero */}
         <section className="relative overflow-hidden bg-bg pt-[96px]">
-          {/* dimmed background portrait + grid pattern */}
-          <div aria-hidden className="absolute inset-0">
-            {/* subtle grid lines behind everything */}
-            <div
-              className="absolute inset-0 opacity-[0.5]"
-              style={{
-                backgroundImage:
-                  "repeating-linear-gradient(to right, rgba(255,255,255,0.045) 0 1px, transparent 1px 96px), repeating-linear-gradient(to bottom, rgba(255,255,255,0.045) 0 1px, transparent 1px 96px)",
-              }}
-            />
-            {/* centered portrait band */}
-            <div className="absolute inset-y-0 left-1/2 w-full max-w-[1040px] -translate-x-1/2">
-              <Image
-                src="/figma/about/aboutus.jpg"
-                alt=""
-                fill
-                priority
-                sizes="1040px"
-                className="object-cover object-[42%_28%] opacity-40"
-              />
-              {/* fade the photo's side edges into the grid */}
-              <div className="absolute inset-0 bg-gradient-to-r from-bg via-transparent to-bg" />
-            </div>
-            {/* top + bottom vignette into the page */}
-            <div className="absolute inset-0 bg-gradient-to-b from-bg/75 via-bg/30 to-bg" />
-          </div>
+          {/* subtle grid pattern behind everything */}
+          <div
+            aria-hidden
+            className="absolute inset-0 opacity-[0.5]"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(to right, rgba(255,255,255,0.045) 0 1px, transparent 1px 96px), repeating-linear-gradient(to bottom, rgba(255,255,255,0.045) 0 1px, transparent 1px 96px)",
+            }}
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -left-40 top-1/3 h-[520px] w-[520px] rounded-full bg-purple-1/20 blur-[150px]"
+          />
 
-          <div className="container-page relative z-10 flex flex-col items-center gap-8 py-20 text-center md:py-28">
-            <Reveal className="flex max-w-[870px] flex-col items-center gap-6">
-              <h1 className="font-serif text-[40px] leading-[1.2] tracking-[-1.5px] text-white sm:text-[52px] lg:text-[64px] lg:tracking-[-2.5px]">
-                Selmir Suljkanovic
+          <div className="container-page relative z-10 grid grid-cols-1 items-center gap-12 py-16 md:py-24 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+            {/* Copy */}
+            <Reveal className="flex flex-col gap-6">
+              <h1 className="font-serif text-[40px] leading-[1.15] tracking-[-1.5px] text-white sm:text-[52px] lg:text-[64px] lg:tracking-[-2.5px]">
+                Selmir <span className="font-display">Suljkanovic</span>
               </h1>
-              <p className="font-serif text-[22px] leading-[1.2] tracking-[-0.5px] text-white sm:text-[26px] lg:text-[32px]">
+              <p className="font-serif text-[22px] leading-[1.25] tracking-[-0.5px] text-white sm:text-[26px] lg:text-[32px]">
                 dein Wegbereiter zum unternehmerischen Erfolg
               </p>
-              <p className="max-w-[820px] font-body text-[15px] leading-[1.55] tracking-[-0.3px] text-white/70 md:text-[16px]">
+              <p className="max-w-[560px] font-body text-[15px] leading-[1.6] tracking-[-0.3px] text-white/70 md:text-[16px]">
                 Seine Karriere begann unter den härtesten Bedingungen. Als
                 Kriegsflüchtling erlebte Selmir früh, was es bedeutet, mit
                 Unsicherheiten umzugehen und Chancen zu ergreifen, sobald sie sich
@@ -66,22 +54,35 @@ export default function UeberPage() {
                 Jahrzehnt in leitenden Managementpositionen, nutzt Selmir seine
                 Fähigkeiten, um auch dein Unternehmen zum Erfolg zu führen.
               </p>
+
+              <div className="flex flex-col gap-4 pt-2 sm:flex-row sm:items-center">
+                <Button href="/#tickets" icon={<ArrowUpRight className="size-5" />}>
+                   Ticket sichern
+                </Button>
+                <Button
+                  href="/#event"
+                  variant="secondary"
+                  icon={<ArrowRight className="size-5" />}
+                >
+                  Infos zum Event
+                </Button>
+              </div>
             </Reveal>
 
-            <Reveal
-              delay={0.1}
-              className="flex w-full flex-col items-center gap-4 sm:w-auto sm:flex-row"
-            >
-              <Button href="/#tickets" icon={<ArrowUpRight className="size-5" />}>
-                 Ticket sichern
-              </Button>
-              <Button
-                href="/#event"
-                variant="secondary"
-                icon={<ArrowRight className="size-5" />}
-              >
-                Infos zum Event
-              </Button>
+            {/* Portrait */}
+            <Reveal delay={0.1} className="w-full">
+              <div className="relative mx-auto max-w-[520px] overflow-hidden rounded-[20px] border border-white/[0.09] bg-white/[0.04]">
+                <div className="relative aspect-[4/5] w-full">
+                  <Image
+                    src="/figma/about/hero-coffee.jpg"
+                    alt="Selmir Suljkanovic"
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 90vw, 520px"
+                    className="object-cover object-[50%_28%]"
+                  />
+                </div>
+              </div>
             </Reveal>
           </div>
         </section>
@@ -94,7 +95,7 @@ export default function UeberPage() {
               <div className="overflow-hidden rounded-[18px] border border-white/[0.09] bg-white/[0.04]">
                 <div className="relative aspect-[3/4] w-full">
                   <Image
-                    src="/figma/about/selmir-portrait.jpg"
+                    src="/figma/about/selmir-stage.jpg"
                     alt="Selmir Suljkanovic auf der Bühne"
                     fill
                     sizes="(max-width: 1024px) 90vw, 420px"

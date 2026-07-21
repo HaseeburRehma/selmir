@@ -1,6 +1,7 @@
 import Navbar from "@/components/sections/Navbar";
 import HeroSection from "@/components/sections/HeroSection";
 import BenefitsSection from "@/components/sections/BenefitsSection";
+import GastSpeakerSection from "@/components/sections/GastSpeakerSection";
 import StoriesSection from "@/components/sections/StoriesSection";
 import PricingSection from "@/components/sections/PricingSection";
 import CaseStudiesSection from "@/components/sections/CaseStudiesSection";
@@ -18,6 +19,7 @@ export default function Home() {
       <main>
         <HeroSection />
         <BenefitsSection />
+        <GastSpeakerSection />
         <StoriesSection />
         <PricingSection />
         <CaseStudiesSection />
