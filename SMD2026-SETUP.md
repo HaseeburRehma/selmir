@@ -18,6 +18,24 @@ one-time token.
 
 ---
 
+## ✅ Already done (built live in HubSpot)
+
+The HubSpot side is fully set up and tested:
+
+- **Service key** `SMD2026 Tracking` created with scopes
+  `crm.objects.contacts.read/write`, `crm.lists.read/write`,
+  `crm.schemas.contacts.read/write`. Token is stored locally in `.env.local`
+  (view it any time: HubSpot → Development → Keys → Service-Schlüssel).
+- **5 contact properties** created: `smd2026_ticket_tier`, `smd2026_amount`,
+  `smd2026_quantity`, `smd2026_purchase_date`, `smd2026_stripe_session`.
+- **Static list "SMD2026"** created → **`SMD2026_LIST_ID = 761`**.
+- Verified end-to-end: a test buyer was written with tier + amount + date,
+  added to the SMD2026 list, then removed.
+
+**Remaining to go live = only the Stripe side + deploy env (steps 4 & 5 below).**
+
+---
+
 ## What YOU (a HubSpot Super-Admin) do once — ~10 min
 
 ### 1. Create a HubSpot private app → get a token
