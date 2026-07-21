@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { ArrowUpRight, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Marquee } from "@/components/ui/Marquee";
@@ -55,17 +56,44 @@ export default function HeroSection() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <Button href="#tickets" icon={<ArrowUpRight className="size-5" />}>
-              Ticket sichern
-            </Button>
-            <Button
-              href="#event"
-              variant="secondary"
-              icon={<ArrowRight className="size-5" />}
+          <div className="flex flex-col gap-7">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <Button href="#tickets" icon={<ArrowUpRight className="size-5" />}>
+                Ticket sichern
+              </Button>
+              <Button
+                href="#event"
+                variant="secondary"
+                icon={<ArrowRight className="size-5" />}
+              >
+                Infos zum Event
+              </Button>
+            </div>
+
+            {/* Gast Speaker badge */}
+            <a
+              href="#gast-speaker"
+              className="group inline-flex w-fit items-center gap-4 rounded-full border border-purple-2/40 bg-white/[0.03] p-2 pr-7 transition-colors duration-300 hover:border-purple-2/70 hover:bg-white/[0.06]"
             >
-              Infos zum Event
-            </Button>
+              <span className="relative block size-14 shrink-0 overflow-hidden rounded-full border border-white/15">
+                <Image
+                  src="/figma/speakers/tolga-toker.jpg"
+                  alt="Tolga Toker"
+                  fill
+                  priority
+                  sizes="56px"
+                  className="object-cover object-top"
+                />
+              </span>
+              <span className="flex flex-col">
+                <span className="font-body text-[13px] italic tracking-[0.2px] text-white/55">
+                  Gast Speaker
+                </span>
+                <span className="font-display text-[20px] leading-tight tracking-[-0.3px] text-white">
+                  Tolga Toker
+                </span>
+              </span>
+            </a>
           </div>
         </div>
 
