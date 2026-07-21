@@ -19,8 +19,8 @@ export default function UeberPage() {
     <>
       <Navbar />
       <main>
-        {/* Hero */}
-        <section className="relative overflow-hidden bg-bg pt-[96px]">
+        {/* Hero — split screen: dark text panel left, full-bleed photo right */}
+        <section className="relative overflow-hidden bg-bg">
           {/* subtle grid pattern behind everything */}
           <div
             aria-hidden
@@ -35,70 +35,94 @@ export default function UeberPage() {
             className="pointer-events-none absolute -left-40 top-1/3 h-[520px] w-[520px] rounded-full bg-purple-1/20 blur-[150px]"
           />
 
-          <div className="container-page relative z-10 grid grid-cols-1 items-center gap-12 py-16 md:py-24 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
-            {/* Copy */}
-            <Reveal className="flex flex-col gap-6">
-              <h1 className="font-serif text-[40px] leading-[1.15] tracking-[-1.5px] text-white sm:text-[52px] lg:text-[64px] lg:tracking-[-2.5px]">
-                Selmir <span className="font-display">Suljkanovic</span>
-              </h1>
-              <p className="font-serif text-[22px] leading-[1.25] tracking-[-0.5px] text-white sm:text-[26px] lg:text-[32px]">
-                dein Wegbereiter zum unternehmerischen Erfolg
-              </p>
-              <p className="max-w-[560px] font-body text-[15px] leading-[1.6] tracking-[-0.3px] text-white/70 md:text-[16px]">
-                Seine Karriere begann unter den härtesten Bedingungen. Als
-                Kriegsflüchtling erlebte Selmir früh, was es bedeutet, mit
-                Unsicherheiten umzugehen und Chancen zu ergreifen, sobald sie sich
-                bieten. Diese Erfahrungen schärften seinen Blick für das
-                Wesentliche und stärkten seinen unerschütterlichen Willen zum
-                Erfolg. Heute, mit über 13 Jahren Erfahrung im Vertrieb und einem
-                Jahrzehnt in leitenden Managementpositionen, nutzt Selmir seine
-                Fähigkeiten, um auch dein Unternehmen zum Erfolg zu führen.
-              </p>
-
-              <div className="flex flex-col gap-4 pt-2 sm:flex-row sm:items-center">
-                <Button href="/#tickets" icon={<ArrowUpRight className="size-5" />}>
-                   Ticket sichern
-                </Button>
-                <Button
-                  href="/#event"
-                  variant="secondary"
-                  icon={<ArrowRight className="size-5" />}
-                >
-                  Infos zum Event
-                </Button>
-              </div>
-            </Reveal>
-
-            {/* Portrait */}
-            <Reveal delay={0.1} className="w-full">
-              <div className="relative mx-auto max-w-[520px] overflow-hidden rounded-[20px] border border-white/[0.09] bg-white/[0.04]">
-                <div className="relative aspect-[4/5] w-full">
-                  <Image
-                    src="/figma/about/hero-coffee.jpg"
-                    alt="Selmir Suljkanovic"
-                    fill
-                    priority
-                    sizes="(max-width: 1024px) 90vw, 520px"
-                    className="object-cover object-[50%_28%]"
-                  />
-                </div>
-              </div>
-            </Reveal>
+          {/* Full-bleed photo, right half (desktop only) */}
+          <div
+            aria-hidden
+            className="absolute inset-y-0 right-0 hidden w-1/2 lg:block"
+          >
+            <Image
+              src="/figma/about/hero-coffee.jpg"
+              alt=""
+              fill
+              priority
+              sizes="50vw"
+              className="object-cover object-[38%_22%]"
+            />
+            {/* blend the left edge of the photo into the dark panel */}
+            <div className="absolute inset-0 bg-gradient-to-r from-bg via-bg/25 to-transparent" />
+            {/* soft top + bottom fades into the page */}
+            <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-bg/70 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-bg to-transparent" />
           </div>
+
+          <div className="container-page relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2">
+              {/* Copy */}
+              <Reveal className="flex min-h-[520px] flex-col justify-center gap-6 pb-10 pt-[124px] md:min-h-[560px] lg:min-h-[760px] lg:py-[120px] lg:pr-14">
+                <h1 className="font-serif text-[40px] leading-[1.15] tracking-[-1.5px] text-white sm:text-[52px] lg:text-[64px] lg:tracking-[-2.5px]">
+                  Selmir <span className="font-display">Suljkanovic</span>
+                </h1>
+                <p className="font-serif text-[22px] leading-[1.25] tracking-[-0.5px] text-white sm:text-[26px] lg:text-[32px]">
+                  dein Wegbereiter zum unternehmerischen Erfolg
+                </p>
+                <p className="max-w-[560px] font-body text-[15px] leading-[1.6] tracking-[-0.3px] text-white/70 md:text-[16px]">
+                  Seine Karriere begann unter den härtesten Bedingungen. Als
+                  Kriegsflüchtling erlebte Selmir früh, was es bedeutet, mit
+                  Unsicherheiten umzugehen und Chancen zu ergreifen, sobald sie
+                  sich bieten. Diese Erfahrungen schärften seinen Blick für das
+                  Wesentliche und stärkten seinen unerschütterlichen Willen zum
+                  Erfolg. Heute, mit über 13 Jahren Erfahrung im Vertrieb und
+                  einem Jahrzehnt in leitenden Managementpositionen, nutzt Selmir
+                  seine Fähigkeiten, um auch dein Unternehmen zum Erfolg zu führen.
+                </p>
+
+                <div className="flex flex-col gap-4 pt-2 sm:flex-row sm:items-center">
+                  <Button
+                    href="/#tickets"
+                    icon={<ArrowUpRight className="size-5" />}
+                  >
+                     Ticket sichern
+                  </Button>
+                  <Button
+                    href="/#event"
+                    variant="secondary"
+                    icon={<ArrowRight className="size-5" />}
+                  >
+                    Infos zum Event
+                  </Button>
+                </div>
+              </Reveal>
+            </div>
+          </div>
+
+          {/* Photo below the text on mobile / tablet */}
+          <Reveal className="relative z-10 lg:hidden">
+            <div className="relative aspect-[4/5] w-full sm:aspect-[16/12]">
+              <Image
+                src="/figma/about/hero-coffee.jpg"
+                alt="Selmir Suljkanovic"
+                fill
+                sizes="100vw"
+                className="object-cover object-[38%_22%]"
+              />
+              <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-bg to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-bg to-transparent" />
+            </div>
+          </Reveal>
         </section>
 
         {/* Über Selmir — Führung & Netzwerk */}
         <section className="bg-bg px-6 py-20 md:px-12 md:py-28 lg:px-[120px] lg:py-[120px]">
-          <div className="mx-auto flex max-w-[1440px] flex-col items-center gap-12 lg:flex-row lg:items-stretch lg:gap-[64px]">
+          <div className="mx-auto flex max-w-[1440px] flex-col items-center gap-12 lg:flex-row lg:items-start lg:gap-[64px]">
             {/* Photo */}
-            <Reveal className="w-full max-w-[420px] shrink-0 self-center">
+            <Reveal className="w-full max-w-[460px] shrink-0 lg:sticky lg:top-[120px]">
               <div className="overflow-hidden rounded-[18px] border border-white/[0.09] bg-white/[0.04]">
-                <div className="relative aspect-[3/4] w-full">
+                <div className="relative aspect-[4/5] w-full">
                   <Image
                     src="/figma/about/selmir-stage.jpg"
                     alt="Selmir Suljkanovic auf der Bühne"
                     fill
-                    sizes="(max-width: 1024px) 90vw, 420px"
+                    sizes="(max-width: 1024px) 90vw, 460px"
                     className="object-cover object-top"
                   />
                 </div>
@@ -106,7 +130,7 @@ export default function UeberPage() {
             </Reveal>
 
             {/* Copy */}
-            <Reveal delay={0.1} className="w-full max-w-[720px] self-center">
+            <Reveal delay={0.1} className="w-full max-w-[720px]">
               <div className="flex flex-col gap-7">
                 <div className="flex items-center gap-3.5">
                   <span className="h-0.5 w-10 bg-purple-2" />
