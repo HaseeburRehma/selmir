@@ -28,7 +28,18 @@ The HubSpot side is fully set up and tested:
   (view it any time: HubSpot → Development → Keys → Service-Schlüssel).
 - **5 contact properties** created: `smd2026_ticket_tier`, `smd2026_amount`,
   `smd2026_quantity`, `smd2026_purchase_date`, `smd2026_stripe_session`.
-- **Static list "SMD2026"** created → **`SMD2026_LIST_ID = 761`**.
+- **Static list "SMD2026"** created → **`SMD2026_LIST_ID = 761`** (master list,
+  every buyer).
+- **Per-tier routing**: on top of the master list, each buyer is added to the
+  segment matching the ticket they bought:
+  | Tier | Segment | List ID | env override |
+  |---|---|---|---|
+  | Basic | SMD26 November Teilnehmer Basic | `757` | `SMD2026_LIST_BASIC` |
+  | Business | SMD26 November Teilnehmer Business | `758` | `SMD2026_LIST_BUSINESS` |
+  | First Class | SMD26 November Teilnehmer First | `760` | `SMD2026_LIST_FIRST` |
+
+  IDs are hardcoded fallbacks in `src/lib/hubspot.ts`; set the env vars only if
+  the segments are ever recreated with new IDs.
 - Verified end-to-end: a test buyer was written with tier + amount + date,
   added to the SMD2026 list, then removed.
 
