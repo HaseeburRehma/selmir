@@ -19,11 +19,11 @@ export default function GastSpeakerSection() {
         className="pointer-events-none absolute -left-40 top-1/2 h-[520px] w-[520px] -translate-y-1/2 rounded-full bg-purple-1/20 blur-[140px]"
       />
 
-      <div className="relative z-10 mx-auto flex max-w-[1440px] flex-col items-center gap-12 lg:flex-row lg:items-center lg:gap-[64px]">
+      <div className="relative z-10 mx-auto flex max-w-[1200px] flex-col items-center justify-center gap-12 lg:flex-row lg:items-center lg:gap-[64px]">
         {/* Photo */}
         <Reveal className="w-full max-w-[440px] shrink-0">
           <div className="overflow-hidden rounded-[18px] border border-white/[0.09] bg-white/[0.04]">
-            <div className="relative aspect-[3/4] w-full">
+            <div className="relative aspect-[4/5] w-full">
               <Image
                 src="/figma/speakers/tolga-toker.jpg"
                 alt="Tolga Toker — Deutschlands bester BMW Verkäufer"
@@ -50,23 +50,9 @@ export default function GastSpeakerSection() {
               <span className="font-display">BMW Verkäufer</span>
             </h2>
 
-            <p className="font-display text-[20px] tracking-[-0.4px] text-purple-2 md:text-[24px]">
+            <p className="font-serif text-[22px] tracking-[-0.4px] text-white/85 md:text-[26px]">
               Tolga Toker
             </p>
-
-            <div className="space-y-4 font-body text-[16px] leading-[1.6] tracking-[-0.3px] text-white/[0.68] md:text-[17px]">
-              <p>
-                Tolga Toker gehört zu den erfolgreichsten Automobilverkäufern
-                Deutschlands. Was ihn auszeichnet, ist nicht Zufall, sondern
-                System: eine klare Gesprächsführung, echtes Gespür für den
-                Kunden und die Disziplin, jeden Abschluss planbar zu machen.
-              </p>
-              <p>
-                Auf den Sales Mastery Days teilt er live, wie er im
-                Premium-Segment verkauft, Vertrauen aufbaut und aus Interessenten
-                treue Kunden macht, direkt aus der Praxis, ohne Theorie.
-              </p>
-            </div>
           </div>
         </Reveal>
       </div>
