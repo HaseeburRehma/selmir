@@ -3,7 +3,14 @@
 import { useState } from "react";
 import { Send, CheckCircle2, AlertCircle } from "lucide-react";
 
-const ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY ?? "";
+// Web3Forms access keys are public by design (used client-side, spam-protected
+// by Web3Forms). Env var wins; hardcoded fallback keeps it working in prod.
+const ACCESS_KEY =
+  process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY ??
+  "65a97f92-403e-415e-b686-a721097a8368";
+
+// Second inbox — receives a copy of every submission.
+const CC_EMAILS = ["info@tylotech.de"];
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -34,6 +41,7 @@ export function ContactForm() {
         },
         body: JSON.stringify({
           access_key: ACCESS_KEY,
+          cc: CC_EMAILS,
           subject: `Neue Kontaktanfrage von ${data.name || "Website"}`,
           from_name: "Sales Mastery Days — Kontaktformular",
           replyto: data.email,
