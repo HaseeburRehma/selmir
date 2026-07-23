@@ -35,14 +35,17 @@ export function ContactForm() {
     setStatus("submitting");
     setError("");
 
+    // German field labels in the notification email (Web3Forms uses the JSON
+    // keys as labels). Special keys (access_key/subject/from_name/replyto)
+    // stay lowercase; the rest become the visible German labels.
     const payload = {
       subject: `Neue Kontaktanfrage von ${data.name || "Website"}`,
       from_name: "Sales Mastery Days — Kontaktformular",
       replyto: data.email,
-      name: data.name,
-      email: data.email,
-      betreff: data.betreff,
-      nachricht: data.nachricht,
+      Name: data.name,
+      "E-Mail": data.email,
+      Betreff: data.betreff,
+      Nachricht: data.nachricht,
     };
 
     try {
