@@ -9,8 +9,9 @@ const ACCESS_KEY =
   process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY ??
   "65a97f92-403e-415e-b686-a721097a8368";
 
-// Second inbox — receives a copy of every submission.
-const CC_EMAILS = ["info@tylotech.de"];
+// Client inboxes — every submission is copied here (the access key itself is
+// registered to a different address, so these must be explicit recipients).
+const CC_EMAILS = ["info@sh-wachstum.de", "info@tylotech.de"];
 
 type Status = "idle" | "submitting" | "success" | "error";
 
