@@ -13,7 +13,7 @@ const LINKS = [
   { label: "Case Studies", href: "/#cases" },
   { label: "Über", href: "/ueber" },
   { label: "Karriere", href: "/#footer" },
-  { label: "Kontakt", href: "/#footer" },
+  { label: "Kontakt", href: "/kontakt" },
 ];
 
 export default function Navbar() {

@@ -31,6 +31,8 @@ function linkHref(label: string): string {
   const l = label.toLowerCase();
   if (l.includes("impressum")) return "/impressum";
   if (l.includes("datenschutz")) return "/datenschutz";
+  if (l === "kontakt") return "/kontakt";
+  if (l === "über") return "/ueber";
   if (label.includes("@")) return `mailto:${label}`;
   if (/\d{3,}/.test(label)) return `tel:${label.replace(/[^\d+]/g, "")}`;
   return "#";

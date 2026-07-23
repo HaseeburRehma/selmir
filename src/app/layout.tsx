@@ -51,6 +51,9 @@ export const metadata: Metadata = {
   description: SITE_DESCRIPTION,
   verification: {
     google: "_KS332maxCyUk5SIxQfPsbzLugkehvqpz1Hwi0fSjXU",
+    other: {
+      "facebook-domain-verification": "5kdghk1yknkvjc8jyn8mdvdd7ygd6l",
+    },
   },
   openGraph: {
     title: SITE_TITLE,
