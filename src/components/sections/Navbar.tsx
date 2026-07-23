@@ -38,7 +38,7 @@ export default function Navbar() {
       <nav className="container-page flex h-[80px] items-center justify-between md:h-[96px]">
         <Logo />
 
-        <ul className="hidden items-center gap-5 lg:flex xl:gap-8">
+        <ul className="hidden items-center gap-4 lg:flex xl:gap-7">
           {LINKS.map((l) => (
             <li key={l.label}>
               <Link
@@ -52,8 +52,8 @@ export default function Navbar() {
         </ul>
 
         <div className="hidden lg:block">
-          <Button href="/#tickets" className="h-12 px-6 text-[13px]">
-            TICKET SICHERN
+          <Button href="/#tickets" className="!h-12 !px-4 !text-[11px] xl:!px-6 xl:!text-[13px]">
+            Potenzialanalyse sichern
           </Button>
         </div>
 
@@ -84,7 +84,7 @@ export default function Navbar() {
             ))}
             <li className="pt-2">
               <Button href="/#tickets" full icon={<CalendarDays className="size-5" />}>
-                Ticket sichern
+                Potenzialanalyse sichern
               </Button>
             </li>
           </ul>
