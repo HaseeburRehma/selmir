@@ -9,9 +9,10 @@ const ACCESS_KEY =
   process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY ??
   "65a97f92-403e-415e-b686-a721097a8368";
 
-// Client inboxes — every submission is copied here (the access key itself is
-// registered to a different address, so these must be explicit recipients).
-const CC_EMAILS = ["info@sh-wachstum.de", "info@tylotech.de"];
+// NOTE: recipients are controlled in the Web3Forms dashboard
+// (Form Settings → Email Configuration → Recipient Emails), NOT here.
+// CC/BCC via the API is a Pro-only feature and is ignored on the free plan.
+// Add info@sh-wachstum.de + info@tylotech.de as Recipient Emails there.
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -42,7 +43,6 @@ export function ContactForm() {
         },
         body: JSON.stringify({
           access_key: ACCESS_KEY,
-          cc: CC_EMAILS,
           subject: `Neue Kontaktanfrage von ${data.name || "Website"}`,
           from_name: "Sales Mastery Days — Kontaktformular",
           replyto: data.email,
