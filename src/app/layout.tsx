@@ -48,6 +48,9 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://selmir-suljkanovic.de"),
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
+  verification: {
+    google: "_KS332maxCyUk5SIxQfPsbzLugkehvqpz1Hwi0fSjXU",
+  },
   openGraph: {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
