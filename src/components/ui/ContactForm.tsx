@@ -4,15 +4,16 @@ import { useState } from "react";
 import { Send, CheckCircle2, AlertCircle } from "lucide-react";
 
 // Web3Forms access keys are public by design (used client-side, spam-protected
-// by Web3Forms). Env var wins; hardcoded fallback keeps it working in prod.
-const ACCESS_KEY =
+// by Web3Forms). One key = one recipient on the free plan, so we submit to two
+// separate forms — one per inbox — to deliver to both.
+//   Key 1 → info@sh-wachstum.de
+//   Key 2 → info@tylotech.de   (create a 2nd free form with this recipient)
+const ACCESS_KEYS = [
   process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY ??
-  "65a97f92-403e-415e-b686-a721097a8368";
-
-// NOTE: recipients are controlled in the Web3Forms dashboard
-// (Form Settings → Email Configuration → Recipient Emails), NOT here.
-// CC/BCC via the API is a Pro-only feature and is ignored on the free plan.
-// Add info@sh-wachstum.de + info@tylotech.de as Recipient Emails there.
+    "65a97f92-403e-415e-b686-a721097a8368",
+  process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY_2 ??
+    "REPLACE_WITH_SECOND_KEY",
+].filter((k) => k && !k.startsWith("REPLACE"));
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -34,31 +35,47 @@ export function ContactForm() {
     setStatus("submitting");
     setError("");
 
+    const payload = {
+      subject: `Neue Kontaktanfrage von ${data.name || "Website"}`,
+      from_name: "Sales Mastery Days — Kontaktformular",
+      replyto: data.email,
+      name: data.name,
+      email: data.email,
+      betreff: data.betreff,
+      nachricht: data.nachricht,
+    };
+
     try {
-      const res = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          access_key: ACCESS_KEY,
-          subject: `Neue Kontaktanfrage von ${data.name || "Website"}`,
-          from_name: "Sales Mastery Days — Kontaktformular",
-          replyto: data.email,
-          name: data.name,
-          email: data.email,
-          betreff: data.betreff,
-          nachricht: data.nachricht,
-        }),
-      });
-      const json = await res.json();
-      if (json.success) {
+      // Submit to every configured key — one delivery per inbox.
+      const results = await Promise.allSettled(
+        ACCESS_KEYS.map((access_key) =>
+          fetch("https://api.web3forms.com/submit", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({ access_key, ...payload }),
+          }).then((r) => r.json()),
+        ),
+      );
+      const anySuccess = results.some(
+        (r) => r.status === "fulfilled" && r.value?.success,
+      );
+      const firstError = results.find(
+        (r) => r.status === "fulfilled" && !r.value?.success,
+      );
+
+      if (anySuccess) {
         setStatus("success");
         form.reset();
       } else {
         setStatus("error");
-        setError(json.message || "Etwas ist schiefgelaufen.");
+        const msg =
+          firstError?.status === "fulfilled"
+            ? firstError.value?.message
+            : undefined;
+        setError(msg || "Etwas ist schiefgelaufen.");
       }
     } catch {
       setStatus("error");
