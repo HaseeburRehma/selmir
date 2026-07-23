@@ -12,7 +12,7 @@ const ACCESS_KEYS = [
   process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY ??
     "65a97f92-403e-415e-b686-a721097a8368",
   process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY_2 ??
-    "REPLACE_WITH_SECOND_KEY",
+    "42fa7773-555f-40c9-9afb-a17a8049df7c",
 ].filter((k) => k && !k.startsWith("REPLACE"));
 
 type Status = "idle" | "submitting" | "success" | "error";
