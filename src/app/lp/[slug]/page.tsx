@@ -9,7 +9,6 @@ import LpSolution from "@/components/landing/LpSolution";
 import LpSteps from "@/components/landing/LpSteps";
 import LpAudience from "@/components/landing/LpAudience";
 import LpAbout from "@/components/landing/LpAbout";
-import LpStories from "@/components/landing/LpStories";
 import LpCaseStudy from "@/components/landing/LpCaseStudy";
 import LpOffer from "@/components/landing/LpOffer";
 import LpFaq from "@/components/landing/LpFaq";
@@ -73,13 +72,14 @@ export default async function LandingPage({
         <LpProof />
         <LpProblem />
         <LpSolution />
-        <LpSteps />
-        <LpAudience />
-        <LpAbout />
-        <LpStories />
+        {/* The four case studies land straight after "Die Lösung" — the proof
+            follows the claim, before the how ("So läuft's ab"). */}
         {CASE_STUDIES.map((study) => (
           <LpCaseStudy key={study.eyebrow} study={study} />
         ))}
+        <LpSteps />
+        <LpAudience />
+        <LpAbout />
         <LpOffer pageName={page.name} />
         <LpFaq />
         <LpFinalCta />

@@ -9,8 +9,6 @@ interface YouTubeLiteProps {
   className?: string;
   /** Custom still to show before playback; defaults to the YouTube thumbnail. */
   poster?: string;
-  /** Aspect utility for the frame — override when the design isn't 16:9. */
-  aspectClassName?: string;
   /** called when the user starts the video */
   onPlay?: () => void;
 }
@@ -24,7 +22,6 @@ export function YouTubeLite({
   title = "Video",
   className = "",
   poster,
-  aspectClassName = "aspect-video",
   onPlay,
 }: YouTubeLiteProps) {
   const [playing, setPlaying] = useState(false);
@@ -32,7 +29,7 @@ export function YouTubeLite({
   const thumb = poster ?? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
 
   return (
-    <div className={`relative w-full overflow-hidden ${aspectClassName} ${className}`}>
+    <div className={`relative aspect-video w-full overflow-hidden ${className}`}>
       {playing ? (
         <iframe
           className="absolute inset-0 h-full w-full"

@@ -95,13 +95,15 @@ export default function LpCaseStudy({ study }: { study: CaseStudy }) {
 
             <RevenueChart {...study.chart} />
 
+            {/* 16:9, not the design's 568x267 frame: a YouTube player letterboxes
+                anything wider than 16:9, which left black bars down both sides and
+                made the video look narrower than the chart card above it. */}
             {study.video && (
               <div className="overflow-hidden rounded-[20px] border border-white/[0.06]">
                 <YouTubeLite
                   videoId={study.video.id}
                   title={study.video.title}
                   poster={study.video.poster}
-                  aspectClassName="aspect-[568/267]"
                 />
               </div>
             )}

@@ -55,6 +55,22 @@ export function LpLeadForm({ pageName }: { pageName: string }) {
       Landingpage: pageName,
     };
 
+    // The CRM write runs alongside the e-mail notification. It must never be
+    // what fails the submission, so its outcome is logged, not surfaced.
+    const hubspot = fetch("/api/lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: data.name,
+        phone: data.telefon,
+        company: data.firma,
+        decisionMaker: decider,
+        landingPage: pageName,
+      }),
+    })
+      .then((r) => r.json())
+      .catch(() => ({ ok: false }));
+
     try {
       const results = await Promise.allSettled(
         ACCESS_KEYS.map((access_key) =>
@@ -68,6 +84,10 @@ export function LpLeadForm({ pageName }: { pageName: string }) {
           }).then((r) => r.json()),
         ),
       );
+
+      void hubspot.then((res) => {
+        if (!res?.ok) console.warn("[lead] CRM sync did not complete", res);
+      });
       const anySuccess = results.some(
         (r) => r.status === "fulfilled" && r.value?.success,
       );

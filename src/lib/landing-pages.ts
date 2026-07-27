@@ -158,7 +158,7 @@ export const PROOF = {
   headlineSerif: "Von 4 auf 18 Millionen Euro",
   headlineDisplay: "in 2 Jahren.",
   body: "Gemeinsam mit einem Wärmepumpen-Betrieb haben wir den Vertrieb von Grund auf aufgebaut – ohne mehr Werbebudget, allein durch Struktur und Vertrieb. Das Ergebnis: eine Vervierfachung des Jahresumsatzes.",
-  videoId: "oNulnavbtTM",
+  videoId: "KIfrhPyYPNA",
   caption: "Video: Hörmann-Podcast-Clip",
 };
 
@@ -261,19 +261,9 @@ export const ABOUT = {
   ],
 };
 
-export const STORIES = {
-  eyebrow: "Erfolgsgeschichten",
-  headlineSerif: "6 Erfolgsgeschichten, die zeigen:",
-  headlineDisplay: "Dein Vertrieb geht auch ohne dich.",
-  videoIds: [
-    "KIfrhPyYPNA",
-    "kMeN9SY_Ld4",
-    "PDgj_f7vJu8",
-    "89Mzx7TPlzQ",
-    "Ok2j8LeBYW0",
-    "3fLDRD6aezg",
-  ],
-};
+// The "6 Erfolgsgeschichten" video-carousel section was dropped from the
+// landing pages — the four case studies below carry the proof instead. The
+// carousel still runs on the main site (see StoriesSection).
 
 export interface CaseStudy {
   /**
@@ -409,8 +399,8 @@ export const CASE_STUDIES: CaseStudy[] = [
       { src: "/figma/lp/cases/hoermann-1.webp", alt: "Selmir Suljkanovic im Gespräch bei Hörmann Haustechnik" },
       { src: "/figma/lp/cases/hoermann-2.webp", alt: "Vertriebsgespräch bei Hörmann Haustechnik" },
     ],
-    // The clip is the Hörmann podcast episode — the same video the
-    // "Der Beweis" section opens with.
+    // "Von 4 auf 18 Millionen €" — the same clip "Der Beweis" opens with,
+    // which is this study's own story.
     video: {
       id: PROOF.videoId,
       poster: "/figma/lp/cases/hoermann-video.webp",

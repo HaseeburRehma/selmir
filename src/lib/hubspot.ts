@@ -1,4 +1,4 @@
-import type { TicketSale } from "./smd2026";
+import { splitName, type TicketSale } from "./smd2026";
 
 /**
  * Pushes a ticket sale into HubSpot ("SMD2026"):
@@ -113,6 +113,96 @@ async function addToList(listId: string, contactId: string): Promise<void> {
   if (!res.ok) {
     throw new Error(`HubSpot list ${listId} add failed: ${await res.text()}`);
   }
+}
+
+/* ------------------------------------------------------------------ */
+/* Landing-page leads ("Kostenlose Potenzialanalyse")                   */
+/* ------------------------------------------------------------------ */
+
+export interface PotenzialanalyseLead {
+  name: string;
+  phone: string;
+  company: string;
+  /** Answer to "Bist du Inhaber / Entscheider?" */
+  decisionMaker: "Ja" | "Nein";
+  /** Which of the eight landing pages the form was submitted from. */
+  landingPage: string;
+}
+
+/**
+ * Upserts a landing-page lead as a HubSpot contact.
+ *
+ * The form deliberately collects no email address (the Figma design ships
+ * name / phone / company only), so the usual email dedup key isn't available —
+ * we match on `phone` instead. Two submissions from the same number update one
+ * contact; a changed number creates a second one.
+ *
+ * Everything written here is a property that already exists in the portal.
+ * The extra answers go into the standard `message` field because there is no
+ * dedicated property for them yet — see the note in the route handler.
+ */
+export async function submitLeadToHubSpot(
+  lead: PotenzialanalyseLead,
+): Promise<string> {
+  const { firstName, lastName } = splitName(lead.name);
+
+  const properties: Record<string, string> = {
+    firstname: firstName,
+    lastname: lastName,
+    phone: lead.phone,
+    company: lead.company,
+    lifecyclestage: "lead",
+    // "Noch nicht erreicht" — the lead is waiting for the callback.
+    hs_lead_status: "NEW",
+    message: [
+      "Kostenlose Potenzialanalyse angefragt",
+      `Landingpage: ${lead.landingPage}`,
+      `Inhaber / Entscheider: ${lead.decisionMaker}`,
+    ].join(" · "),
+  };
+
+  const existingId = await findContactIdByPhone(lead.phone);
+
+  if (existingId) {
+    const patchRes = await fetch(`${BASE}/crm/v3/objects/contacts/${existingId}`, {
+      method: "PATCH",
+      headers: authHeaders(),
+      body: JSON.stringify({ properties }),
+    });
+    if (!patchRes.ok) {
+      throw new Error(`HubSpot lead PATCH failed: ${await patchRes.text()}`);
+    }
+    return existingId;
+  }
+
+  const createRes = await fetch(`${BASE}/crm/v3/objects/contacts`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({ properties }),
+  });
+  if (!createRes.ok) {
+    throw new Error(`HubSpot lead create failed: ${await createRes.text()}`);
+  }
+  const created = (await createRes.json()) as { id: string };
+  return created.id;
+}
+
+/** Finds a contact by phone number, or null. Used instead of email dedup. */
+async function findContactIdByPhone(phone: string): Promise<string | null> {
+  const res = await fetch(`${BASE}/crm/v3/objects/contacts/search`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({
+      filterGroups: [
+        { filters: [{ propertyName: "phone", operator: "EQ", value: phone }] },
+      ],
+      properties: ["phone"],
+      limit: 1,
+    }),
+  });
+  if (!res.ok) return null; // search failing shouldn't block the lead
+  const found = (await res.json()) as { results?: { id: string }[] };
+  return found.results?.[0]?.id ?? null;
 }
 
 export async function trackSaleInHubSpot(sale: TicketSale): Promise<string> {
