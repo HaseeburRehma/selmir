@@ -38,11 +38,22 @@ const PAYMENT_LINK_TIER: Record<string, TicketTier> = {
     "First Class",
 };
 
-/** Fallback: map by the amount paid (early-bird + regular prices). */
+/**
+ * Fallback: map by the amount paid. Stripe reports the GROSS amount the
+ * customer actually paid (incl. 19% German VAT), while our list prices are
+ * NET. So match against both the net price and the gross (net × 1.19), with a
+ * small rounding tolerance.
+ *   Basic       69 € net → 82.11 € gross   (99 → 117.81)
+ *   Business   379 € net → 451.01 € gross  (499 → 593.81)
+ *   First Class 1199 € net → 1426.81 € gross (1499 → 1783.81)
+ */
+const VAT = 1.19;
 function tierFromAmount(eur: number): TicketTier {
-  if (eur === 69 || eur === 99) return "Basic";
-  if (eur === 379 || eur === 499) return "Business";
-  if (eur === 1199 || eur === 1499) return "First Class";
+  const near = (t: number) => Math.abs(eur - t) < 0.75;
+  const matches = (net: number) => near(net) || near(net * VAT);
+  if (matches(69) || matches(99)) return "Basic";
+  if (matches(379) || matches(499)) return "Business";
+  if (matches(1199) || matches(1499)) return "First Class";
   return "Unbekannt";
 }
 
