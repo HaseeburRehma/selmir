@@ -49,7 +49,7 @@ for (const c of CASES) {
   const tierOk = tier === c.expect;
 
   const id = await trackSaleInHubSpot({
-    email, firstName: "TIER", lastName: `TEST ${c.expect}`,
+    email, firstName: "TIER", lastName: `TEST ${c.expect}`, phone: "",
     tier, amount: c.amount, currency: "EUR", quantity: 1,
     purchaseDate: new Date().toISOString(), stripeSessionId: `test_${ts}_${c.expect}`,
   });

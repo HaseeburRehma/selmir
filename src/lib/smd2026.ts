@@ -11,6 +11,8 @@ export interface TicketSale {
   email: string;
   firstName: string;
   lastName: string;
+  /** phone as collected by Stripe checkout (empty if not collected) */
+  phone: string;
   tier: TicketTier;
   /** amount actually paid, in EUR (e.g. 69, 379, 1199) */
   amount: number;

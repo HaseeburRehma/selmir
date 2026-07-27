@@ -72,6 +72,7 @@ export async function POST(req: NextRequest) {
       email,
       firstName,
       lastName,
+      phone: session.customer_details?.phone ?? "",
       tier: resolveTier(paymentLinkId, amountEur),
       amount: amountEur,
       currency: (session.currency ?? "eur").toUpperCase(),

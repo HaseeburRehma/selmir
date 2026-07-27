@@ -36,6 +36,10 @@ async function upsertContact(sale: TicketSale): Promise<string> {
     lifecyclestage: "customer",
   };
 
+  // Only set phone when Stripe actually collected one (don't overwrite an
+  // existing HubSpot phone with a blank value).
+  if (sale.phone) properties.phone = sale.phone;
+
   // Try create first
   const createRes = await fetch(`${BASE}/crm/v3/objects/contacts`, {
     method: "POST",
