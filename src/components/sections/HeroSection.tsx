@@ -72,9 +72,14 @@ export default function HeroSection() {
 
             {/* Gast Speaker badges */}
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+              {/* Noah's stage shot is too wide to read at 56px, so the badge
+                  uses a head-and-shoulders crop of it. */}
               {[
                 { name: "Tolga Toker", image: "/figma/speakers/tolga-toker.jpg" },
-                { name: "Noah Geerkens", image: "/figma/speakers/noah-geerkens.jpg" },
+                {
+                  name: "Noah Geerkens",
+                  image: "/figma/speakers/noah-geerkens-avatar.jpg",
+                },
               ].map((s) => (
                 <a
                   key={s.name}
