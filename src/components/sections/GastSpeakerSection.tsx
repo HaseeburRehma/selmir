@@ -19,7 +19,6 @@ export default function GastSpeakerSection() {
         className="pointer-events-none absolute -left-40 top-1/2 h-[520px] w-[520px] -translate-y-1/2 rounded-full bg-purple-1/20 blur-[140px]"
       />
 
-  
       <div className="relative z-10 mx-auto flex max-w-[1200px] flex-col items-center justify-center gap-12 lg:flex-row lg:items-center lg:gap-[64px]">
         {/* Photo */}
         <Reveal className="w-full max-w-[440px] shrink-0">
