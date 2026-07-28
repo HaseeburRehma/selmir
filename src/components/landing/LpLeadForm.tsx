@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertCircle, CalendarDays, CheckCircle2 } from "lucide-react";
 import { OFFER } from "@/lib/landing-pages";
+import { captureAttribution, readAttribution } from "@/lib/attribution";
 
 // Web3Forms access keys are public by design (client-side, spam-protected by
 // Web3Forms). One key = one recipient on the free plan, so we submit once per
@@ -31,6 +32,11 @@ export function LpLeadForm({ pageName }: { pageName: string }) {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
   const [decider, setDecider] = useState<"Ja" | "Nein">("Ja");
+
+  // Remember the ad click that brought this visitor here, before they navigate.
+  useEffect(() => {
+    captureAttribution();
+  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -66,6 +72,7 @@ export function LpLeadForm({ pageName }: { pageName: string }) {
         company: data.firma,
         decisionMaker: decider,
         landingPage: pageName,
+        attribution: readAttribution(),
       }),
     })
       .then((r) => r.json())

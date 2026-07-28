@@ -1,4 +1,5 @@
 import { splitName, type TicketSale } from "./smd2026";
+import type { LeadAttribution } from "./attribution";
 
 /**
  * Pushes a ticket sale into HubSpot ("SMD2026"):
@@ -127,6 +128,8 @@ export interface PotenzialanalyseLead {
   decisionMaker: "Ja" | "Nein";
   /** Which of the eight landing pages the form was submitted from. */
   landingPage: string;
+  /** Ad attribution captured on the landing page, when the click carried any. */
+  attribution?: LeadAttribution;
 }
 
 /**
@@ -159,7 +162,30 @@ export async function submitLeadToHubSpot(
       `Landingpage: ${lead.landingPage}`,
       `Inhaber / Entscheider: ${lead.decisionMaker}`,
     ].join(" · "),
+    // "Landingpage & Ads" property group — the filterable half.
+    lp_landing_page: lead.landingPage,
+    lp_submitted_at: new Date().toISOString(),
   };
+
+  // Ad attribution, when the click carried any. Only non-empty values are sent
+  // so a later direct visit can't blank out the original campaign.
+  const a = lead.attribution ?? {};
+  const attributionProps: Record<string, string | undefined> = {
+    lp_utm_source: a.utmSource,
+    lp_utm_medium: a.utmMedium,
+    lp_utm_campaign: a.utmCampaign,
+    lp_utm_content: a.utmContent,
+    lp_utm_term: a.utmTerm,
+    lp_campaign_id: a.campaignId,
+    lp_adset_id: a.adsetId,
+    lp_ad_id: a.adId,
+    lp_fbclid: a.fbclid,
+    lp_landing_page_url: a.landingPageUrl,
+    lp_referrer: a.referrer,
+  };
+  for (const [key, value] of Object.entries(attributionProps)) {
+    if (value) properties[key] = value;
+  }
 
   const existingId = await findContactIdByPhone(lead.phone);
 

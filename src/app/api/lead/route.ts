@@ -48,6 +48,7 @@ export async function POST(req: NextRequest) {
       company,
       decisionMaker: body.decisionMaker === "Nein" ? "Nein" : "Ja",
       landingPage: body.landingPage?.trim() || "Unbekannt",
+      attribution: body.attribution,
     });
     return NextResponse.json({ ok: true, contactId });
   } catch (err) {
