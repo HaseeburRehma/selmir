@@ -7,8 +7,6 @@ interface YouTubeLiteProps {
   videoId: string;
   title?: string;
   className?: string;
-  /** Custom still to show before playback; defaults to the YouTube thumbnail. */
-  poster?: string;
   /** called when the user starts the video */
   onPlay?: () => void;
 }
@@ -21,12 +19,15 @@ export function YouTubeLite({
   videoId,
   title = "Video",
   className = "",
-  poster,
   onPlay,
 }: YouTubeLiteProps) {
   const [playing, setPlaying] = useState(false);
-  // hqdefault always exists for every video (reliable)
-  const thumb = poster ?? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+  // maxresdefault is the only 16:9 still (1280x720) — it fills the frame without
+  // cropping. Not every upload has one, so fall back to hqdefault (4:3, always
+  // present) if it 404s.
+  const [thumb, setThumb] = useState(
+    `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
+  );
 
   return (
     <div className={`relative aspect-video w-full overflow-hidden ${className}`}>
@@ -53,6 +54,9 @@ export function YouTubeLite({
             src={thumb}
             alt={title}
             loading="lazy"
+            onError={() =>
+              setThumb(`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`)
+            }
             className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
           <span className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />

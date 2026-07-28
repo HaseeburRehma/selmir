@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-/** Selmir Suljkanovic brand logo (white wordmark). */
+/** Selmir Suljkanovic brand logo (red gradient wordmark). */
 export function Logo({ className = "" }: { className?: string }) {
   return (
     <Link

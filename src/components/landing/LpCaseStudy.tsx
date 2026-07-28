@@ -103,7 +103,6 @@ export default function LpCaseStudy({ study }: { study: CaseStudy }) {
                 <YouTubeLite
                   videoId={study.video.id}
                   title={study.video.title}
-                  poster={study.video.poster}
                 />
               </div>
             )}

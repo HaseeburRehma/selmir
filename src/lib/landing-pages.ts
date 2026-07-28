@@ -289,8 +289,12 @@ export interface CaseStudy {
    * 4 → a 2×2 grid of 280×187.5 frames.
    */
   images: { src: string; alt: string }[];
-  /** Video card under the chart — only the Hörmann study has one. */
-  video?: { id: string; poster: string; title: string };
+  /**
+   * Video card under the chart — only the Hörmann study has one. The still is
+   * YouTube's own 16:9 thumbnail (see YouTubeLite); the Figma frame's custom
+   * poster was a 2.13:1 crop that lost its subject in a 16:9 card.
+   */
+  video?: { id: string; title: string };
 }
 
 export const CASE_STUDIES: CaseStudy[] = [
@@ -403,7 +407,6 @@ export const CASE_STUDIES: CaseStudy[] = [
     // which is this study's own story.
     video: {
       id: PROOF.videoId,
-      poster: "/figma/lp/cases/hoermann-video.webp",
       title: "Hörmann Haustechnik im Podcast",
     },
   },
