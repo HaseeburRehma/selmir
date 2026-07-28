@@ -80,6 +80,10 @@ export default function Error({
           >
             Erneut versuchen
           </button>
+          {/* Deliberately a plain anchor, not next/link: a hard navigation
+              throws away whatever client state broke, which is the point of
+              this escape hatch. */}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a
             href="/"
             className="rounded-[10px] border border-white/15 px-6 py-[14px] font-body text-[15px] text-white/80 transition-colors hover:border-white/30 hover:text-white"
