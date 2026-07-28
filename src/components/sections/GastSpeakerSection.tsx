@@ -48,26 +48,37 @@ export default function GastSpeakerSection() {
 
         <div className="grid grid-cols-1 gap-14 sm:grid-cols-2 lg:gap-[64px]">
           {SPEAKERS.map((s, i) => (
-            <Reveal key={s.name} delay={i * 0.1} className="flex flex-col gap-7">
-              <div className="overflow-hidden rounded-[18px] border border-white/[0.09] bg-white/[0.04]">
-                <div className="relative aspect-[4/5] w-full">
-                  <Image
-                    src={s.image}
-                    alt={s.alt}
-                    fill
-                    sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 540px"
-                    className="object-cover object-top"
-                  />
+            <Reveal
+              key={s.name}
+              delay={i * 0.1}
+              className="mx-auto flex w-full max-w-[400px] flex-col gap-7"
+            >
+              <div className="relative">
+                {/* purple bloom behind the portrait */}
+                <div
+                  aria-hidden
+                  className="absolute -inset-5 rounded-[28px] bg-[radial-gradient(120%_100%_at_50%_0%,rgba(116,84,243,0.50)_0%,rgba(176,137,255,0.20)_45%,rgba(10,8,18,0)_80%)]"
+                />
+                <div className="relative overflow-hidden rounded-[18px] border border-white/[0.09] bg-white/[0.04]">
+                  <div className="relative aspect-square w-full">
+                    <Image
+                      src={s.image}
+                      alt={s.alt}
+                      fill
+                      sizes="(max-width: 640px) 90vw, 400px"
+                      className="object-cover object-top"
+                    />
+                  </div>
                 </div>
               </div>
 
               <div className="flex flex-col gap-3">
-                <h2 className="font-serif text-[30px] leading-[1.15] tracking-[-1px] text-white md:text-[38px] md:tracking-[-1.2px]">
+                <h2 className="font-serif text-[28px] leading-[1.15] tracking-[-0.9px] text-white md:text-[34px] md:tracking-[-1.1px]">
                   {s.claim.serif && `${s.claim.serif} `}
                   <span className="font-display">{s.claim.display}</span>
                 </h2>
 
-                <p className="font-serif text-[20px] tracking-[-0.4px] text-white/85 md:text-[24px]">
+                <p className="font-serif text-[19px] tracking-[-0.4px] text-white/85 md:text-[22px]">
                   {s.name}
                 </p>
               </div>
