@@ -374,10 +374,10 @@ export const CASE_STUDIES: CaseStudy[] = [
       "44 % mehr Mitarbeiter durch klaren Recruitingprozess",
     ],
     images: [
-      { src: "/figma/lp/cases/hohnen-1.webp", alt: "Vertriebsteam der Jürgen Hohnen GmbH im Gespräch" },
+      { src: "/figma/lp/cases/hohnen-front.webp", alt: "Das Team der Jürgen Hohnen GmbH vor dem Firmengebäude" },
       { src: "/figma/lp/cases/hohnen-2.webp", alt: "Schulung des Vertriebsteams der Jürgen Hohnen GmbH" },
       { src: "/figma/lp/cases/hohnen-3.webp", alt: "Beratung im Betrieb der Jürgen Hohnen GmbH" },
-      { src: "/figma/lp/cases/hohnen-4.webp", alt: "Team der Jürgen Hohnen GmbH bei der Vertriebsarbeit" },
+      { src: "/figma/lp/cases/hohnen-desk.webp", alt: "Jürgen Hohnen, Geschäftsführer der Jürgen Hohnen GmbH, an seinem Schreibtisch" },
     ],
   },
   {
@@ -400,7 +400,7 @@ export const CASE_STUDIES: CaseStudy[] = [
       "Von 30 auf 96 Mitarbeiter, 11 Verkäufer eingestellt",
     ],
     images: [
-      { src: "/figma/lp/cases/hoermann-1.webp", alt: "Selmir Suljkanovic im Gespräch bei Hörmann Haustechnik" },
+      { src: "/figma/lp/cases/hoermann-team.webp", alt: "Das Team von Hörmann Haustechnik" },
       { src: "/figma/lp/cases/hoermann-2.webp", alt: "Vertriebsgespräch bei Hörmann Haustechnik" },
     ],
     // "Von 4 auf 18 Millionen €" — the same clip "Der Beweis" opens with,

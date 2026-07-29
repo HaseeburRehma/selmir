@@ -49,6 +49,19 @@ const COLUMNS = [
   },
 ];
 
+// Landing pages keep the full footer but drop the site page-links: no
+// Navigation column, and Ressourcen trimmed to the two legally required links.
+const LANDING_COLUMNS = [
+  {
+    title: "Ressourcen",
+    links: ["Impressum", "Datenschutz"],
+  },
+  {
+    title: "Kontakt",
+    links: ["info@sh-wachstum.de", "0201 - 498 692 20"],
+  },
+];
+
 /** Route legal links, mailto: for emails, tel: for phone numbers. */
 function linkHref(label: string): string {
   const l = label.toLowerCase();
@@ -90,7 +103,12 @@ function WhiteChip({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function FooterSection() {
+export default function FooterSection({
+  landing = false,
+}: {
+  landing?: boolean;
+}) {
+  const columns = landing ? LANDING_COLUMNS : COLUMNS;
   return (
     <footer id="footer" className="relative overflow-hidden bg-[#07050e] px-6 pt-16 md:px-12 md:pt-24 lg:px-[120px]">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-10 md:gap-14">
@@ -145,7 +163,7 @@ export default function FooterSection() {
 
           {/* Link columns — stacked on mobile, row on larger screens */}
           <div className="flex flex-col gap-10 sm:flex-row sm:flex-wrap sm:gap-x-16 sm:gap-y-10 md:gap-x-[88px]">
-            {COLUMNS.map((col) => (
+            {columns.map((col) => (
               <div key={col.title} className="flex flex-col gap-3.5 md:gap-[18px]">
                 <p className="font-body text-[15px] font-semibold tracking-[-0.2px] text-white">
                   {col.title}

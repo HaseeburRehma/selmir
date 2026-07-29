@@ -13,7 +13,7 @@ import LpCaseStudy from "@/components/landing/LpCaseStudy";
 import LpOffer from "@/components/landing/LpOffer";
 import LpFaq from "@/components/landing/LpFaq";
 import LpFinalCta from "@/components/landing/LpFinalCta";
-import LpFooter from "@/components/landing/LpFooter";
+import FooterSection from "@/components/sections/FooterSection";
 
 import { CASE_STUDIES, LANDING_PAGES, getLandingPage } from "@/lib/landing-pages";
 
@@ -84,7 +84,7 @@ export default async function LandingPage({
         <LpFaq />
         <LpFinalCta />
       </main>
-      <LpFooter />
+      <FooterSection landing />
     </>
   );
 }
