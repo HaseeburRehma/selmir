@@ -136,29 +136,31 @@ export default function FooterSection({
               dein Unternehmen auch ohne dich funktioniert.
             </p>
 
-            {/* Payment methods */}
-            <div className="flex flex-wrap gap-[15px] pt-2">
-              {FULL_CARD.map((p) => (
-                <CardBox key={p}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={`/figma/footer/${p}`} alt="" className="h-full w-full object-contain" />
-                </CardBox>
-              ))}
-              {MARK_ONLY.map((p) => (
-                <WhiteChip key={p}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={`/figma/footer/${p}`} alt="" className="h-full w-full object-contain" />
+            {/* Payment methods — hidden on landing pages */}
+            {!landing && (
+              <div className="flex flex-wrap gap-[15px] pt-2">
+                {FULL_CARD.map((p) => (
+                  <CardBox key={p}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={`/figma/footer/${p}`} alt="" className="h-full w-full object-contain" />
+                  </CardBox>
+                ))}
+                {MARK_ONLY.map((p) => (
+                  <WhiteChip key={p}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={`/figma/footer/${p}`} alt="" className="h-full w-full object-contain" />
+                  </WhiteChip>
+                ))}
+                <WhiteChip>
+                  <span className="flex items-center gap-[2px]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/figma/footer/pay-gpay-g.svg" alt="" className="h-[14px] w-auto" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/figma/footer/pay-gpay-pay.svg" alt="Google Pay" className="h-[11px] w-auto" />
+                  </span>
                 </WhiteChip>
-              ))}
-              <WhiteChip>
-                <span className="flex items-center gap-[2px]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/figma/footer/pay-gpay-g.svg" alt="" className="h-[14px] w-auto" />
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/figma/footer/pay-gpay-pay.svg" alt="Google Pay" className="h-[11px] w-auto" />
-                </span>
-              </WhiteChip>
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Link columns — stacked on mobile, row on larger screens */}
