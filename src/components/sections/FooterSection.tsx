@@ -3,7 +3,7 @@ import TylotechCredit from "@/components/ui/TylotechCredit";
 import {
   InstagramIcon,
   LinkedInIcon,
-  XIcon,
+  SpotifyIcon,
   YouTubeIcon,
 } from "@/components/ui/SocialIcons";
 
@@ -17,12 +17,20 @@ const SOCIALS: {
     href: "https://www.instagram.com/selmir.suljkanovic_official/",
     Icon: InstagramIcon,
   },
-  { label: "LinkedIn", href: "#", Icon: LinkedInIcon },
-  { label: "X", href: "#", Icon: XIcon },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/in/selmir-suljkanovic-13a480235/",
+    Icon: LinkedInIcon,
+  },
   {
     label: "YouTube",
     href: "https://www.youtube.com/@SelmirSuljkanovic",
     Icon: YouTubeIcon,
+  },
+  {
+    label: "Spotify",
+    href: "https://open.spotify.com/show/31UgYBHjbCHtqVrRyz9yIH?si=JCfLKY9PSLeI4tPErwBc5g",
+    Icon: SpotifyIcon,
   },
 ];
 

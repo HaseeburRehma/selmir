@@ -14,9 +14,9 @@ const SPEAKERS = [
   },
   {
     name: "Noah Geerkens",
-    claim: { serif: "", display: "KI Spezialist" },
+    claim: { serif: "", display: "KI Spezialist & Handwerksunternehmer" },
     image: "/figma/speakers/noah-geerkens.jpg",
-    alt: "Noah Geerkens — KI Spezialist",
+    alt: "Noah Geerkens — KI Spezialist & Handwerksunternehmer",
   },
 ];
 
@@ -60,7 +60,7 @@ export default function GastSpeakerSection() {
                   className="absolute -inset-5 rounded-[28px] bg-[radial-gradient(120%_100%_at_50%_0%,rgba(116,84,243,0.50)_0%,rgba(176,137,255,0.20)_45%,rgba(10,8,18,0)_80%)]"
                 />
                 <div className="relative overflow-hidden rounded-[18px] border border-white/[0.09] bg-white/[0.04]">
-                  <div className="relative aspect-square w-full">
+                  <div className="relative aspect-[4/5] w-full">
                     <Image
                       src={s.image}
                       alt={s.alt}
