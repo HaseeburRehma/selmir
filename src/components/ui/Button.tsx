@@ -33,6 +33,18 @@ export function Button({
   const showIcon = icon !== false;
   const iconNode = icon ?? <CalendarDays className="size-5" strokeWidth={2} />;
   const isExternal = /^https?:\/\//.test(href);
+  // Same-page anchor (e.g. "#analyse"): scroll on EVERY click. A plain anchor
+  // only jumps when the hash actually changes, so a second click with the hash
+  // already set does nothing — this handler forces the scroll each time.
+  const isHash = href.startsWith("#");
+
+  function handleHashClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    const el = document.getElementById(href.slice(1));
+    if (!el) return; // target not on this page → let the browser handle it
+    e.preventDefault();
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.history.replaceState(null, "", href);
+  }
 
   const base =
     "group relative inline-flex h-16 items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-[6px] px-6 font-label text-[14px] font-bold uppercase tracking-wide transition-transform duration-300 will-change-transform hover:-translate-y-0.5 active:translate-y-0";
@@ -73,6 +85,14 @@ export function Button({
   if (isExternal) {
     return (
       <a href={href} target="_blank" rel="noopener noreferrer" className={classes}>
+        {inner}
+      </a>
+    );
+  }
+
+  if (isHash) {
+    return (
+      <a href={href} onClick={handleHashClick} className={classes}>
         {inner}
       </a>
     );
