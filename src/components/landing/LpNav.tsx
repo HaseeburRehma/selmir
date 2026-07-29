@@ -29,7 +29,7 @@ export default function LpNav() {
       }`}
     >
       <nav className="mx-auto flex h-[72px] w-full max-w-[1440px] items-center justify-between px-5 md:h-[96px] md:px-12">
-        <Logo />
+        <Logo href="#top" />
         <Button
           href={CTA_HREF}
           className="!h-11 !px-4 !text-[10.5px] sm:!h-12 sm:!px-5 sm:!text-[12px] md:!h-16 md:!px-7 md:!text-[14px]"

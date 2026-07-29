@@ -1,11 +1,21 @@
 import Link from "next/link";
 
-/** Selmir Suljkanovic brand logo (red gradient wordmark). */
-export function Logo({ className = "" }: { className?: string }) {
+/**
+ * Selmir Suljkanovic brand logo (red gradient wordmark).
+ * `href` defaults to the homepage; landing pages pass "#top" so the logo
+ * scrolls to the top instead of leaving the conversion page.
+ */
+export function Logo({
+  className = "",
+  href = "/",
+}: {
+  className?: string;
+  href?: string;
+}) {
   return (
     <Link
-      href="/"
-      aria-label="Selmir Suljkanovic — Startseite"
+      href={href}
+      aria-label="Selmir Suljkanovic"
       className={`inline-flex select-none items-center ${className}`}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
