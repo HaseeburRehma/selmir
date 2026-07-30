@@ -68,11 +68,17 @@ export async function POST(req: NextRequest) {
       session.customer_details?.email || session.customer_email || "";
     const { firstName, lastName } = splitName(session.customer_details?.name);
 
+    const addr = session.customer_details?.address;
+    const addressLine = [addr?.line1, addr?.line2].filter(Boolean).join(", ");
+
     const sale: TicketSale = {
       email,
       firstName,
       lastName,
       phone: session.customer_details?.phone ?? "",
+      address: addressLine,
+      city: addr?.city ?? "",
+      zip: addr?.postal_code ?? "",
       tier: resolveTier(paymentLinkId, amountEur),
       amount: amountEur,
       currency: (session.currency ?? "eur").toUpperCase(),

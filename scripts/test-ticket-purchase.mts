@@ -7,7 +7,8 @@ for (const line of readFileSync(".env.local", "utf8").split("\n")) {
   if (m && process.env[m[1]] === undefined) process.env[m[1]] = m[2];
 }
 
-const WEBHOOK = "http://localhost:3007/api/stripe/webhook";
+const WEBHOOK =
+  process.env.WEBHOOK_URL ?? "http://localhost:3000/api/stripe/webhook";
 const BASE = "https://api.hubapi.com";
 const secret = process.env.STRIPE_WEBHOOK_SECRET!;
 const H = {
@@ -37,6 +38,14 @@ const event = {
         name: "Muhammed Mehmet Sahin",
         email,
         phone,
+        address: {
+          line1: "Zweigertstraße 50",
+          line2: "",
+          city: "Essen",
+          postal_code: "45130",
+          state: "",
+          country: "DE",
+        },
       },
       payment_link: "fZucN564Z4yU6YHbnG4ko02", // First Class payment link
     },
@@ -69,6 +78,7 @@ const search = await fetch(`${BASE}/crm/v3/objects/contacts/search`, {
     filterGroups: [{ filters: [{ propertyName: "email", operator: "EQ", value: email }] }],
     properties: [
       "email", "firstname", "lastname", "phone",
+      "address", "city", "zip", "rechnungs_emailadresse",
       "smd2026_ticket_tier", "smd2026_amount", "smd2026_quantity",
       "smd2026_purchase_date", "smd2026_stripe_session", "lifecyclestage",
     ],
@@ -95,6 +105,10 @@ const rows: [string, string, boolean][] = [
   ["Nachname (lastname)", p.lastname, p.lastname === "Mehmet Sahin"],
   ["E-Mail", p.email, p.email === email],
   ["Telefon (phone)", p.phone, !!p.phone && p.phone.replace(/\s/g, "") === phone.replace(/\s/g, "")],
+  ["Adresszeile (address)", p.address, p.address === "Zweigertstraße 50"],
+  ["Stadt (city)", p.city, p.city === "Essen"],
+  ["Postleitzahl (zip)", p.zip, p.zip === "45130"],
+  ["Rechnungs-E-Mail", p.rechnungs_emailadresse, p.rechnungs_emailadresse === email],
   ["Ticket-Tier", p.smd2026_ticket_tier, p.smd2026_ticket_tier === "First Class"],
   ["Betrag (amount)", p.smd2026_amount, String(p.smd2026_amount) === "1199"],
   ["Kaufdatum", p.smd2026_purchase_date, !!p.smd2026_purchase_date],

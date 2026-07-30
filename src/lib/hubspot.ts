@@ -37,9 +37,14 @@ async function upsertContact(sale: TicketSale): Promise<string> {
     lifecyclestage: "customer",
   };
 
-  // Only set phone when Stripe actually collected one (don't overwrite an
-  // existing HubSpot phone with a blank value).
+  // Only set these when Stripe actually collected them (don't overwrite an
+  // existing HubSpot value with a blank).
   if (sale.phone) properties.phone = sale.phone;
+  if (sale.address) properties.address = sale.address; // Adresszeile
+  if (sale.city) properties.city = sale.city; // Stadt
+  if (sale.zip) properties.zip = sale.zip; // Postleitzahl
+  // Billing email — the same address, copied into the custom billing field.
+  if (sale.email) properties.rechnungs_emailadresse = sale.email;
 
   // Try create first
   const createRes = await fetch(`${BASE}/crm/v3/objects/contacts`, {
