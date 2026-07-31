@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { Minus, Plus } from "lucide-react";
 import { Reveal } from "@/components/ui/Reveal";
 
@@ -112,20 +111,20 @@ export default function FaqSection() {
                       {isOpen ? <Minus className="size-5" /> : <Plus className="size-5" />}
                     </span>
                   </button>
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                      >
-                        <div className="space-y-3 px-[30px] pb-[30px] font-body text-[16px] leading-[26px] text-white/50">
-                          {item.a}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  <div
+                    className="grid transition-[grid-template-rows] duration-300 ease-out"
+                    style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
+                  >
+                    <div
+                      className={`overflow-hidden transition-opacity duration-300 ${
+                        isOpen ? "opacity-100" : "opacity-0"
+                      }`}
+                    >
+                      <div className="space-y-3 px-[30px] pb-[30px] font-body text-[16px] leading-[26px] text-white/50">
+                        {item.a}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </Reveal>
             );
