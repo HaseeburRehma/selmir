@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 // in prod without a Vercel var.
 const SHEET_URL =
   process.env.GOOGLE_SHEET_WEBHOOK_URL ??
-  "REPLACE_WITH_APPS_SCRIPT_EXEC_URL";
+  "https://script.google.com/macros/s/AKfycbzyCReYrLxFN95sNd5hmHtHl8Uk4XVpPzwR5g4CJgj6y673LtsKKFe2lzRQwaM_QtM2/exec";
 
 /** Append the lead to the internal Google Sheet (best-effort, never blocks). */
 async function appendToSheet(row: {
@@ -26,7 +26,11 @@ async function appendToSheet(row: {
     await fetch(SHEET_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(row),
+      // Prefix the phone with ' so Sheets stores "+49…" as text, not a formula.
+      body: JSON.stringify({
+        ...row,
+        phone: row.phone ? `'${row.phone}` : "",
+      }),
     });
   } catch (err) {
     console.error("[lead] sheet append failed:", (err as Error).message);
