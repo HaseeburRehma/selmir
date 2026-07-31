@@ -5,6 +5,34 @@ import { submitLeadToHubSpot, type PotenzialanalyseLead } from "@/lib/hubspot";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// Google Apps Script web-app URL (deploy the script bound to the shared sheet).
+// Public endpoint, not a secret — env wins; hardcoded fallback keeps it working
+// in prod without a Vercel var.
+const SHEET_URL =
+  process.env.GOOGLE_SHEET_WEBHOOK_URL ??
+  "REPLACE_WITH_APPS_SCRIPT_EXEC_URL";
+
+/** Append the lead to the internal Google Sheet (best-effort, never blocks). */
+async function appendToSheet(row: {
+  name: string;
+  phone: string;
+  company: string;
+  decisionMaker: string;
+  landingPage: string;
+  pageUrl: string;
+}): Promise<void> {
+  if (!SHEET_URL || SHEET_URL.startsWith("REPLACE_")) return;
+  try {
+    await fetch(SHEET_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(row),
+    });
+  } catch (err) {
+    console.error("[lead] sheet append failed:", (err as Error).message);
+  }
+}
+
 /**
  * Landing-page lead intake. The form also posts to Web3Forms for the e-mail
  * notification; this route is the CRM half, kept server-side so the HubSpot
@@ -23,9 +51,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, reason: "not-configured" }, { status: 200 });
   }
 
-  let body: Partial<PotenzialanalyseLead>;
+  let body: Partial<PotenzialanalyseLead> & { pageUrl?: string };
   try {
-    body = (await req.json()) as Partial<PotenzialanalyseLead>;
+    body = (await req.json()) as Partial<PotenzialanalyseLead> & {
+      pageUrl?: string;
+    };
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
@@ -41,13 +71,26 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const decisionMaker = body.decisionMaker === "Nein" ? "Nein" : "Ja";
+  const landingPage = body.landingPage?.trim() || "Unbekannt";
+
+  // Internal Google Sheet — best-effort, runs alongside the CRM write.
+  void appendToSheet({
+    name,
+    phone,
+    company,
+    decisionMaker,
+    landingPage,
+    pageUrl: body.pageUrl?.trim() || "",
+  });
+
   try {
     const contactId = await submitLeadToHubSpot({
       name,
       phone,
       company,
-      decisionMaker: body.decisionMaker === "Nein" ? "Nein" : "Ja",
-      landingPage: body.landingPage?.trim() || "Unbekannt",
+      decisionMaker,
+      landingPage,
       attribution: body.attribution,
     });
     return NextResponse.json({ ok: true, contactId });

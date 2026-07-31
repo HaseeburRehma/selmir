@@ -72,6 +72,7 @@ export function LpLeadForm({ pageName }: { pageName: string }) {
         company: data.firma,
         decisionMaker: decider,
         landingPage: pageName,
+        pageUrl: typeof window !== "undefined" ? window.location.href : "",
         attribution: readAttribution(),
       }),
     })
