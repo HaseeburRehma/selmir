@@ -77,6 +77,8 @@ export default function LpHero({ hero }: { hero: LandingHero }) {
               <img
                 src={src}
                 alt=""
+                loading="lazy"
+                decoding="async"
                 className={`w-auto object-contain ${
                   src.includes("eoptimum") ? "max-h-[42px]" : "max-h-[40px]"
                 }`}
