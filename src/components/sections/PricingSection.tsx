@@ -1,12 +1,11 @@
 import Image from "next/image";
-import { Sparkles, Clock, CalendarDays } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
 
 type Tier = {
   name: string;
   price: string;
-  oldPrice: string;
   ticket: string;
   features: string[];
   cta: string;
@@ -17,8 +16,7 @@ type Tier = {
 const TIERS: Tier[] = [
   {
     name: "Basic",
-    price: "69€",
-    oldPrice: "99€",
+    price: "99€",
     ticket: "/figma/pricing/ticket-basic.webp",
     cta: "Basic Ticket sichern",
     checkout: "https://buy.stripe.com/6oU3cveBve9u3MvcrK4ko00",
@@ -26,8 +24,7 @@ const TIERS: Tier[] = [
   },
   {
     name: "First Class",
-    price: "1.199€",
-    oldPrice: "1.499€",
+    price: "1.499€",
     ticket: "/figma/pricing/ticket-firstclass.webp",
     cta: "First Class Ticket sichern",
     checkout: "https://buy.stripe.com/fZucN564Z4yU6YHbnG4ko02",
@@ -35,7 +32,7 @@ const TIERS: Tier[] = [
     features: [
       "Fast Lane Zugang",
       "Sitzplätze in der ersten Reihe",
-      
+
       "Mittag- und Abendessen mit First Class Teilnehmern und Selmir Suljkanovic",
       "Goodiebag mit exklusiven Seminarunterlagen",
       "Roundtable und Q&A mit Selmir Suljkanovic",
@@ -43,8 +40,7 @@ const TIERS: Tier[] = [
   },
   {
     name: "Business",
-    price: "379€",
-    oldPrice: "499€",
+    price: "499€",
     ticket: "/figma/pricing/ticket-business.webp",
     cta: "Business Ticket sichern",
     checkout: "https://buy.stripe.com/14AaEXeBvaXi82LdvO4ko01",
@@ -62,12 +58,10 @@ const TIERS: Tier[] = [
 function PriceHeading({
   name,
   price,
-  oldPrice,
   dark,
 }: {
   name: string;
   price: string;
-  oldPrice: string;
   dark?: boolean;
 }) {
   return (
@@ -81,24 +75,7 @@ function PriceHeading({
           <span className="font-serif text-[24px] sm:text-[28px] lg:text-[34px]">{name} </span>
           <span className="font-display text-[24px] sm:text-[28px] lg:text-[34px]">{price}</span>
         </p>
-        <span
-          className={`font-serif text-[15px] line-through sm:text-[17px] lg:text-[20px] ${
-            dark ? "text-[#0e101c]/45" : "text-white/40"
-          }`}
-        >
-          {oldPrice}
-        </span>
       </div>
-      <span
-        className={`inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 font-label text-[11px] font-bold uppercase tracking-[0.08em] ${
-          dark
-            ? "bg-[#0e101c] text-[#ffbf00]"
-            : "bg-purple-2/15 text-purple-2 ring-1 ring-purple-2/30"
-        }`}
-      >
-        <Sparkles className="size-3" />
-        Early Bird · bis 31.07.
-      </span>
     </div>
   );
 }
@@ -118,12 +95,6 @@ export default function PricingSection() {
             Zwei Wege. Ein Ziel: dein Unternehmen{" "}
             <span className="font-display">ohne dich</span>.
           </h2>
-          <div className="flex w-fit items-center gap-2.5 rounded-full border border-[#ffbf00]/40 bg-[#ffbf00]/10 px-4 py-2">
-            <Clock className="size-4 text-[#ffbf00]" />
-            <span className="font-body text-[14px] font-semibold tracking-[-0.2px] text-[#ffbf00]">
-              Early-Bird-Preise – nur noch bis zum 31.07. sichern
-            </span>
-          </div>
         </Reveal>
 
         <div className="flex flex-col items-stretch gap-6 lg:flex-row lg:items-center">
@@ -180,7 +151,6 @@ export default function PricingSection() {
                     <PriceHeading
                       name={tier.name}
                       price={tier.price}
-                      oldPrice={tier.oldPrice}
                       dark={gold}
                     />
                     <p
