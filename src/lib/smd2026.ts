@@ -33,12 +33,12 @@ export interface TicketSale {
  * regenerates a link, update the ID here (or set the SMD2026_PLINK_* env vars).
  */
 const PAYMENT_LINK_TIER: Record<string, TicketTier> = {
-  // Basic — buy.stripe.com/6oU3cveBve9u3MvcrK4ko00
-  [process.env.SMD2026_PLINK_BASIC ?? "6oU3cveBve9u3MvcrK4ko00"]: "Basic",
-  // Business — buy.stripe.com/14AaEXeBvaXi82LdvO4ko01
-  [process.env.SMD2026_PLINK_BUSINESS ?? "14AaEXeBvaXi82LdvO4ko01"]: "Business",
-  // First Class — buy.stripe.com/fZucN564Z4yU6YHbnG4ko02
-  [process.env.SMD2026_PLINK_FIRSTCLASS ?? "fZucN564Z4yU6YHbnG4ko02"]:
+  // Basic — buy.stripe.com/fZu4gz64Z7L6gzhajC4ko03
+  [process.env.SMD2026_PLINK_BASIC ?? "fZu4gz64Z7L6gzhajC4ko03"]: "Basic",
+  // Business — buy.stripe.com/7sY7sLbpj9TeaaTgI04ko04
+  [process.env.SMD2026_PLINK_BUSINESS ?? "7sY7sLbpj9TeaaTgI04ko04"]: "Business",
+  // First Class — buy.stripe.com/cNiaEX50V8Pa4QzbnG4ko05
+  [process.env.SMD2026_PLINK_FIRSTCLASS ?? "cNiaEX50V8Pa4QzbnG4ko05"]:
     "First Class",
 };
 

@@ -19,7 +19,7 @@ const TIERS: Tier[] = [
     price: "99€",
     ticket: "/figma/pricing/ticket-basic.webp",
     cta: "Basic Ticket sichern",
-    checkout: "https://buy.stripe.com/6oU3cveBve9u3MvcrK4ko00",
+    checkout: "https://buy.stripe.com/fZu4gz64Z7L6gzhajC4ko03",
     features: ["Eintritt für beide Tage", "Sitzplätze im hinteren Bereich"],
   },
   {
@@ -27,7 +27,7 @@ const TIERS: Tier[] = [
     price: "1.499€",
     ticket: "/figma/pricing/ticket-firstclass.webp",
     cta: "First Class Ticket sichern",
-    checkout: "https://buy.stripe.com/fZucN564Z4yU6YHbnG4ko02",
+    checkout: "https://buy.stripe.com/cNiaEX50V8Pa4QzbnG4ko05",
     highlight: true,
     features: [
       "Fast Lane Zugang",
@@ -43,7 +43,7 @@ const TIERS: Tier[] = [
     price: "499€",
     ticket: "/figma/pricing/ticket-business.webp",
     cta: "Business Ticket sichern",
-    checkout: "https://buy.stripe.com/14AaEXeBvaXi82LdvO4ko01",
+    checkout: "https://buy.stripe.com/7sY7sLbpj9TeaaTgI04ko04",
     features: [
       "Goodiebag mit Seminarunterlagen",
       "Sitzplätze direkt hinter First Class",
