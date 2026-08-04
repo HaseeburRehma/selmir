@@ -17,10 +17,9 @@ function LinkedInMark() {
 }
 
 /**
- * The Figma "Card - Hover Slider": purple radial-gradient card with a portrait
- * and the name at the bottom. On hover (or keyboard focus) a frosted panel
- * slides up to reveal the role, LinkedIn and bio. Members without a bio don't
- * flip — the photo simply lifts.
+ * The Figma "Card - Hover Slider": a bright purple radial-gradient card with a
+ * cut-out portrait. On hover (or keyboard focus) a frosted panel slides up to
+ * reveal the role, LinkedIn and bio. Members without a bio don't flip.
  *
  * `allowExternalLinks=false` (landing pages) keeps the LinkedIn handle as plain
  * text so visitors aren't sent off-page.
@@ -53,26 +52,26 @@ function TeamCard({
   return (
     <article
       tabIndex={flips ? 0 : -1}
-      className="group relative aspect-[405/459] w-full overflow-hidden rounded-[20px] outline-none [background:radial-gradient(120%_100%_at_50%_38%,#b089ff_0%,#926ff9_50%,#7454f3_100%)]"
+      className="group relative aspect-[405/459] w-full overflow-hidden rounded-[20px] outline-none [background:radial-gradient(120%_100%_at_50%_36%,#b089ff_0%,#926ff9_50%,#7454f3_100%)]"
     >
-      {/* Portrait */}
+      {/* Cut-out portrait sitting on the purple card */}
       <Image
         src={member.photo}
         alt={member.name}
         fill
         sizes="(max-width: 640px) 80vw, 405px"
-        className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
+        className="object-contain object-bottom transition-transform duration-500 group-hover:scale-[1.04]"
       />
 
       {/* Bottom fade to the card purple */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-gradient-to-t from-purple-1 via-purple-1/85 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-purple-1 via-purple-1/80 to-transparent" />
 
       {/* Front label */}
       <div className="absolute inset-x-6 bottom-6 flex flex-col gap-1 text-white transition-opacity duration-300 group-hover:opacity-0 group-focus-within:opacity-0">
-        <p className="font-display text-[26px] leading-none tracking-[-0.5px] lg:text-[32px]">
+        <p className="font-display text-[20px] leading-none tracking-[-0.5px] sm:text-[24px] lg:text-[28px] whitespace-nowrap">
           {member.name}
         </p>
-        <p className="font-body text-[15px] font-semibold tracking-[-0.5px] text-white/70 lg:text-[18px]">
+        <p className="font-body text-[14px] font-semibold tracking-[-0.4px] text-white/70 lg:text-[16px]">
           {member.role}
         </p>
       </div>
@@ -95,7 +94,7 @@ function TeamCard({
           />
 
           <div className="relative flex flex-col gap-3">
-            <p className="font-display text-[24px] leading-tight tracking-[-1px] lg:text-[30px]">
+            <p className="font-display text-[22px] leading-tight tracking-[-1px] lg:text-[28px]">
               {member.title ?? member.role}
             </p>
             {member.linkedin && (
@@ -106,7 +105,7 @@ function TeamCard({
             )}
           </div>
 
-          <p className="relative font-body text-[15px] leading-[1.4] tracking-[-0.3px] text-white/80 lg:text-[17px]">
+          <p className="relative font-body text-[14px] leading-[1.4] tracking-[-0.3px] text-white/80 lg:text-[16px]">
             {member.bio}
           </p>
         </div>
@@ -125,6 +124,7 @@ export default function TeamCarousel({
   const scroller = useRef<HTMLDivElement>(null);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
+  const [paused, setPaused] = useState(false);
 
   const update = useCallback(() => {
     const el = scroller.current;
@@ -145,13 +145,36 @@ export default function TeamCarousel({
     };
   }, [update, members.length]);
 
+  /** Distance to advance by one card (card width + gap). */
+  const stepSize = () => {
+    const el = scroller.current;
+    if (!el) return 420;
+    const cards = el.querySelectorAll<HTMLElement>("[data-card]");
+    if (cards.length > 1) return cards[1].offsetLeft - cards[0].offsetLeft;
+    return cards[0] ? cards[0].offsetWidth + 32 : 420;
+  };
+
   const scrollByCard = (dir: 1 | -1) => {
     const el = scroller.current;
     if (!el) return;
-    const card = el.querySelector<HTMLElement>("[data-card]");
-    const step = card ? card.offsetWidth + 32 : 420;
-    el.scrollBy({ left: dir * step, behavior: "smooth" });
+    el.scrollBy({ left: dir * stepSize(), behavior: "smooth" });
   };
+
+  // Auto-advance every 2s; loops back to the start; pauses on interaction.
+  useEffect(() => {
+    if (paused) return;
+    const el = scroller.current;
+    if (!el) return;
+    const id = setInterval(() => {
+      if (el.scrollWidth <= el.clientWidth + 8) return; // nothing to scroll
+      if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 8) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        el.scrollBy({ left: stepSize(), behavior: "smooth" });
+      }
+    }, 2000);
+    return () => clearInterval(id);
+  }, [paused, members.length]);
 
   const scrollable = canPrev || canNext;
 
@@ -159,6 +182,11 @@ export default function TeamCarousel({
     <div className="relative">
       <div
         ref={scroller}
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        onFocusCapture={() => setPaused(true)}
+        onBlurCapture={() => setPaused(false)}
+        onTouchStart={() => setPaused(true)}
         className={`flex gap-6 overflow-x-auto scroll-smooth pb-1 lg:gap-8 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
           scrollable ? "snap-x snap-mandatory" : "lg:justify-center"
         }`}
@@ -167,7 +195,7 @@ export default function TeamCarousel({
           <div
             key={m.name}
             data-card
-            className="w-[80vw] max-w-[360px] shrink-0 snap-start sm:w-[340px] lg:w-[405px]"
+            className="w-[78vw] max-w-[360px] shrink-0 snap-start sm:w-[320px] lg:w-[389px]"
           >
             <TeamCard member={m} allowExternalLinks={allowExternalLinks} />
           </div>
