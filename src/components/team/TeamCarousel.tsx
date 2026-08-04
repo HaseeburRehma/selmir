@@ -64,34 +64,24 @@ function TeamCard({
         }}
       />
 
-      {/* Original portrait — untouched. */}
+      {/* Cut-out portrait sitting on the full purple card, aligned to the
+          bottom edge so the head reaches near the top like the Figma card. */}
       <Image
         src={member.photo}
         alt={member.name}
         fill
         sizes="(max-width: 640px) 80vw, 405px"
-        className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
+        className="scale-[1.04] object-contain object-bottom transition-transform duration-500 group-hover:scale-[1.08]"
       />
 
-      {/* Top purple overlay — melts the black studio backdrop above the head
-          into the card's purple so the card reads as full-purple. */}
+      {/* Bottom purple fade — sits above the person's shoulders and holds
+          the name / role text on a clean purple ground. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[38%]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[38%]"
         style={{
           background:
-            "linear-gradient(to bottom, #7454f3 0%, rgba(146,111,249,0.85) 45%, rgba(176,137,255,0.25) 85%, rgba(116,84,243,0) 100%)",
-        }}
-      />
-
-      {/* Bottom purple overlay — same trick under the shoulders, and it holds
-          the name/role text on a clean purple ground. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[50%]"
-        style={{
-          background:
-            "linear-gradient(to top, #7454f3 0%, #7454f3 25%, rgba(146,111,249,0.85) 60%, rgba(176,137,255,0.25) 90%, rgba(116,84,243,0) 100%)",
+            "linear-gradient(to top, #7454f3 0%, #7454f3 30%, rgba(146,111,249,0.60) 75%, rgba(116,84,243,0) 100%)",
         }}
       />
 
