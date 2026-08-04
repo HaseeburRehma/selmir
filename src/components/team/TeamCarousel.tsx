@@ -61,20 +61,18 @@ function TeamCard({
         alt={member.name}
         fill
         sizes="(max-width: 640px) 80vw, 405px"
-        className={`object-cover transition-transform duration-500 group-hover:scale-[1.04] ${
-          member.cutout ? "object-bottom" : "object-top"
-        }`}
+        className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
       />
 
       {/* Bottom fade to the card purple */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[54%] bg-gradient-to-t from-purple-1 via-purple-1/85 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-gradient-to-t from-purple-1 via-purple-1/85 to-transparent" />
 
       {/* Front label */}
       <div className="absolute inset-x-6 bottom-6 flex flex-col gap-1 text-white transition-opacity duration-300 group-hover:opacity-0 group-focus-within:opacity-0">
-        <p className="font-display text-[24px] leading-none tracking-[-0.5px] lg:text-[30px]">
+        <p className="font-display text-[26px] leading-none tracking-[-0.5px] lg:text-[32px]">
           {member.name}
         </p>
-        <p className="font-body text-[14px] font-semibold tracking-[-0.4px] text-white/70 lg:text-[17px]">
+        <p className="font-body text-[15px] font-semibold tracking-[-0.5px] text-white/70 lg:text-[18px]">
           {member.role}
         </p>
       </div>

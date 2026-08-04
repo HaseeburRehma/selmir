@@ -17,7 +17,7 @@ export default function TeamSection() {
           <span className="font-body text-[13px] font-semibold uppercase tracking-[2px] text-purple-2">
             Our Heart
           </span>
-          <h2 className="max-w-[900px] font-serif text-[32px] leading-[1.18] tracking-[-1px] text-white md:text-[48px] md:tracking-[-1.6px]">
+          <h2 className="max-w-[1200px] font-serif text-[32px] leading-[1.18] tracking-[-1px] text-white md:text-[44px] lg:text-[48px] md:tracking-[-1.6px]">
             Treffen Sie unsere Besten{" "}
             <span className="font-display">Talentiertes Team</span>
           </h2>

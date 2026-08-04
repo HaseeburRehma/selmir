@@ -1,23 +1,19 @@
 /**
  * "Talentiertes Team" — the people behind Selmir Suljkanovic.
  *
- * Content + photos are taken 1:1 from the Figma "Card - Hover Slider" section
- * (TyloTech Design File, node 3409:2325). Figma ships one fully-authored member
- * (Aaliyah, with LinkedIn + bio) plus a second real headshot whose name/role is
- * still a placeholder — fill `name`/`title`/`bio`/`linkedin` below to complete it,
- * and add more members by pushing onto this array.
+ * Names, roles, bios and LinkedIn come from the client roster (MA TyloTech).
+ * Photos live under /public/figma/team. Add or reorder members here; the
+ * carousel and the hover-flip card adapt automatically.
  */
 export type TeamMember = {
   /** Shown large on the card front (Days One). */
   name: string;
-  /** Sub-line on the card front. */
+  /** Sub-line on the card front — the full job title. */
   role: string;
-  /** Short heading revealed on hover (the role without the "Selmir …" suffix). */
+  /** Short heading revealed on hover. Falls back to `role`. */
   title?: string;
   /** Path under /public. */
   photo: string;
-  /** True when the photo is a transparent cut-out that sits on the purple card. */
-  cutout?: boolean;
   linkedin?: { url: string; handle: string };
   /** Paragraph revealed on hover. Members without a bio simply don't flip. */
   bio?: string;
@@ -25,10 +21,20 @@ export type TeamMember = {
 
 export const TEAM: TeamMember[] = [
   {
-    name: "Aaliyah Hümme",
+    name: "Selmir Suljkanovic",
+    role: "Geschäftsführer",
+    photo: "/figma/team/selmir.jpg",
+    linkedin: {
+      url: "https://www.linkedin.com/in/selmir-suljkanovic-13a480235/",
+      handle: "Selmir Suljkanovic",
+    },
+    bio: "Selmir Suljkanovic kam im Kindesalter als bosnischer Kriegsflüchtling ohne Besitz nach Deutschland, nur mit dem festen Willen, sich etwas aufzubauen. Heute ist er erfolgreicher Unternehmer, Mentor und Investor. Mit mehr als 13 Jahren Erfahrung im Vertrieb und einem Jahrzehnt in leitenden Managementpositionen hat er über 47 Vertriebsteams aufgebaut und in 33 Branchen messbare Ergebnisse erzielt.",
+  },
+  {
+    name: "Aaliyah Hümmer",
     role: "Persönliche Assistenz Selmir Suljkanovic",
     title: "Persönliche Assistenz",
-    photo: "/figma/team/aaliyah-huemme.jpg",
+    photo: "/figma/team/aaliyah.jpg",
     linkedin: {
       url: "https://www.linkedin.com/in/aaliyah-h%C3%BCmmer-531996274/",
       handle: "Aaliyah Hümmer",
@@ -36,10 +42,49 @@ export const TEAM: TeamMember[] = [
     bio: "Aaliyah hat einen dualen Bachelor of Arts im Personalmanagement mit Schwerpunkt Sales sowie Expertise in Grafik- und Objektdesign. Als persönliche Assistenz des Geschäftsführers setzt sie beides gezielt ein: Sie gestaltet die Marke aktiv mit und verantwortet die strategische Kommunikation.",
   },
   {
-    // Real headshot from Figma — name/role/bio still to be confirmed.
-    name: "Teammitglied",
-    role: "Team Selmir Suljkanovic",
-    photo: "/figma/team/team-mann.png",
-    cutout: true,
+    name: "Vanessa Suljkanovic",
+    role: "Head of Support",
+    photo: "/figma/team/vanessa.jpg",
+    linkedin: {
+      url: "https://www.linkedin.com/in/vanessa-suljkanovic-1532a52ab/",
+      handle: "Vanessa Suljkanovic",
+    },
+    bio: "Vanessa hat einen Bachelor of Science in Management and Economics und ist als zentrale Ansprechpartnerin für Recruiting, internes wie externes Relationship Management sowie Prozess- und Eventmanagement verantwortlich. Sie bündelt ihr Know-how, um Kunden und Kollegen professionell zu betreuen und einen reibungslosen Ablauf im Unternehmen sicherzustellen.",
+  },
+  {
+    name: "Andre Wilhelm",
+    role: "Wachstumsmanager",
+    photo: "/figma/team/andre.jpg",
+    linkedin: {
+      url: "https://www.linkedin.com/in/andre-wilhelm-6a2788303/",
+      handle: "Andre Wilhelm",
+    },
+    bio: "Andre ist seit über sechs Jahren im Vertrieb tätig und verfügt über Erfahrung in den Bereichen Energie, Photovoltaik und Wärmepumpen, Telekommunikation und Finanzberatung – sowohl im B2B- als auch im B2C-Vertrieb. Dabei erzielte er im Bereich Photovoltaik und Wärmepumpen in weniger als sechs Monaten einen höheren siebenstelligen Umsatz.",
+  },
+  {
+    name: "Fernando Ferreira",
+    role: "Wachstumsmanager",
+    photo: "/figma/team/fernando.jpg",
+    bio: "Fernando bringt über 10 Jahre Vertriebserfahrung mit, vom Direktvertrieb bis zu Spitzenpositionen im hochpreisigen B2C- und B2B-Geschäft. Als Sales Operator in der Unternehmensberatung erzielte er eigenständig über zwei Jahre einen siebenstelligen Verkaufsumsatz. Zudem bringt er Erfahrung im KI-Vertrieb mit Fokus auf Geschäftsführer aus der Immobilienbranche mit.",
+  },
+  {
+    name: "Mikail Turgut",
+    role: "Wachstumsmanager",
+    photo: "/figma/team/mikail.jpg",
+    linkedin: {
+      url: "https://www.linkedin.com/in/mikail-turgut-257990170/",
+      handle: "Mikail Turgut",
+    },
+    bio: "Mikail bringt über drei Jahre Berufserfahrung in technischer Entwicklung, Consulting und Selbstständigkeit in den Bereichen Medizintechnik und Automotive mit. Im B2B-Vertrieb verbindet er technisches Verständnis mit wirtschaftlichem Denken und analytischer Arbeitsweise und berät Kunden präzise und lösungsorientiert.",
+  },
+  {
+    name: "Juri Michalev",
+    role: "Videograf",
+    photo: "/figma/team/juri.jpg",
+    linkedin: {
+      url: "https://www.linkedin.com/in/juri-michalev-9aba54371/",
+      handle: "Juri Michalev",
+    },
+    bio: "Juri verfügt über mehr als sieben Jahre Erfahrung in der professionellen Medienproduktion mit Fokus auf Social Media und Performance Marketing. Er entwickelt strategischen Content, der Aufmerksamkeit schafft, Reichweite steigert und die Marke nachhaltig stärkt.",
   },
 ];
