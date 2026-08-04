@@ -9,6 +9,7 @@ import LpSolution from "@/components/landing/LpSolution";
 import LpSteps from "@/components/landing/LpSteps";
 import LpAudience from "@/components/landing/LpAudience";
 import LpAbout from "@/components/landing/LpAbout";
+import LpTeam from "@/components/landing/LpTeam";
 import LpCaseStudy from "@/components/landing/LpCaseStudy";
 import LpOffer from "@/components/landing/LpOffer";
 import LpFaq from "@/components/landing/LpFaq";
@@ -80,6 +81,7 @@ export default async function LandingPage({
         <LpSteps />
         <LpAudience />
         <LpAbout />
+        <LpTeam />
         <LpOffer pageName={page.name} />
         <LpFaq />
         <LpFinalCta />
