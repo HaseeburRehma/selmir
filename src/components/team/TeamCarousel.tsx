@@ -54,17 +54,17 @@ function TeamCard({
       tabIndex={flips ? 0 : -1}
       className="group relative aspect-[405/459] w-full overflow-hidden rounded-[20px] outline-none [background:radial-gradient(120%_100%_at_50%_36%,#b089ff_0%,#926ff9_50%,#7454f3_100%)]"
     >
-      {/* Cut-out portrait sitting on the purple card */}
+      {/* Portrait */}
       <Image
         src={member.photo}
         alt={member.name}
         fill
         sizes="(max-width: 640px) 80vw, 405px"
-        className="object-contain object-bottom transition-transform duration-500 group-hover:scale-[1.04]"
+        className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
       />
 
       {/* Bottom fade to the card purple */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-purple-1 via-purple-1/80 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-gradient-to-t from-purple-1 via-purple-1/85 to-transparent" />
 
       {/* Front label */}
       <div className="absolute inset-x-6 bottom-6 flex flex-col gap-1 text-white transition-opacity duration-300 group-hover:opacity-0 group-focus-within:opacity-0">
