@@ -54,7 +54,17 @@ function TeamCard({
       tabIndex={flips ? 0 : -1}
       className="group relative aspect-[405/459] w-full overflow-hidden rounded-[20px] outline-none [background:radial-gradient(120%_100%_at_50%_36%,#b089ff_0%,#926ff9_50%,#7454f3_100%)]"
     >
-      {/* Original portrait — fills the card, cropped to top for the head */}
+      {/* Subtle grid tile texture on top of the purple, from the Figma card */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-25"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(to right, rgba(255,255,255,0.10) 0 1px, transparent 1px 34px), repeating-linear-gradient(to bottom, rgba(255,255,255,0.10) 0 1px, transparent 1px 34px)",
+        }}
+      />
+
+      {/* Original portrait — untouched. */}
       <Image
         src={member.photo}
         alt={member.name}
@@ -63,12 +73,25 @@ function TeamCard({
         className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
       />
 
-      {/* Purple gradient overlay only at the bottom, matching Figma */}
+      {/* Top purple overlay — melts the black studio backdrop above the head
+          into the card's purple so the card reads as full-purple. */}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[65%]"
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[38%]"
         style={{
           background:
-            "linear-gradient(to top, #7454f3 0%, #7454f3 30%, rgba(146,111,249,0.85) 55%, rgba(176,137,255,0.35) 82%, rgba(9,7,17,0) 100%)",
+            "linear-gradient(to bottom, #7454f3 0%, rgba(146,111,249,0.85) 45%, rgba(176,137,255,0.25) 85%, rgba(116,84,243,0) 100%)",
+        }}
+      />
+
+      {/* Bottom purple overlay — same trick under the shoulders, and it holds
+          the name/role text on a clean purple ground. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[50%]"
+        style={{
+          background:
+            "linear-gradient(to top, #7454f3 0%, #7454f3 25%, rgba(146,111,249,0.85) 60%, rgba(176,137,255,0.25) 90%, rgba(116,84,243,0) 100%)",
         }}
       />
 
