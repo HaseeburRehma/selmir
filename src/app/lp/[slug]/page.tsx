@@ -78,10 +78,10 @@ export default async function LandingPage({
         {CASE_STUDIES.map((study) => (
           <LpCaseStudy key={study.eyebrow} study={study} />
         ))}
+        <LpTeam />
         <LpSteps />
         <LpAudience />
         <LpAbout />
-        <LpTeam />
         <LpOffer pageName={page.name} />
         <LpFaq />
         <LpFinalCta />

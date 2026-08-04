@@ -54,7 +54,7 @@ function TeamCard({
       tabIndex={flips ? 0 : -1}
       className="group relative aspect-[405/459] w-full overflow-hidden rounded-[20px] outline-none [background:radial-gradient(120%_100%_at_50%_36%,#b089ff_0%,#926ff9_50%,#7454f3_100%)]"
     >
-      {/* Portrait */}
+      {/* Original portrait — fills the card, cropped to top for the head */}
       <Image
         src={member.photo}
         alt={member.name}
@@ -63,8 +63,14 @@ function TeamCard({
         className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
       />
 
-      {/* Bottom fade to the card purple */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-gradient-to-t from-purple-1 via-purple-1/85 to-transparent" />
+      {/* Purple gradient overlay only at the bottom, matching Figma */}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[65%]"
+        style={{
+          background:
+            "linear-gradient(to top, #7454f3 0%, #7454f3 30%, rgba(146,111,249,0.85) 55%, rgba(176,137,255,0.35) 82%, rgba(9,7,17,0) 100%)",
+        }}
+      />
 
       {/* Front label */}
       <div className="absolute inset-x-6 bottom-6 flex flex-col gap-1 text-white transition-opacity duration-300 group-hover:opacity-0 group-focus-within:opacity-0">
