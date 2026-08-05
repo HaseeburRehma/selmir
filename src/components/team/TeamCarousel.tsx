@@ -54,24 +54,30 @@ function TeamCard({
       tabIndex={flips ? 0 : -1}
       className="group relative aspect-[405/459] w-full overflow-hidden rounded-[20px] outline-none [background:radial-gradient(120%_100%_at_50%_36%,#b089ff_0%,#926ff9_50%,#7454f3_100%)]"
     >
-      {/* Subtle grid tile texture on top of the purple, from the Figma card */}
+      {/* Tile grid texture on top of the purple, matching the Figma card */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-25"
+        className="pointer-events-none absolute inset-0"
         style={{
           backgroundImage:
-            "repeating-linear-gradient(to right, rgba(255,255,255,0.10) 0 1px, transparent 1px 34px), repeating-linear-gradient(to bottom, rgba(255,255,255,0.10) 0 1px, transparent 1px 34px)",
+            // horizontal + vertical grid lines
+            "linear-gradient(to right, rgba(255,255,255,0.18) 1px, transparent 1px), " +
+            "linear-gradient(to bottom, rgba(255,255,255,0.18) 1px, transparent 1px), " +
+            // subtle per-tile highlight so cells read as tiles, not just a grid
+            "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 60%)",
+          backgroundSize: "28px 28px, 28px 28px, 28px 28px",
+          mixBlendMode: "overlay",
         }}
       />
 
-      {/* Cut-out portrait sitting on the full purple card, aligned to the
-          bottom edge so the head reaches near the top like the Figma card. */}
+      {/* Cut-out portrait — bottom-aligned, slightly smaller than the card so
+          the head has breathing room at the top (matches Figma). */}
       <Image
         src={member.photo}
         alt={member.name}
         fill
         sizes="(max-width: 640px) 80vw, 405px"
-        className="scale-[1.04] object-contain object-bottom transition-transform duration-500 group-hover:scale-[1.08]"
+        className="scale-[0.92] object-contain object-bottom transition-transform duration-500 group-hover:scale-[0.96]"
       />
 
       {/* Bottom purple fade — sits above the person's shoulders and holds
