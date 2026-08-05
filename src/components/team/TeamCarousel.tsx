@@ -17,9 +17,10 @@ function LinkedInMark() {
 }
 
 /**
- * The Figma "Card - Hover Slider": a bright purple radial-gradient card with a
- * cut-out portrait. On hover (or keyboard focus) a frosted panel slides up to
- * reveal the role, LinkedIn and bio. Members without a bio don't flip.
+ * Team card. Dark ground with the original studio photo shown as-is (the
+ * dark studio backdrop blends into the card). A subtle purple bottom-corner
+ * glow adds warmth. Hover / focus flips to a dark details panel with the
+ * tile grid, role heading, LinkedIn and bio. Members without a bio don't flip.
  *
  * `allowExternalLinks=false` (landing pages) keeps the LinkedIn handle as plain
  * text so visitors aren't sent off-page.
@@ -61,31 +62,35 @@ function TeamCard({
   return (
     <article
       tabIndex={flips ? 0 : -1}
-      className="group relative aspect-[405/459] w-full overflow-hidden rounded-[20px] outline-none [background:radial-gradient(120%_100%_at_50%_36%,#b089ff_0%,#926ff9_50%,#7454f3_100%)]"
+      className="group relative aspect-[405/459] w-full overflow-hidden rounded-[20px] border border-white/[0.06] bg-[#0e0918] outline-none"
     >
-      {/* Portrait. Cut-outs are bottom-aligned and slightly scaled down so the
-          head has breathing room; pre-composited card designs are rendered
-          full-bleed (they already include the purple background). */}
+      {/* Original photo, full-bleed. The dark studio backdrop naturally
+          blends into the dark card. */}
       <Image
         src={member.photo}
         alt={member.name}
         fill
         sizes="(max-width: 640px) 80vw, 405px"
-        className={
-          member.preComposited
-            ? "object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-            : "scale-[0.92] object-contain object-bottom transition-transform duration-500 group-hover:scale-[0.96]"
-        }
+        className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
       />
 
-      {/* Bottom purple fade — sits above the person's shoulders and holds
-          the name / role text on a clean purple ground. */}
+      {/* Warm purple ambient glow in the bottom-left corner. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[70%]"
+        style={{
+          background:
+            "radial-gradient(120% 100% at 15% 100%, rgba(116,84,243,0.35) 0%, rgba(116,84,243,0.10) 40%, rgba(116,84,243,0) 70%)",
+        }}
+      />
+
+      {/* Bottom dark fade holds the name / role text over any photo. */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 bottom-0 h-[38%]"
         style={{
           background:
-            "linear-gradient(to top, #7454f3 0%, #7454f3 30%, rgba(146,111,249,0.60) 75%, rgba(116,84,243,0) 100%)",
+            "linear-gradient(to top, #0e0918 0%, rgba(14,9,24,0.85) 55%, rgba(14,9,24,0) 100%)",
         }}
       />
 
@@ -99,26 +104,33 @@ function TeamCard({
         </p>
       </div>
 
-      {/* Hover panel */}
+      {/* Hover / focus details panel — dark frosted glass with a visible
+          tile grid, matching the Figma State=Hovered variant. */}
       {flips && (
-        <div className="absolute inset-0 flex translate-y-full flex-col justify-between rounded-[20px] bg-purple-1/[0.72] p-6 text-white backdrop-blur-xl transition-transform duration-500 ease-out group-hover:translate-y-0 group-focus-within:translate-y-0">
-          {/* Tile grid texture — the Figma card carries the pattern on the
-              hover overlay, not on the front photo. */}
+        <div className="absolute inset-0 flex translate-y-full flex-col justify-between rounded-[20px] bg-[#0a0612]/92 p-6 text-white backdrop-blur-xl backdrop-saturate-150 transition-transform duration-500 ease-out group-hover:translate-y-0 group-focus-within:translate-y-0">
+          {/* Tile grid — clearly visible, matches the Figma card texture. */}
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 rounded-[20px]"
             style={{
               backgroundImage:
-                "linear-gradient(to right, rgba(255,255,255,0.18) 1px, transparent 1px), " +
-                "linear-gradient(to bottom, rgba(255,255,255,0.18) 1px, transparent 1px), " +
-                "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 60%)",
-              backgroundSize: "28px 28px, 28px 28px, 28px 28px",
-              mixBlendMode: "overlay",
+                "linear-gradient(to right, rgba(255,255,255,0.13) 1px, transparent 1px), " +
+                "linear-gradient(to bottom, rgba(255,255,255,0.13) 1px, transparent 1px)",
+              backgroundSize: "28px 28px, 28px 28px",
+            }}
+          />
+          {/* Very soft warm glow behind the tile grid — the "glass" sheen. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 rounded-[20px]"
+            style={{
+              background:
+                "radial-gradient(60% 45% at 55% 55%, rgba(176,137,255,0.14) 0%, rgba(116,84,243,0.06) 45%, rgba(116,84,243,0) 75%)",
             }}
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 rounded-[20px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.14)]"
+            className="pointer-events-none absolute inset-0 rounded-[20px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]"
           />
 
           <div className="relative flex flex-col gap-3">

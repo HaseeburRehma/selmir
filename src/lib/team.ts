@@ -14,10 +14,6 @@ export type TeamMember = {
   title?: string;
   /** Path under /public. */
   photo: string;
-  /** true when the photo is a pre-composited card design (purple background
-   *  baked in, same aspect as the card). Rendered full-bleed instead of
-   *  scaled cut-out. */
-  preComposited?: boolean;
   linkedin?: { url: string; handle: string };
   /** Paragraph revealed on hover. Members without a bio simply don't flip. */
   bio?: string;
@@ -27,7 +23,7 @@ export const TEAM: TeamMember[] = [
   {
     name: "Selmir Suljkanovic",
     role: "Geschäftsführer",
-    photo: "/figma/team/selmir.png",
+    photo: "/figma/team/selmir.jpg",
     linkedin: {
       url: "https://www.linkedin.com/in/selmir-suljkanovic-13a480235/",
       handle: "Selmir Suljkanovic",
@@ -37,8 +33,7 @@ export const TEAM: TeamMember[] = [
   {
     name: "Vanessa Suljkanovic",
     role: "Head of Support",
-    photo: "/figma/team/vanessa.png",
-    preComposited: true,
+    photo: "/figma/team/vanessa.jpg",
     linkedin: {
       url: "https://www.linkedin.com/in/vanessa-suljkanovic-1532a52ab/",
       handle: "Vanessa Suljkanovic",
@@ -48,7 +43,7 @@ export const TEAM: TeamMember[] = [
   {
     name: "Andre Wilhelm",
     role: "Wachstumsmanager",
-    photo: "/figma/team/andre.png",
+    photo: "/figma/team/andre.jpg",
     linkedin: {
       url: "https://www.linkedin.com/in/andre-wilhelm-6a2788303/",
       handle: "Andre Wilhelm",
@@ -58,13 +53,13 @@ export const TEAM: TeamMember[] = [
   {
     name: "Fernando Ferreira",
     role: "Wachstumsmanager",
-    photo: "/figma/team/fernando.png",
+    photo: "/figma/team/fernando.jpg",
     bio: "Fernando bringt über 10 Jahre Vertriebserfahrung mit, vom Direktvertrieb bis zu Spitzenpositionen im hochpreisigen B2C- und B2B-Geschäft. Als Sales Operator in der Unternehmensberatung erzielte er eigenständig über zwei Jahre einen siebenstelligen Verkaufsumsatz. Zudem bringt er Erfahrung im KI-Vertrieb mit Fokus auf Geschäftsführer aus der Immobilienbranche mit.",
   },
   {
     name: "Mikail Turgut",
     role: "Wachstumsmanager",
-    photo: "/figma/team/mikail.png",
+    photo: "/figma/team/mikail.jpg",
     linkedin: {
       url: "https://www.linkedin.com/in/mikail-turgut-257990170/",
       handle: "Mikail Turgut",
@@ -75,8 +70,7 @@ export const TEAM: TeamMember[] = [
     name: "Aaliyah Hümmer",
     role: "Persönliche Assistenz Selmir Suljkanovic",
     title: "Persönliche Assistenz",
-    photo: "/figma/team/aaliyah.png",
-    preComposited: true,
+    photo: "/figma/team/aaliyah.jpg",
     linkedin: {
       url: "https://www.linkedin.com/in/aaliyah-h%C3%BCmmer-531996274/",
       handle: "Aaliyah Hümmer",
@@ -86,7 +80,7 @@ export const TEAM: TeamMember[] = [
   {
     name: "Juri Michalev",
     role: "Videograf",
-    photo: "/figma/team/juri.png",
+    photo: "/figma/team/juri.jpg",
     linkedin: {
       url: "https://www.linkedin.com/in/juri-michalev-9aba54371/",
       handle: "Juri Michalev",
