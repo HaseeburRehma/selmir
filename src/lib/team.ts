@@ -14,6 +14,10 @@ export type TeamMember = {
   title?: string;
   /** Path under /public. */
   photo: string;
+  /** true when the photo is a pre-composited card design (purple background
+   *  baked in, same aspect as the card). Rendered full-bleed instead of
+   *  scaled cut-out. */
+  preComposited?: boolean;
   linkedin?: { url: string; handle: string };
   /** Paragraph revealed on hover. Members without a bio simply don't flip. */
   bio?: string;
@@ -34,6 +38,7 @@ export const TEAM: TeamMember[] = [
     name: "Vanessa Suljkanovic",
     role: "Head of Support",
     photo: "/figma/team/vanessa.png",
+    preComposited: true,
     linkedin: {
       url: "https://www.linkedin.com/in/vanessa-suljkanovic-1532a52ab/",
       handle: "Vanessa Suljkanovic",
@@ -71,6 +76,7 @@ export const TEAM: TeamMember[] = [
     role: "Persönliche Assistenz Selmir Suljkanovic",
     title: "Persönliche Assistenz",
     photo: "/figma/team/aaliyah.png",
+    preComposited: true,
     linkedin: {
       url: "https://www.linkedin.com/in/aaliyah-h%C3%BCmmer-531996274/",
       handle: "Aaliyah Hümmer",

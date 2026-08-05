@@ -63,14 +63,19 @@ function TeamCard({
       tabIndex={flips ? 0 : -1}
       className="group relative aspect-[405/459] w-full overflow-hidden rounded-[20px] outline-none [background:radial-gradient(120%_100%_at_50%_36%,#b089ff_0%,#926ff9_50%,#7454f3_100%)]"
     >
-      {/* Cut-out portrait — bottom-aligned, slightly smaller than the card so
-          the head has breathing room at the top (matches Figma). */}
+      {/* Portrait. Cut-outs are bottom-aligned and slightly scaled down so the
+          head has breathing room; pre-composited card designs are rendered
+          full-bleed (they already include the purple background). */}
       <Image
         src={member.photo}
         alt={member.name}
         fill
         sizes="(max-width: 640px) 80vw, 405px"
-        className="scale-[0.92] object-contain object-bottom transition-transform duration-500 group-hover:scale-[0.96]"
+        className={
+          member.preComposited
+            ? "object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+            : "scale-[0.92] object-contain object-bottom transition-transform duration-500 group-hover:scale-[0.96]"
+        }
       />
 
       {/* Bottom purple fade — sits above the person's shoulders and holds
