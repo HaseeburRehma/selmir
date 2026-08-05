@@ -32,22 +32,31 @@ function TeamCard({
   allowExternalLinks: boolean;
 }) {
   const flips = Boolean(member.bio);
-  const handle =
+  const linkedInRow =
     member.linkedin &&
-    (allowExternalLinks ? (
-      <a
-        href={member.linkedin.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="font-body text-[16px] font-semibold tracking-[-0.5px] text-white/80 transition-colors hover:text-white"
-      >
-        {member.linkedin.handle}
-      </a>
-    ) : (
-      <span className="font-body text-[16px] font-semibold tracking-[-0.5px] text-white/80">
-        {member.linkedin.handle}
-      </span>
-    ));
+    (() => {
+      const Inner = (
+        <>
+          <LinkedInMark />
+          <span className="font-body text-[16px] font-semibold tracking-[-0.5px] text-white/80 transition-colors group-hover/link:text-white">
+            {member.linkedin.handle}
+          </span>
+        </>
+      );
+      return allowExternalLinks ? (
+        <a
+          href={member.linkedin.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group/link flex w-fit items-center gap-2.5 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {Inner}
+        </a>
+      ) : (
+        <div className="flex w-fit items-center gap-2.5">{Inner}</div>
+      );
+    })();
 
   return (
     <article
@@ -111,12 +120,7 @@ function TeamCard({
             <p className="font-display text-[22px] leading-tight tracking-[-1px] lg:text-[28px]">
               {member.title ?? member.role}
             </p>
-            {member.linkedin && (
-              <div className="flex items-center gap-2.5">
-                <LinkedInMark />
-                {handle}
-              </div>
-            )}
+            {linkedInRow}
           </div>
 
           <p className="relative font-body text-[14px] leading-[1.4] tracking-[-0.3px] text-white/80 lg:text-[16px]">
@@ -200,7 +204,6 @@ export default function TeamCarousel({
         onMouseLeave={() => setPaused(false)}
         onFocusCapture={() => setPaused(true)}
         onBlurCapture={() => setPaused(false)}
-        onTouchStart={() => setPaused(true)}
         className={`flex gap-6 overflow-x-auto scroll-smooth pb-1 lg:gap-8 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
           scrollable ? "snap-x snap-mandatory" : "lg:justify-center"
         }`}
