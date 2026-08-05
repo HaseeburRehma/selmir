@@ -54,22 +54,6 @@ function TeamCard({
       tabIndex={flips ? 0 : -1}
       className="group relative aspect-[405/459] w-full overflow-hidden rounded-[20px] outline-none [background:radial-gradient(120%_100%_at_50%_36%,#b089ff_0%,#926ff9_50%,#7454f3_100%)]"
     >
-      {/* Tile grid texture on top of the purple, matching the Figma card */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage:
-            // horizontal + vertical grid lines
-            "linear-gradient(to right, rgba(255,255,255,0.18) 1px, transparent 1px), " +
-            "linear-gradient(to bottom, rgba(255,255,255,0.18) 1px, transparent 1px), " +
-            // subtle per-tile highlight so cells read as tiles, not just a grid
-            "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 60%)",
-          backgroundSize: "28px 28px, 28px 28px, 28px 28px",
-          mixBlendMode: "overlay",
-        }}
-      />
-
       {/* Cut-out portrait — bottom-aligned, slightly smaller than the card so
           the head has breathing room at the top (matches Figma). */}
       <Image
@@ -104,13 +88,18 @@ function TeamCard({
       {/* Hover panel */}
       {flips && (
         <div className="absolute inset-0 flex translate-y-full flex-col justify-between rounded-[20px] bg-purple-1/[0.72] p-6 text-white backdrop-blur-xl transition-transform duration-500 ease-out group-hover:translate-y-0 group-focus-within:translate-y-0">
-          {/* grid texture + inner glow */}
+          {/* Tile grid texture — the Figma card carries the pattern on the
+              hover overlay, not on the front photo. */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 rounded-[20px] opacity-40"
+            className="pointer-events-none absolute inset-0 rounded-[20px]"
             style={{
               backgroundImage:
-                "repeating-linear-gradient(to right, rgba(255,255,255,0.06) 0 1px, transparent 1px 34px), repeating-linear-gradient(to bottom, rgba(255,255,255,0.06) 0 1px, transparent 1px 34px)",
+                "linear-gradient(to right, rgba(255,255,255,0.18) 1px, transparent 1px), " +
+                "linear-gradient(to bottom, rgba(255,255,255,0.18) 1px, transparent 1px), " +
+                "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 60%)",
+              backgroundSize: "28px 28px, 28px 28px, 28px 28px",
+              mixBlendMode: "overlay",
             }}
           />
           <div
