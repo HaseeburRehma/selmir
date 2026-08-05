@@ -31,17 +31,6 @@ export const TEAM: TeamMember[] = [
     bio: "Selmir Suljkanovic kam im Kindesalter als bosnischer Kriegsflüchtling ohne Besitz nach Deutschland, nur mit dem festen Willen, sich etwas aufzubauen. Heute ist er erfolgreicher Unternehmer, Mentor und Investor. Mit mehr als 13 Jahren Erfahrung im Vertrieb und einem Jahrzehnt in leitenden Managementpositionen hat er über 47 Vertriebsteams aufgebaut und in 33 Branchen messbare Ergebnisse erzielt.",
   },
   {
-    name: "Aaliyah Hümmer",
-    role: "Persönliche Assistenz Selmir Suljkanovic",
-    title: "Persönliche Assistenz",
-    photo: "/figma/team/aaliyah.png",
-    linkedin: {
-      url: "https://www.linkedin.com/in/aaliyah-h%C3%BCmmer-531996274/",
-      handle: "Aaliyah Hümmer",
-    },
-    bio: "Aaliyah hat einen dualen Bachelor of Arts im Personalmanagement mit Schwerpunkt Sales sowie Expertise in Grafik- und Objektdesign. Als persönliche Assistenz des Geschäftsführers setzt sie beides gezielt ein: Sie gestaltet die Marke aktiv mit und verantwortet die strategische Kommunikation.",
-  },
-  {
     name: "Vanessa Suljkanovic",
     role: "Head of Support",
     photo: "/figma/team/vanessa.png",
@@ -76,6 +65,17 @@ export const TEAM: TeamMember[] = [
       handle: "Mikail Turgut",
     },
     bio: "Mikail bringt über drei Jahre Berufserfahrung in technischer Entwicklung, Consulting und Selbstständigkeit in den Bereichen Medizintechnik und Automotive mit. Im B2B-Vertrieb verbindet er technisches Verständnis mit wirtschaftlichem Denken und analytischer Arbeitsweise und berät Kunden präzise und lösungsorientiert.",
+  },
+  {
+    name: "Aaliyah Hümmer",
+    role: "Persönliche Assistenz Selmir Suljkanovic",
+    title: "Persönliche Assistenz",
+    photo: "/figma/team/aaliyah.png",
+    linkedin: {
+      url: "https://www.linkedin.com/in/aaliyah-h%C3%BCmmer-531996274/",
+      handle: "Aaliyah Hümmer",
+    },
+    bio: "Aaliyah hat einen dualen Bachelor of Arts im Personalmanagement mit Schwerpunkt Sales sowie Expertise in Grafik- und Objektdesign. Als persönliche Assistenz des Geschäftsführers setzt sie beides gezielt ein: Sie gestaltet die Marke aktiv mit und verantwortet die strategische Kommunikation.",
   },
   {
     name: "Juri Michalev",

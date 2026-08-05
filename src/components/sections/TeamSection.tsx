@@ -3,8 +3,9 @@ import TeamCarousel from "@/components/team/TeamCarousel";
 import { TEAM } from "@/lib/team";
 
 /**
- * "OUR HEART — Talentiertes Team": the hover-slider team carousel from Figma
- * (node 3409:2325). Homepage variant keeps the members' LinkedIn links live.
+ * "UNSER TEAM — Die Menschen hinter deinem Wachstum": the hover-slider team
+ * carousel from Figma (node 3409:2325). Homepage variant keeps the members'
+ * LinkedIn links live.
  */
 export default function TeamSection() {
   return (
@@ -15,11 +16,11 @@ export default function TeamSection() {
       <div className="mx-auto max-w-[1440px]">
         <Reveal className="mb-12 flex flex-col items-center gap-5 text-center lg:mb-16">
           <span className="font-body text-[13px] font-semibold uppercase tracking-[2px] text-purple-2">
-            Our Heart
+            Unser Team
           </span>
           <h2 className="max-w-[1200px] font-serif text-[32px] leading-[1.18] tracking-[-1px] text-white md:text-[44px] lg:text-[48px] md:tracking-[-1.6px]">
-            Treffen Sie unsere Besten{" "}
-            <span className="font-display">Talentiertes Team</span>
+            Die <span className="font-display">Menschen</span> hinter deinem{" "}
+            <span className="font-display">Wachstum</span>
           </h2>
         </Reveal>
 
