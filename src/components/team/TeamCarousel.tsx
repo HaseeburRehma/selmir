@@ -64,14 +64,16 @@ function TeamCard({
       tabIndex={flips ? 0 : -1}
       className="group relative aspect-[405/459] w-full overflow-hidden rounded-[20px] border border-white/[0.06] bg-[#0e0918] outline-none"
     >
-      {/* Original photo, full-bleed. The dark studio backdrop naturally
-          blends into the dark card. */}
+      {/* Original photo, full-bleed. object-position lines every subject's
+          face on the same Y, so cards read as a matched set. The dark studio
+          backdrop naturally blends into the dark card. */}
       <Image
         src={member.photo}
         alt={member.name}
         fill
         sizes="(max-width: 640px) 80vw, 405px"
-        className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
+        style={{ objectPosition: "50% 22%" }}
+        className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
       />
 
       {/* Warm purple ambient glow in the bottom-left corner. */}

@@ -4,10 +4,10 @@ import { TEAM } from "@/lib/team";
 import { LpContainer, Eyebrow, LP_SECTION } from "./lp-ui";
 
 /**
- * Landing-page variant of the team carousel. External LinkedIn links are
- * disabled here so the page keeps visitors in the funnel (on-page rule).
- * Heading uses two display highlights (Menschen + Wachstum), so it inlines
- * the h2 instead of using the single-span `LpHeading` primitive.
+ * Landing-page variant of the team carousel. LinkedIn links open in a new tab
+ * (target=_blank) so the LP itself is not left. Heading uses two display
+ * highlights (Menschen + Wachstum), so it inlines the h2 instead of using the
+ * single-span `LpHeading` primitive.
  */
 export default function LpTeam() {
   return (
@@ -22,7 +22,7 @@ export default function LpTeam() {
         </Reveal>
 
         <Reveal delay={0.1} className="mt-10 lg:mt-[64px]">
-          <TeamCarousel members={TEAM} allowExternalLinks={false} />
+          <TeamCarousel members={TEAM} allowExternalLinks />
         </Reveal>
       </LpContainer>
     </section>

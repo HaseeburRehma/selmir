@@ -50,10 +50,14 @@ export function LpLeadForm({ pageName }: { pageName: string }) {
     setError("");
 
     // Web3Forms uses the JSON keys as labels in the notification email, so the
-    // keys are the German field names.
+    // keys are the German field names. The first key ("Kurzhinweis") is a
+    // German intro line so the email reads as a proper German notification
+    // even though Web3Forms prefixes its own English "A new form has been…"
+    // preamble on the free plan.
     const payload = {
       subject: `Neue Potenzialanalyse-Anfrage von ${data.name || "Website"}`,
       from_name: "Selmir Suljkanovic — Potenzialanalyse",
+      Kurzhinweis: `Neue Potenzialanalyse-Anfrage über die Landingpage "${pageName}". Details unten.`,
       Name: data.name,
       Telefonnummer: data.telefon,
       "Firma / Betrieb": data.firma,

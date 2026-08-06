@@ -42,6 +42,7 @@ export function ContactForm() {
       subject: `Neue Kontaktanfrage von ${data.name || "Website"}`,
       from_name: "Sales Mastery Days — Kontaktformular",
       replyto: data.email,
+      Kurzhinweis: `Neue Kontaktanfrage über die Website. Details unten.`,
       Name: data.name,
       "E-Mail": data.email,
       Betreff: data.betreff,
