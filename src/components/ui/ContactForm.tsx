@@ -38,7 +38,9 @@ export function ContactForm() {
     // German field labels in the notification email (Web3Forms uses the JSON
     // keys as labels). Special keys (access_key/subject/from_name/replyto)
     // stay lowercase; the rest become the visible German labels.
-    const payload = {
+    // Web3Forms payload — fallback path, used only if /api/notify/contact
+    // is not yet configured (RESEND_API_KEY missing).
+    const web3Payload = {
       subject: `Neue Kontaktanfrage von ${data.name || "Website"}`,
       from_name: "Sales Mastery Days — Kontaktformular",
       replyto: data.email,
@@ -50,7 +52,29 @@ export function ContactForm() {
     };
 
     try {
-      // Submit to every configured key — one delivery per inbox.
+      // Primary: our own /api/notify/contact (Resend). Genuine German email
+      // to both info@sh-wachstum.de and info@tylotech.de, no third-party
+      // preamble.
+      const notifyRes = await fetch("/api/notify/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          betreff: data.betreff,
+          nachricht: data.nachricht,
+        }),
+      })
+        .then((r) => r.json())
+        .catch(() => ({ ok: false }));
+
+      if (notifyRes?.ok) {
+        setStatus("success");
+        form.reset();
+        return;
+      }
+
+      // Fallback: Web3Forms, so the message is never lost during transition.
       const results = await Promise.allSettled(
         ACCESS_KEYS.map((access_key) =>
           fetch("https://api.web3forms.com/submit", {
@@ -59,7 +83,7 @@ export function ContactForm() {
               "Content-Type": "application/json",
               Accept: "application/json",
             },
-            body: JSON.stringify({ access_key, ...payload }),
+            body: JSON.stringify({ access_key, ...web3Payload }),
           }).then((r) => r.json()),
         ),
       );

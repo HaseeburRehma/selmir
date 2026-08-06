@@ -49,12 +49,13 @@ export function LpLeadForm({ pageName }: { pageName: string }) {
     setStatus("submitting");
     setError("");
 
-    // Web3Forms uses the JSON keys as labels in the notification email, so the
-    // keys are the German field names. The first key ("Kurzhinweis") is a
-    // German intro line so the email reads as a proper German notification
-    // even though Web3Forms prefixes its own English "A new form has been…"
-    // preamble on the free plan.
-    const payload = {
+    const pageUrl =
+      typeof window !== "undefined" ? window.location.href : "";
+
+    // Web3Forms payload — used as a fallback until RESEND_API_KEY is live.
+    // Once Resend is configured in prod it becomes redundant, but leaving it
+    // in means a form submission is never lost during the transition.
+    const web3Payload = {
       subject: `Neue Potenzialanalyse-Anfrage von ${data.name || "Website"}`,
       from_name: "Selmir Suljkanovic — Potenzialanalyse",
       Kurzhinweis: `Neue Potenzialanalyse-Anfrage über die Landingpage "${pageName}". Details unten.`,
@@ -65,8 +66,24 @@ export function LpLeadForm({ pageName }: { pageName: string }) {
       Landingpage: pageName,
     };
 
-    // The CRM write runs alongside the e-mail notification. It must never be
-    // what fails the submission, so its outcome is logged, not surfaced.
+    // Primary: our own /api/notify/lead (Resend). Sends a genuine German
+    // e-mail to both info@sh-wachstum.de and info@tylotech.de.
+    const notify = fetch("/api/notify/lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: data.name,
+        telefon: data.telefon,
+        firma: data.firma,
+        entscheider: decider,
+        landingpage: pageName,
+        pageUrl,
+      }),
+    })
+      .then((r) => r.json())
+      .catch(() => ({ ok: false }));
+
+    // CRM write runs in parallel; its outcome is logged, never surfaced.
     const hubspot = fetch("/api/lead", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -76,7 +93,7 @@ export function LpLeadForm({ pageName }: { pageName: string }) {
         company: data.firma,
         decisionMaker: decider,
         landingPage: pageName,
-        pageUrl: typeof window !== "undefined" ? window.location.href : "",
+        pageUrl,
         attribution: readAttribution(),
       }),
     })
@@ -84,6 +101,20 @@ export function LpLeadForm({ pageName }: { pageName: string }) {
       .catch(() => ({ ok: false }));
 
     try {
+      // Wait for Resend first — if it succeeds, we're done.
+      const notifyRes = await notify;
+      void hubspot.then((res) => {
+        if (!res?.ok) console.warn("[lead] CRM sync did not complete", res);
+      });
+
+      if (notifyRes?.ok) {
+        setStatus("success");
+        form.reset();
+        return;
+      }
+
+      // Resend not configured yet (or transient failure) — fall back to
+      // Web3Forms so the lead still reaches the inboxes.
       const results = await Promise.allSettled(
         ACCESS_KEYS.map((access_key) =>
           fetch("https://api.web3forms.com/submit", {
@@ -92,14 +123,10 @@ export function LpLeadForm({ pageName }: { pageName: string }) {
               "Content-Type": "application/json",
               Accept: "application/json",
             },
-            body: JSON.stringify({ access_key, ...payload }),
+            body: JSON.stringify({ access_key, ...web3Payload }),
           }).then((r) => r.json()),
         ),
       );
-
-      void hubspot.then((res) => {
-        if (!res?.ok) console.warn("[lead] CRM sync did not complete", res);
-      });
       const anySuccess = results.some(
         (r) => r.status === "fulfilled" && r.value?.success,
       );
