@@ -1,11 +1,28 @@
+"use client";
+
 import Image from "next/image";
-import Link from "next/link";
 import { Settings, TrendingUp, Users } from "lucide-react";
 import { Reveal } from "@/components/ui/Reveal";
 import { YouTubeLite } from "@/components/ui/YouTubeLite";
 import { CTA_HREF, type CaseStudy } from "@/lib/landing-pages";
 import { Eyebrow, LP_SECTION, LpContainer } from "./lp-ui";
 import { RevenueChart } from "./RevenueChart";
+
+/**
+ * Scroll to the offer form even when the URL already contains #analyse.
+ * A plain hash link is a no-op in that case, which is why the CTA in the
+ * case studies felt "dead" once you'd clicked any anchor once.
+ */
+function scrollToAnalyse(e: React.MouseEvent<HTMLAnchorElement>) {
+  const target = document.getElementById("analyse");
+  if (!target) return; // fall through to the browser's default
+  e.preventDefault();
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
+  // Keep the hash in sync so bookmarks / refresh still land here.
+  if (window.location.hash !== "#analyse") {
+    history.replaceState(null, "", "#analyse");
+  }
+}
 
 /**
  * Result icons, in the order the Figma lists them:
@@ -137,8 +154,9 @@ export default function LpCaseStudy({ study }: { study: CaseStudy }) {
               })}
             </ul>
 
-            <Link
+            <a
               href={CTA_HREF}
+              onClick={scrollToAnalyse}
               className="btn-gradient group flex flex-col items-center justify-center rounded-[10px] px-6 py-[18px] text-center text-black transition-transform duration-300 hover:-translate-y-0.5"
             >
               <span className="font-body text-[16px] font-semibold leading-normal lg:text-[18px]">
@@ -147,7 +165,7 @@ export default function LpCaseStudy({ study }: { study: CaseStudy }) {
               <span className="mt-[3px] font-body text-[12px] leading-normal text-black/70 lg:text-[14px]">
                 Kostenlos &amp; unverbindlich in 15 Minuten
               </span>
-            </Link>
+            </a>
           </Reveal>
         </div>
       </LpContainer>
