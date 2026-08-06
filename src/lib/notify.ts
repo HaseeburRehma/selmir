@@ -26,9 +26,11 @@ export type NotifyPayload = {
 };
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
+// Sender is the verified sh-wachstum.de address (DKIM + SPF live in DNS).
+// Override with NOTIFY_FROM if the address ever changes.
 const FROM =
   process.env.NOTIFY_FROM ??
-  "Sales Mastery Days <onboarding@resend.dev>";
+  "Sales Mastery Days <noreply@sh-wachstum.de>";
 const TO = (
   process.env.NOTIFY_TO ?? "info@sh-wachstum.de,info@tylotech.de"
 )
