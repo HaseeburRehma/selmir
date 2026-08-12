@@ -80,6 +80,10 @@ export default function HeroSection() {
                   name: "Noah Geerkens",
                   image: "/figma/speakers/noah-geerkens-avatar.jpg",
                 },
+                {
+                  name: "Arafat Alves",
+                  image: "/figma/speakers/arafat-alves-avatar.jpg",
+                },
               ].map((s) => (
                 <a
                   key={s.name}

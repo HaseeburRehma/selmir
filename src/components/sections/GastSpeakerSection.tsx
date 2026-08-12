@@ -18,6 +18,12 @@ const SPEAKERS = [
     image: "/figma/speakers/noah-geerkens.jpg",
     alt: "Noah Geerkens — KI Spezialist & Handwerksunternehmer",
   },
+  {
+    name: "Arafat Alves",
+    claim: { serif: "", display: "Spezialist für digitales Marketing" },
+    image: "/figma/speakers/arafat-alves.jpg",
+    alt: "Arafat Alves — Spezialist für digitales Marketing",
+  },
 ];
 
 export default function GastSpeakerSection() {
