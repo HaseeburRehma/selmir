@@ -52,12 +52,15 @@ export default function GastSpeakerSection() {
           </span>
         </Reveal>
 
-        <div className="grid grid-cols-1 gap-14 sm:grid-cols-2 lg:gap-[64px]">
+        {/* 1 col mobile → 2 col tablet → 3 col desktop. Cards stay equal-height
+            and share the same headline space so the row reads as a set even
+            when the individual pitch lines wrap to different heights. */}
+        <div className="grid grid-cols-1 items-stretch gap-14 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
           {SPEAKERS.map((s, i) => (
             <Reveal
               key={s.name}
               delay={i * 0.1}
-              className="mx-auto flex w-full max-w-[400px] flex-col gap-7"
+              className="mx-auto flex h-full w-full max-w-[400px] flex-col gap-7 lg:max-w-none"
             >
               <div className="relative">
                 {/* purple bloom behind the portrait */}
@@ -71,7 +74,7 @@ export default function GastSpeakerSection() {
                       src={s.image}
                       alt={s.alt}
                       fill
-                      sizes="(max-width: 640px) 90vw, 400px"
+                      sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 360px"
                       className="object-cover object-top"
                     />
                   </div>
@@ -79,7 +82,7 @@ export default function GastSpeakerSection() {
               </div>
 
               <div className="flex flex-col gap-3">
-                <h2 className="font-serif text-[28px] leading-[1.15] tracking-[-0.9px] text-white md:text-[34px] md:tracking-[-1.1px]">
+                <h2 className="font-serif text-[26px] leading-[1.15] tracking-[-0.9px] text-white md:text-[30px] lg:text-[28px] lg:tracking-[-1px] xl:text-[32px]">
                   {s.claim.serif && `${s.claim.serif} `}
                   <span className="font-display">{s.claim.display}</span>
                 </h2>
