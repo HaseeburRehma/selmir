@@ -55,7 +55,7 @@ export default function GastSpeakerSection() {
         {/* 1 col mobile → 2 col tablet → 3 col desktop. Cards stay equal-height
             and share the same headline space so the row reads as a set even
             when the individual pitch lines wrap to different heights. */}
-        <div className="grid grid-cols-1 items-stretch gap-14 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
+        <div className="grid grid-cols-1 items-stretch gap-14 sm:grid-cols-2 lg:grid-cols-3 lg:gap-16">
           {SPEAKERS.map((s, i) => (
             <Reveal
               key={s.name}
