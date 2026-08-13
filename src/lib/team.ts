@@ -41,16 +41,6 @@ export const TEAM: TeamMember[] = [
     bio: "Vanessa hat einen Bachelor of Science in Management and Economics und ist als zentrale Ansprechpartnerin für Recruiting, internes wie externes Relationship Management sowie Prozess- und Eventmanagement verantwortlich. Sie bündelt ihr Know-how, um Kunden und Kollegen professionell zu betreuen und einen reibungslosen Ablauf im Unternehmen sicherzustellen.",
   },
   {
-    name: "Andre Wilhelm",
-    role: "Wachstumsmanager",
-    photo: "/figma/team/andre.jpg",
-    linkedin: {
-      url: "https://www.linkedin.com/in/andre-wilhelm-6a2788303/",
-      handle: "Andre Wilhelm",
-    },
-    bio: "Andre ist seit über sechs Jahren im Vertrieb tätig und verfügt über Erfahrung in den Bereichen Energie, Photovoltaik und Wärmepumpen, Telekommunikation und Finanzberatung – sowohl im B2B- als auch im B2C-Vertrieb. Dabei erzielte er im Bereich Photovoltaik und Wärmepumpen in weniger als sechs Monaten einen höheren siebenstelligen Umsatz.",
-  },
-  {
     name: "Fernando Ferreira",
     role: "Wachstumsmanager",
     photo: "/figma/team/fernando.jpg",
