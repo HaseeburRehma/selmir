@@ -37,7 +37,7 @@ const SOCIALS: {
 const COLUMNS = [
   {
     title: "Navigation",
-    links: ["Leistungen", "Methode", "Case Studies", "Über", "Karriere", "Kontakt"],
+    links: ["Leistungen", "Methode", "Case Studies", "Über", "Buch", "Karriere", "Kontakt"],
   },
   {
     title: "Ressourcen",
@@ -69,6 +69,7 @@ function linkHref(label: string): string {
   if (l.includes("datenschutz")) return "/datenschutz";
   if (l === "kontakt") return "/kontakt";
   if (l === "über") return "/ueber";
+  if (l === "buch") return "/buch";
   if (label.includes("@")) return `mailto:${label}`;
   if (/\d{3,}/.test(label)) return `tel:${label.replace(/[^\d+]/g, "")}`;
   return "#";

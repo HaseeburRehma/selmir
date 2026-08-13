@@ -12,6 +12,7 @@ const LINKS = [
   { label: "Methode", href: "/#stories" },
   { label: "Case Studies", href: "/#cases" },
   { label: "Über", href: "/ueber" },
+  { label: "Buch", href: "/buch" },
   { label: "Karriere", href: "/#footer" },
   { label: "Kontakt", href: "/kontakt" },
 ];
