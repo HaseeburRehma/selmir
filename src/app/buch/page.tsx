@@ -98,7 +98,7 @@ export default function BuchPage() {
                 />
                 <div className="relative overflow-hidden rounded-2xl border border-purple-2/40 shadow-[0_30px_80px_-20px_rgba(116,84,243,0.55)]">
                   <Image
-                    src="/71Xlew-cEZL._SY522_.jpg"
+                    src="/figma/buch/buchcover.jpg"
                     alt="SEIN. TUN. HABEN. — Buchcover von Selmir Suljkanovic"
                     width={344}
                     height={522}
