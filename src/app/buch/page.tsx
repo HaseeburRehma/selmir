@@ -86,7 +86,10 @@ export default function BuchPage() {
               </p>
 
               <div>
-                <Button href="/#tickets" icon={<ShoppingBag className="size-5" />}>
+                <Button
+                  href="https://www.amazon.de/dp/3982560667"
+                  icon={<ShoppingBag className="size-5" />}
+                >
                   Jetzt Buch sichern
                 </Button>
               </div>
