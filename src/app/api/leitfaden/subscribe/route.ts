@@ -235,6 +235,20 @@ export async function POST(req: NextRequest) {
   const firstName = (body.name ?? "").trim();
   const phone = (body.phone ?? "").trim();
   const email = (body.email ?? "").trim().toLowerCase();
+  // All three fields are required. Return the first offender so the client
+  // can show a targeted error.
+  if (!firstName) {
+    return NextResponse.json(
+      { ok: false, reason: "name is required" },
+      { status: 400 },
+    );
+  }
+  if (!phone) {
+    return NextResponse.json(
+      { ok: false, reason: "phone is required" },
+      { status: 400 },
+    );
+  }
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json(
       { ok: false, reason: "email is required" },

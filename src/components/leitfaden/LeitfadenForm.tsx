@@ -84,11 +84,12 @@ export default function LeitfadenForm({
       {showFirstName && (
         <div className="flex flex-col gap-1.5">
           <label className="font-body text-[13px] font-semibold text-white/75">
-            Vorname
+            Vorname <span className="text-purple-2">*</span>
           </label>
           <input
             className={inputCls}
             type="text"
+            required
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={firstNamePlaceholder}
@@ -99,15 +100,18 @@ export default function LeitfadenForm({
       {showPhone && (
         <div className="flex flex-col gap-1.5">
           <label className="font-body text-[13px] font-semibold text-white/75">
-            Telefon
+            Telefon <span className="text-purple-2">*</span>
           </label>
           <input
             className={inputCls}
             type="tel"
+            required
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder={phonePlaceholder}
             autoComplete="tel"
+            pattern="[0-9+\s\-()]{6,}"
+            title="Bitte gib eine gültige Telefonnummer ein."
           />
         </div>
       )}
