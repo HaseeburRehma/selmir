@@ -49,7 +49,7 @@ export const HERO = {
   },
   video: {
     label: "Zum Video",
-    href: "https://www.youtube.com/@selmirsuljkanovic",
+    href: "https://youtu.be/imvFnBiyXfs",
   },
   submitLabel: "Leitfaden jetzt zuschicken",
   reassurance: "Deine Daten sind sicher. Kein Spam.",
@@ -167,21 +167,22 @@ export const CLOSES: {
 }[] = [
   {
     tag: "Technik 01",
-    image: "/figma/lp/cases/geerkens-1.webp",
+    // Selmir alone — client asked for solo shots on this section.
+    image: "/figma/about/selmir-stage.jpg",
     title: "Zwei Termine statt Ja oder Nein",
     body:
       "„Möchtest du zum Datum A oder zum Datum B starten?“ Nie eine offene Ja/Nein-Frage stellen — immer zwei positive Optionen zur Auswahl geben.",
   },
   {
     tag: "Technik 02",
-    image: "/figma/lp/cases/geerkens-2.webp",
+    image: "/figma/lp/selmir-about.webp",
     title: "Preis nennen, dann schweigen",
     body:
       "„Der schweigt, der kauft.“ Die Stille nach der Preisnennung aushalten — und sie nicht nervös mit Erklärungen oder Rabatten füllen.",
   },
   {
     tag: "Technik 03",
-    image: "/figma/lp/cases/geerkens-3.webp",
+    image: "/figma/about/selmir-portrait.jpg",
     title: "Commitment statt Vertrag",
     body:
       "„Wir setzen keinen Vertrag auf, sondern ein Commitment zwischen dir und mir.“ Persönlicher, weniger bedrohlich, emotional bindender.",

@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { CalendarDays, ChevronRight, Play, Plus } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronRight,
+  Download,
+  FileText,
+  Lock,
+  Play,
+} from "lucide-react";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button } from "@/components/ui/Button";
 import LeitfadenForm from "@/components/leitfaden/LeitfadenForm";
@@ -69,115 +76,180 @@ export default function LeitfadenPage() {
     <>
       <LeitfadenNav />
       <main>
-        {/* ─────────── HERO ─────────── */}
-        <section className="relative overflow-hidden bg-bg px-6 pb-16 pt-16 md:px-10 md:pb-24 md:pt-24 lg:px-[80px] lg:pb-[112px] lg:pt-[96px]">
-          {/* subtle purple glow */}
+        {/* ─────────── HERO — Figma node 3611:2854 ─────────── */}
+        <section className="relative overflow-hidden bg-bg px-6 pb-16 pt-14 md:px-10 md:pb-24 md:pt-20 lg:px-[120px] lg:pb-[112px] lg:pt-[96px]">
+          {/* faint grid + purple glows to match the Figma bg */}
           <div
             aria-hidden
-            className="pointer-events-none absolute -left-40 top-24 h-[480px] w-[480px] rounded-full bg-purple-1/20 blur-[140px]"
+            className="pointer-events-none absolute inset-0 opacity-[0.5]"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(to right, rgba(255,255,255,0.035) 0 1px, transparent 1px 96px), repeating-linear-gradient(to bottom, rgba(255,255,255,0.035) 0 1px, transparent 1px 96px)",
+            }}
           />
-          <div className="relative mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_460px] lg:gap-[80px]">
-            {/* Left column: eyebrow, headline, lead, form */}
-            <Reveal className="flex flex-col gap-6 lg:gap-8">
-              <span className="flex items-center gap-[14px] font-body text-[12px] font-semibold uppercase leading-[16px] tracking-[2px] text-purple-2 lg:text-[13px]">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -left-40 top-24 h-[520px] w-[520px] rounded-full bg-purple-1/25 blur-[140px]"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-32 top-0 h-[420px] w-[420px] rounded-full bg-purple-2/20 blur-[140px]"
+          />
+
+          <div className="relative mx-auto grid max-w-[1200px] grid-cols-1 items-center gap-14 lg:grid-cols-[600px_1fr] lg:gap-[120px]">
+            {/* Left column: eyebrow, headline, lead, PDF chip, form, trust row */}
+            <Reveal className="flex flex-col gap-6">
+              <span className="flex items-center gap-[14px] font-body text-[13px] font-semibold uppercase leading-[16px] tracking-[2px] text-purple-2">
                 <span
                   aria-hidden
                   className="h-[2px] w-[40px] shrink-0 rounded-full bg-purple-2"
                 />
                 {HERO.eyebrow}
               </span>
-              <h1 className="font-serif text-[34px] leading-[1.1] tracking-[-1px] text-white sm:text-[42px] md:text-[52px] lg:text-[58px] lg:leading-[1.05] lg:tracking-[-1.8px]">
-                {HERO.headline.line1}{" "}
-                <span>{HERO.headline.line2Serif} </span>
+              <h1 className="font-serif text-[34px] leading-[1.15] tracking-[-1px] text-white sm:text-[42px] md:text-[48px] lg:text-[50px] lg:leading-[1.18] lg:tracking-[-1.8px]">
+                {HERO.headline.line1}
+                <br />
+                {HERO.headline.line2Serif}{" "}
                 <span className="font-display">
                   {HERO.headline.line2Display}
                 </span>
               </h1>
-              <p className="font-body text-[15px] leading-[1.6] text-white/60 lg:text-[17px]">
+              <p className="max-w-[560px] font-body text-[15px] leading-[1.62] text-white/60 lg:text-[16.5px]">
                 {HERO.lead}
               </p>
 
-              <div className="mt-2 flex flex-col gap-3">
-                {/* small chip badge */}
-                <div className="inline-flex w-fit items-center gap-3 rounded-[10px] border border-white/[0.08] bg-white/[0.03] px-4 py-2.5">
-                  <span className="grid size-[28px] place-items-center rounded-md bg-purple-2/20 text-purple-2">
-                    <Plus className="size-4" />
+              {/* PDF file badge (Figma "PDF File Badge") */}
+              <div className="inline-flex w-fit items-center gap-3.5 rounded-[14px] border border-white/[0.09] bg-white/[0.03] px-4 py-3.5">
+                <span className="grid size-[42px] place-items-center rounded-[11px] bg-purple-2/[0.16]">
+                  <FileText className="size-[22px] text-purple-2" strokeWidth={1.75} />
+                </span>
+                <div className="flex flex-col leading-tight">
+                  <span className="font-body text-[15px] font-semibold tracking-[-0.2px] text-white">
+                    {HERO.formTag.title}
                   </span>
-                  <div className="flex flex-col leading-tight">
-                    <span className="font-body text-[13px] font-semibold text-white">
-                      {HERO.formTag.title}
-                    </span>
-                    <span className="font-body text-[11px] text-white/50">
-                      {HERO.formTag.subtitle}
-                    </span>
-                  </div>
-                </div>
-                <div className="w-full max-w-[560px]">
-                  <LeitfadenForm
-                    variant="hero"
-                    submitLabel={HERO.submitLabel}
-                    showFirstName={false}
-                  />
-                </div>
-                <div className="mt-1 flex flex-wrap items-center gap-4">
-                  <a
-                    href={HERO.video.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 font-body text-[12px] font-semibold text-white/75 transition-colors hover:border-purple-2/40 hover:text-white"
-                  >
-                    <Play className="size-3.5 text-purple-2" />
-                    {HERO.video.label}
-                  </a>
-                  <span className="font-body text-[12px] text-white/40">
-                    {HERO.audience}
+                  <span className="font-body text-[13.5px] tracking-[-0.1px] text-white/50">
+                    {HERO.formTag.subtitle}
                   </span>
                 </div>
               </div>
+
+              {/* Hero form — email + gradient CTA + security note */}
+              <div className="w-full">
+                <LeitfadenForm
+                  variant="hero"
+                  submitLabel={HERO.submitLabel}
+                  showFirstName={false}
+                />
+              </div>
+
+              {/* Trust row: Zum Video pill + dot + audience note */}
+              <div className="flex flex-wrap items-center gap-[18px]">
+                <a
+                  href={HERO.video.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-[9px] rounded-full border border-white/[0.14] bg-white/[0.06] px-5 py-[11px] font-body text-[14px] font-semibold tracking-[-0.1px] text-white/90 transition-colors hover:border-purple-2/60 hover:bg-white/[0.10]"
+                >
+                  <Play className="size-[16px] fill-purple-2 text-purple-2" />
+                  {HERO.video.label}
+                </a>
+                <span
+                  aria-hidden
+                  className="size-1 rounded-full bg-white/30"
+                />
+                <span className="font-body text-[14px] tracking-[-0.1px] text-white/50">
+                  {HERO.audience}
+                </span>
+              </div>
             </Reveal>
 
-            {/* Right column: PDF preview mock */}
-            <Reveal
-              delay={0.1}
-              className="mx-auto w-full max-w-[420px] lg:max-w-none"
-            >
-              <div className="relative">
+            {/* Right column: rich PDF mockup (3-sheet stack) — Figma node 3615:2885 */}
+            <Reveal delay={0.1} className="mx-auto w-full max-w-[440px] lg:max-w-none">
+              <div className="relative mx-auto aspect-[560/640] w-full max-w-[440px] lg:max-w-[560px]">
+                {/* purple glow behind the mockup */}
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute -inset-6 rounded-[32px] bg-[radial-gradient(120%_100%_at_50%_0%,rgba(116,84,243,0.35)_0%,rgba(10,8,18,0)_75%)]"
+                  className="pointer-events-none absolute left-1/2 top-[24%] size-[62%] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(176,137,255,0.45)_0%,rgba(116,84,243,0.20)_45%,rgba(10,8,18,0)_75%)] blur-[24px]"
                 />
-                <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[22px] border border-white/[0.09] bg-[radial-gradient(120%_100%_at_50%_0%,rgba(116,84,243,0.18)_0%,rgba(10,8,18,0.6)_60%,rgba(10,8,18,0.95)_100%)] p-7 lg:p-9">
-                  <div className="flex h-full flex-col">
-                    <div className="flex items-center justify-between">
-                      <Image
-                        src="/logo-red-dark.svg"
-                        alt="Selmir"
-                        width={110}
-                        height={32}
-                        className="h-7 w-auto opacity-95"
+
+                {/* Back sheet 2 (rightmost, offset right + down) */}
+                <div
+                  aria-hidden
+                  className="absolute left-[32%] top-[20%] h-[64%] w-[54%] rounded-[12px] border border-white/[0.06] bg-[#161127] opacity-80"
+                />
+                {/* Back sheet 1 (slightly closer) */}
+                <div
+                  aria-hidden
+                  className="absolute left-[27%] top-[16%] h-[70%] w-[59%] rounded-[13px] border border-white/[0.08] bg-[#19132d]"
+                />
+
+                {/* Main PDF cover */}
+                <div
+                  className="absolute left-[18%] top-[11%] flex h-[76%] w-[64%] flex-col justify-between overflow-hidden rounded-[14px] border border-purple-2/30 px-[7%] py-[6%]"
+                  style={{
+                    background:
+                      "linear-gradient(117deg, #21183d 14%, #140e25 54%, #0b0816 86%)",
+                    boxShadow: "0 34px 90px 0 rgba(112,77,255,0.36)",
+                  }}
+                >
+                  {/* Top accent band (subtle) */}
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-x-0 top-0 h-[22%]"
+                    style={{
+                      background:
+                        "linear-gradient(180deg, rgba(176,137,255,0.18) 0%, rgba(176,137,255,0) 100%)",
+                    }}
+                  />
+                  <div className="relative flex flex-col gap-4">
+                    <Image
+                      src="/logo-red-dark.svg"
+                      alt="Selmir"
+                      width={104}
+                      height={34}
+                      className="h-[34px] w-auto"
+                    />
+                    <span className="flex items-center gap-2.5">
+                      <span
+                        aria-hidden
+                        className="h-[2px] w-[26px] shrink-0 rounded-full bg-purple-2"
                       />
-                      <span className="rounded-full border border-purple-2/40 bg-purple-2/[0.10] px-3 py-1 font-body text-[10px] font-semibold uppercase tracking-[1.5px] text-purple-2">
-                        {HERO.bookBadge}
-                      </span>
-                    </div>
-                    <div className="mt-8 flex flex-col gap-2">
-                      <span className="font-body text-[11px] font-semibold uppercase tracking-[2px] text-purple-2/80">
+                      <span className="font-body text-[9.5px] font-semibold uppercase tracking-[1.6px] text-purple-2">
                         Vertrieb &amp; Akquise
                       </span>
-                      <p className="font-serif text-[26px] leading-[1.1] tracking-[-0.7px] text-white lg:text-[30px]">
-                        {HERO.bookTitle}
-                      </p>
-                      <p className="font-body text-[14px] leading-[1.5] text-white/60">
-                        {HERO.bookSubtitle}
-                      </p>
-                    </div>
-                    <div className="mt-auto flex items-center justify-between border-t border-white/[0.08] pt-4 font-body text-[11px] uppercase tracking-[1.5px] text-white/50">
-                      <span>{HERO.bookMeta.chapter}</span>
-                      <span>{HERO.bookMeta.pages}</span>
+                    </span>
+                    <p className="font-serif text-[24px] leading-[1.2] tracking-[-0.9px] text-white lg:text-[27px]">
+                      Rollenspiel-
+                      <br />
+                      <span className="font-display">Leitfaden:</span>
+                    </p>
+                    <p className="font-body text-[12.5px] leading-[1.58] tracking-[-0.1px] text-white/70">
+                      Marketingagentur{" "}
+                      <span className="font-bold text-purple-2">vs.</span>{" "}
+                      Handwerksunternehmen
+                    </p>
+                  </div>
+                  <div className="relative flex flex-col gap-3">
+                    <div aria-hidden className="h-px w-full bg-white/[0.12]" />
+                    <div className="flex items-center justify-between font-body text-[10.5px] uppercase tracking-[1.3px]">
+                      <span className="font-semibold text-white/70">
+                        Trainingsmaterial
+                      </span>
+                      <span className="font-medium text-white/40">10 Seiten</span>
                     </div>
                   </div>
                 </div>
-                <p className="mt-3 text-center font-body text-[12px] text-white/40">
+
+                {/* Floating PDF · Gratis badge */}
+                <span
+                  className="absolute right-[6%] top-[6%] rounded-full bg-purple-2 px-3.5 py-2 font-body text-[11px] font-bold uppercase tracking-[0.8px] text-bg"
+                  style={{ boxShadow: "0 6px 24px 0 rgba(112,77,255,0.5)" }}
+                >
+                  PDF · Gratis
+                </span>
+
+                {/* caption */}
+                <p className="absolute inset-x-0 -bottom-8 text-center font-body text-[13px] tracking-[0.2px] text-white/45">
                   Gratis PDF-Vorschau
                 </p>
               </div>

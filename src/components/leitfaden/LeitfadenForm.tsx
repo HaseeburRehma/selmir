@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Send, Check } from "lucide-react";
+import { Check, Download } from "lucide-react";
 
 /**
  * Shared subscribe form for the /leitfaden page.
@@ -113,10 +113,10 @@ export default function LeitfadenForm({
       disabled={status === "loading"}
       className="btn-gradient group flex h-14 w-full items-center justify-center gap-2 rounded-[10px] px-5 text-center text-black transition-transform duration-300 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-70"
     >
-      <span className="font-body text-[15px] font-semibold uppercase tracking-[0.5px] lg:text-[16px]">
+      <span className="font-body text-[15px] font-bold uppercase tracking-[0.6px] lg:text-[16px]">
         {status === "loading" ? "Wird gesendet…" : submitLabel}
       </span>
-      <Send className="size-[18px] opacity-80 transition-transform group-hover:translate-x-0.5" />
+      <Download className="size-[20px] opacity-90 transition-transform group-hover:translate-y-0.5" />
     </button>
   );
 
