@@ -69,9 +69,12 @@ export default function LeitfadenPage() {
   return (
     <>
       <LeitfadenNav />
-      <main>
+      <main className="overflow-x-clip">
         {/* ─────────── HERO — Figma node 3611:2854 ─────────── */}
-        <section className="relative overflow-hidden bg-bg px-6 pb-16 pt-14 md:px-10 md:pb-24 md:pt-20 lg:px-[120px] lg:pb-[112px] lg:pt-[96px]">
+        <section
+          id="download"
+          className="relative overflow-hidden bg-bg px-6 pb-16 pt-14 md:px-10 md:pb-24 md:pt-20 lg:px-[120px] lg:pb-[112px] lg:pt-[96px]"
+        >
           {/* Base radial vignette — dark centre, purple bloom top-right,
               matching the Figma hero background (#090711 → #170b2e). */}
           <div
@@ -153,7 +156,8 @@ export default function LeitfadenPage() {
                 <LeitfadenForm
                   variant="hero"
                   submitLabel={HERO.submitLabel}
-                  showFirstName={false}
+                  showFirstName
+                  showPhone
                 />
               </div>
 
@@ -178,9 +182,17 @@ export default function LeitfadenPage() {
               </div>
             </Reveal>
 
-            {/* Right column: BIG PDF mockup — 3-sheet stack, floating badge */}
-            <Reveal delay={0.1} className="w-full">
-              <div className="relative mx-auto aspect-[500/620] w-full max-w-[500px] lg:mx-0 lg:ml-auto lg:max-w-[560px]">
+            {/* Right column: BIG PDF mockup — 3-sheet stack, floating badge.
+                overflow-hidden on the wrapper keeps the back-sheets and the
+                floating badge from spilling past the column on narrow screens. */}
+            <Reveal
+              delay={0.1}
+              className="mx-auto flex w-full max-w-[300px] flex-col min-w-0 sm:max-w-[420px] lg:mx-0 lg:ml-auto lg:max-w-[560px]"
+            >
+              <div
+                className="relative w-full overflow-visible"
+                style={{ aspectRatio: "500 / 620" }}
+              >
                 {/* soft purple bloom directly behind the cover */}
                 <div
                   aria-hidden
@@ -263,16 +275,17 @@ export default function LeitfadenPage() {
                   PDF · Gratis
                 </span>
 
-                {/* caption */}
-                <p className="absolute inset-x-0 -bottom-10 text-center font-body text-[13px] tracking-[0.2px] text-white/45">
-                  Gratis PDF-Vorschau
-                </p>
               </div>
+
+              {/* caption — normal flow below the mockup, never overlaps the next section */}
+              <p className="mt-5 text-center font-body text-[13px] tracking-[0.2px] text-white/45">
+                Gratis PDF-Vorschau
+              </p>
             </Reveal>
           </div>
         </section>
 
-        {/* ─────────── TRUST BAR — infinite marquee, same component as home ─────────── */}
+        {/* ─────────── TRUST BAR — infinite marquee, same component as home ───────────
         <section className="relative overflow-hidden border-y border-white/[0.05] bg-bg py-10 lg:py-12">
           <div className="mx-auto flex flex-col items-center gap-6 px-6 md:px-10">
             <p className="text-center font-label text-[13px] font-bold uppercase tracking-[2.4px] text-white/55 lg:text-[15px]">
@@ -280,14 +293,13 @@ export default function LeitfadenPage() {
             </p>
           </div>
           <div className="relative mt-6">
-            {/* left / right fade masks so the loop feels continuous */}
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-y-0 left-0 z-10 w-[134px] bg-gradient-to-r from-bg to-transparent"
+              className="pointer-events-none absolute inset-y-0 left-0 z-10 w-[56px] bg-gradient-to-r from-bg to-transparent sm:w-[96px] lg:w-[134px]"
             />
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-y-0 right-0 z-10 w-[134px] bg-gradient-to-l from-bg to-transparent"
+              className="pointer-events-none absolute inset-y-0 right-0 z-10 w-[56px] bg-gradient-to-l from-bg to-transparent sm:w-[96px] lg:w-[134px]"
             />
             <Marquee gap={88} className="max-w-full opacity-60">
               {TRUST_LOGOS.map((l) => (
@@ -295,7 +307,6 @@ export default function LeitfadenPage() {
                   key={l.src}
                   className="flex h-14 items-center justify-center px-3"
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={l.src}
                     alt={l.alt}
@@ -306,8 +317,8 @@ export default function LeitfadenPage() {
             </Marquee>
           </div>
         </section>
-
-        {/* ─────────── Section 1 · Was drin ist ─────────── */}
+ */}
+        {/* ─────────── Section 1 · Was drin ist ───────────
         <section className="bg-bg px-6 py-16 md:px-10 md:py-24 lg:px-[80px] lg:py-[120px]">
           <div className="mx-auto max-w-[1280px]">
             <Reveal className="flex flex-col items-center text-center">
@@ -358,8 +369,9 @@ export default function LeitfadenPage() {
             </p>
           </div>
         </section>
-
-        {/* ─────────── Section 2 · Einwandbehandlung ─────────── */}
+        
+*/}
+        {/* ─────────── Section 2 · Einwandbehandlung ─────────── 
         <section className="bg-bg px-6 py-16 md:px-10 md:py-24 lg:px-[80px] lg:py-[120px]">
           <div className="mx-auto max-w-[1280px]">
             <Reveal className="flex flex-col items-center text-center">
@@ -401,8 +413,8 @@ export default function LeitfadenPage() {
             </div>
           </div>
         </section>
-
-        {/* ─────────── Section 3 · Abschlusstechnik ─────────── */}
+*/}
+        {/* ─────────── Section 3 · Abschlusstechnik ─────────── 
         <section className="bg-bg px-6 py-16 md:px-10 md:py-24 lg:px-[80px] lg:py-[120px]">
           <div className="mx-auto max-w-[1280px]">
             <Reveal className="flex flex-col items-center text-center">
@@ -449,8 +461,8 @@ export default function LeitfadenPage() {
             </div>
           </div>
         </section>
-
-        {/* ─────────── Download / Form ─────────── */}
+*/}
+        {/* ─────────── Download / Form ─────────── 
         <section id="download" className="bg-bg px-6 py-16 md:px-10 md:py-24 lg:px-[80px] lg:py-[120px]">
           <div className="mx-auto grid max-w-[1200px] grid-cols-1 items-start gap-10 lg:grid-cols-2 lg:gap-[80px]">
             <Reveal className="flex flex-col gap-6">
@@ -493,8 +505,8 @@ export default function LeitfadenPage() {
             </Reveal>
           </div>
         </section>
-
-        {/* ─────────── About Selmir ─────────── */}
+*/}
+        {/* ─────────── About Selmir ─────────── 
         <section className="bg-bg px-6 py-16 md:px-10 md:py-24 lg:px-[80px] lg:py-[120px]">
           <div className="mx-auto flex max-w-[1200px] flex-col items-center justify-center gap-10 lg:flex-row lg:gap-[64px]">
             <Reveal className="w-full max-w-[380px] shrink-0">
@@ -533,8 +545,8 @@ export default function LeitfadenPage() {
             </Reveal>
           </div>
         </section>
-
-        {/* ─────────── Track record ─────────── */}
+*/}
+        {/* ─────────── Track record ─────────── 
         <section className="bg-bg px-6 py-16 md:px-10 md:py-20 lg:px-[80px] lg:py-[100px]">
           <div className="mx-auto max-w-[1200px]">
             <Reveal className="flex flex-col items-center text-center">
@@ -567,8 +579,8 @@ export default function LeitfadenPage() {
             </div>
           </div>
         </section>
-
-        {/* ─────────── FAQ ─────────── */}
+*/}
+        {/* ─────────── FAQ ─────────── 
         <section className="bg-bg px-6 py-16 md:px-10 md:py-24 lg:px-[80px] lg:py-[120px]">
           <div className="mx-auto max-w-[900px]">
             <Reveal className="flex flex-col items-center gap-4 text-center">
@@ -584,8 +596,8 @@ export default function LeitfadenPage() {
             </div>
           </div>
         </section>
-
-        {/* ─────────── Final CTA banner ─────────── */}
+*/}
+        {/* ─────────── Final CTA banner ─────────── 
         <section className="bg-bg px-6 pb-24 pt-4 md:px-10 md:pb-32 lg:px-[80px] lg:pb-[140px]">
           <div className="relative mx-auto max-w-[900px] overflow-hidden rounded-[24px] border border-purple-2/30 bg-[radial-gradient(120%_100%_at_50%_0%,rgba(116,84,243,0.30)_0%,rgba(10,8,18,0.85)_60%,rgba(10,8,18,0.95)_100%)] px-6 py-12 text-center md:px-10 md:py-16">
             <div className="mx-auto flex max-w-[640px] flex-col items-center gap-5">
@@ -609,6 +621,7 @@ export default function LeitfadenPage() {
             </div>
           </div>
         </section>
+*/}
       </main>
       <FooterSection landing />
     </>

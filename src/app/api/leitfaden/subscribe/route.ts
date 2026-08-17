@@ -150,9 +150,11 @@ async function loadPdfBase64(): Promise<string | null> {
 /** HubSpot: upsert by email, then add to the lead-magnet list. */
 async function pushHubspot({
   firstName,
+  phone,
   email,
 }: {
   firstName: string;
+  phone: string;
   email: string;
 }): Promise<{ ok: boolean; contactId?: string; reason?: string }> {
   if (!HS_TOKEN) return { ok: false, reason: "HUBSPOT_TOKEN not set" };
@@ -168,6 +170,7 @@ async function pushHubspot({
     hs_analytics_source_data_1: "Lead Magnet - Rollenspiel Handwerks VS Agentur",
   };
   if (firstName) properties.firstname = firstName;
+  if (phone) properties.phone = phone;
 
   // Try create; on 409 (already exists) fall through to patch by email.
   let contactId: string | undefined;
@@ -220,7 +223,7 @@ async function pushHubspot({
 }
 
 export async function POST(req: NextRequest) {
-  let body: { name?: string; email?: string };
+  let body: { name?: string; phone?: string; email?: string };
   try {
     body = await req.json();
   } catch {
@@ -230,6 +233,7 @@ export async function POST(req: NextRequest) {
     );
   }
   const firstName = (body.name ?? "").trim();
+  const phone = (body.phone ?? "").trim();
   const email = (body.email ?? "").trim().toLowerCase();
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json(
@@ -244,7 +248,7 @@ export async function POST(req: NextRequest) {
   const downloadUrl = `${origin.replace(/\/$/, "")}${LEITFADEN.pdfUrl}`;
 
   // 1. HubSpot — never blocks e-mail delivery.
-  const hs = await pushHubspot({ firstName, email }).catch((err) => ({
+  const hs = await pushHubspot({ firstName, phone, email }).catch((err) => ({
     ok: false as const,
     reason: (err as Error).message,
   }));

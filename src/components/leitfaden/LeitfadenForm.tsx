@@ -13,17 +13,22 @@ export default function LeitfadenForm({
   variant = "hero",
   submitLabel = "Leitfaden jetzt zuschicken",
   showFirstName = true,
+  showPhone = false,
   firstNamePlaceholder = "Max",
   emailPlaceholder = "name@firma.de",
+  phonePlaceholder = "+49 151 23456789",
 }: {
   /** hero = single-line, full-width; full = boxed card with header. */
   variant?: "hero" | "full";
   submitLabel?: string;
   showFirstName?: boolean;
+  showPhone?: boolean;
   firstNamePlaceholder?: string;
   emailPlaceholder?: string;
+  phonePlaceholder?: string;
 }) {
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "err">(
     "idle",
@@ -39,11 +44,12 @@ export default function LeitfadenForm({
       const res = await fetch("/api/leitfaden/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email }),
+        body: JSON.stringify({ name, phone, email }),
       }).then((r) => r.json());
       if (res?.ok) {
         setStatus("ok");
         setName("");
+        setPhone("");
         setEmail("");
       } else {
         setStatus("err");
@@ -87,6 +93,21 @@ export default function LeitfadenForm({
             onChange={(e) => setName(e.target.value)}
             placeholder={firstNamePlaceholder}
             autoComplete="given-name"
+          />
+        </div>
+      )}
+      {showPhone && (
+        <div className="flex flex-col gap-1.5">
+          <label className="font-body text-[13px] font-semibold text-white/75">
+            Telefon
+          </label>
+          <input
+            className={inputCls}
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder={phonePlaceholder}
+            autoComplete="tel"
           />
         </div>
       )}
