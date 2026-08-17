@@ -162,12 +162,14 @@ async function pushHubspot({
     Authorization: `Bearer ${HS_TOKEN}`,
     "Content-Type": "application/json",
   };
+  // NOTE: hs_analytics_source_* is read-only in HubSpot — writing to it
+  // rejects the entire create with a 400 (which silently killed every
+  // lead-magnet submission before this fix). The list membership itself
+  // (list 793) is now the source-tag: it's the same segment we filter on.
   const properties: Record<string, string> = {
     email,
     lifecyclestage: "lead",
     hs_lead_status: "NEW",
-    hs_analytics_source: "OFFLINE",
-    hs_analytics_source_data_1: "Lead Magnet - Rollenspiel Handwerks VS Agentur",
   };
   if (firstName) properties.firstname = firstName;
   if (phone) properties.phone = phone;
