@@ -1,17 +1,11 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import {
-  CalendarDays,
-  ChevronRight,
-  Download,
-  FileText,
-  Lock,
-  Play,
-} from "lucide-react";
+import { Download, FileText, Play } from "lucide-react";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button } from "@/components/ui/Button";
 import LeitfadenForm from "@/components/leitfaden/LeitfadenForm";
 import FooterSection from "@/components/sections/FooterSection";
+import { Marquee } from "@/components/ui/Marquee";
 import {
   ABOUT,
   CHAPTERS,
@@ -61,7 +55,7 @@ function LeitfadenNav() {
         </a>
         <Button
           href="#download"
-          icon={<CalendarDays className="size-5" />}
+          icon={<Download className="size-5" />}
           className="!h-11 !px-4 !text-[11px] xl:!h-12 xl:!px-6 xl:!text-[13px]"
         >
           Leitfaden sichern
@@ -278,28 +272,38 @@ export default function LeitfadenPage() {
           </div>
         </section>
 
-        {/* ─────────── TRUST BAR ─────────── */}
-        <section className="border-y border-white/[0.05] bg-bg px-6 py-8 md:px-10 lg:px-[80px] lg:py-10">
-          <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-6">
-            <p className="font-body text-[11px] font-semibold uppercase tracking-[2.5px] text-white/45">
+        {/* ─────────── TRUST BAR — infinite marquee, same component as home ─────────── */}
+        <section className="relative overflow-hidden border-y border-white/[0.05] bg-bg py-10 lg:py-12">
+          <div className="mx-auto flex flex-col items-center gap-6 px-6 md:px-10">
+            <p className="text-center font-label text-[13px] font-bold uppercase tracking-[2.4px] text-white/55 lg:text-[15px]">
               Selmir — bekannt aus
             </p>
-            <div className="flex w-full flex-wrap items-center justify-center gap-x-10 gap-y-6 lg:gap-x-14">
+          </div>
+          <div className="relative mt-6">
+            {/* left / right fade masks so the loop feels continuous */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0 left-0 z-10 w-[134px] bg-gradient-to-r from-bg to-transparent"
+            />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0 right-0 z-10 w-[134px] bg-gradient-to-l from-bg to-transparent"
+            />
+            <Marquee gap={88} className="max-w-full opacity-60">
               {TRUST_LOGOS.map((l) => (
                 <div
                   key={l.src}
-                  className="relative h-[36px] w-[110px] shrink-0 opacity-60 grayscale transition hover:opacity-100 hover:grayscale-0 lg:h-[42px] lg:w-[130px]"
+                  className="flex h-14 items-center justify-center px-3"
                 >
-                  <Image
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
                     src={l.src}
                     alt={l.alt}
-                    fill
-                    sizes="130px"
-                    className="object-contain"
+                    className="max-h-9 w-auto object-contain"
                   />
                 </div>
               ))}
-            </div>
+            </Marquee>
           </div>
         </section>
 
@@ -330,10 +334,10 @@ export default function LeitfadenPage() {
                     <span className="font-body text-[12px] font-semibold uppercase tracking-[2px] text-white/40">
                       {c.n}
                     </span>
-                    <div className="mx-auto grid size-[92px] place-items-center rounded-full border border-white/[0.08] bg-white/[0.04] shadow-[inset_0_0_40px_rgba(116,84,243,0.20)]">
+                    <div className="mx-auto grid size-[120px] place-items-center rounded-full border border-white/[0.08] bg-white/[0.04] shadow-[inset_0_0_50px_rgba(116,84,243,0.24)] lg:size-[140px]">
                       <Icon
-                        className="size-9 text-purple-2"
-                        strokeWidth={1.75}
+                        className="size-12 text-purple-2 lg:size-14"
+                        strokeWidth={1.6}
                       />
                     </div>
                     <div className="flex flex-col gap-3">
@@ -379,10 +383,10 @@ export default function LeitfadenPage() {
                     delay={i * 0.05}
                     className="flex h-full flex-col items-center gap-5 rounded-[20px] border border-white/[0.07] bg-white/[0.02] p-6 text-center lg:p-8"
                   >
-                    <div className="grid size-[76px] place-items-center rounded-full border border-white/[0.08] bg-white/[0.04] shadow-[inset_0_0_36px_rgba(116,84,243,0.20)]">
+                    <div className="grid size-[100px] place-items-center rounded-full border border-white/[0.08] bg-white/[0.04] shadow-[inset_0_0_44px_rgba(116,84,243,0.24)] lg:size-[112px]">
                       <Icon
-                        className="size-[30px] text-purple-2"
-                        strokeWidth={1.75}
+                        className="size-10 text-purple-2 lg:size-12"
+                        strokeWidth={1.6}
                       />
                     </div>
                     <h3 className="font-body text-[16px] font-semibold text-white lg:text-[18px]">
@@ -595,7 +599,11 @@ export default function LeitfadenPage() {
               <p className="max-w-[520px] font-body text-[14px] leading-[1.55] text-white/60 lg:text-[15px]">
                 {FINAL_CTA.body}
               </p>
-              <Button href="#download" icon={<ChevronRight className="size-5" />} className="mt-2">
+              <Button
+                href="#download"
+                icon={<Download className="size-5" />}
+                className="mt-2"
+              >
                 {FINAL_CTA.submitLabel}
               </Button>
             </div>

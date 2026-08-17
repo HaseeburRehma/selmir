@@ -167,22 +167,22 @@ export const CLOSES: {
 }[] = [
   {
     tag: "Technik 01",
-    // Selmir alone — client asked for solo shots on this section.
-    image: "/figma/about/selmir-stage.jpg",
+    // 3 truly distinct Selmir-alone shots — no repeats.
+    image: "/figma/about/selmir-stage.jpg", // dark suit, speaking
     title: "Zwei Termine statt Ja oder Nein",
     body:
       "„Möchtest du zum Datum A oder zum Datum B starten?“ Nie eine offene Ja/Nein-Frage stellen — immer zwei positive Optionen zur Auswahl geben.",
   },
   {
     tag: "Technik 02",
-    image: "/figma/lp/selmir-about.webp",
+    image: "/figma/about/hero-coffee.jpg", // moody coffee shot
     title: "Preis nennen, dann schweigen",
     body:
       "„Der schweigt, der kauft.“ Die Stille nach der Preisnennung aushalten — und sie nicht nervös mit Erklärungen oder Rabatten füllen.",
   },
   {
     tag: "Technik 03",
-    image: "/figma/about/selmir-portrait.jpg",
+    image: "/figma/about/selmir-portrait.jpg", // light suit on stage
     title: "Commitment statt Vertrag",
     body:
       "„Wir setzen keinen Vertrag auf, sondern ein Commitment zwischen dir und mir.“ Persönlicher, weniger bedrohlich, emotional bindender.",
