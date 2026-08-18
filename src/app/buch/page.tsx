@@ -94,20 +94,22 @@ export default function BuchPage() {
                 </Button>
               </div>
 
-              <div className="relative mx-auto w-full max-w-[380px] lg:mx-0">
+              {/* Full wrap image (back + spine + front) — landscape 1125x804,
+                  so the wrapper is wider than the previous portrait cover. */}
+              <div className="relative mx-auto w-full max-w-[560px] lg:mx-0 lg:max-w-[640px]">
                 <div
                   aria-hidden
                   className="pointer-events-none absolute -inset-10 rounded-full bg-purple-1/30 blur-[100px]"
                 />
                 <div className="relative overflow-hidden rounded-2xl border border-purple-2/40 shadow-[0_30px_80px_-20px_rgba(116,84,243,0.55)]">
                   <Image
-                    src="/figma/buch/buchcover-v2.jpg"
-                    alt="SEIN. TUN. HABEN. — Buchcover von Selmir Suljkanovic"
-                    width={344}
-                    height={522}
+                    src="/figma/buch/buchcover-v3.png"
+                    alt="SEIN. TUN. HABEN. — Buchumschlag von Selmir Suljkanovic"
+                    width={1125}
+                    height={804}
                     priority
-                    sizes="(max-width: 1024px) 70vw, 380px"
-                    className="h-auto w-full object-cover"
+                    sizes="(max-width: 1024px) 90vw, 640px"
+                    className="h-auto w-full"
                   />
                 </div>
               </div>
