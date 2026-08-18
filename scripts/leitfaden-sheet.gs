@@ -1,88 +1,112 @@
 /**
- * Google Apps Script — Leitfaden sheet webhook
- * ============================================
+ * Google Apps Script — unified sheet router
+ * ==========================================
  *
- * Deploy this bound to the Google Sheet you want to receive rows in.
- * The Next.js route src/app/api/leitfaden/subscribe/route.ts POSTs to
- * this script's /exec URL after each successful lead-magnet download.
+ * Deploy this bound to the "Meta Ads Leads" sheet.
+ * Every POST from the Next.js app is routed by payload:
  *
- * DEPLOYMENT (~2 minutes, done once):
+ *   • Potenzialanalyse / LP forms  → Sheet1  (the existing tab)
+ *       (payload has `company` and `decisionMaker`, no `email`)
+ *   • Leitfaden lead magnet        → Sheet2  (new tab)
+ *       (payload has `email`, or `formType: "leitfaden"`)
  *
- *   1. Open the target sheet
- *      → https://docs.google.com/spreadsheets/d/1jBsRniEI3_voHYr_u2dToupdRg4zwZupbNWOiXjDyto/
- *   2. Menu: Extensions → Apps Script
- *   3. Paste this whole file into `Code.gs` (replace whatever's there).
- *   4. Deploy → New deployment
- *      - Select type: Web app
- *      - Description: "Leitfaden intake"
- *      - Execute as: Me (design@tylotech.de)
- *      - Who has access: Anyone
- *      → Deploy
- *   5. Copy the Web app URL (ends in /exec) — paste it into Vercel env:
- *        LEITFADEN_SHEET_WEBHOOK_URL=<that url>
- *   6. Redeploy the Vercel project.
+ * Both tabs share the same 7-column header so downstream reports stay
+ * consistent:
  *
- * COLUMNS the script writes (row-1 header is created on first run):
- *   A  Zeitstempel        e.g. 2026-08-18 14:23:04
- *   B  Vorname            Max
- *   C  Telefon            '+491701234567    (leading ' keeps it as text)
- *   D  E-Mail             max@firma.de
- *   E  Landing Page       Leitfaden Rollenspiel
- *   F  Seiten-URL         https://selmir-suljkanovic.de/leitfaden
+ *   A Zeitstempel   B Name   C Telefonnummer   D Firma / Betrieb
+ *   E Inhaber / Entscheider   F Landingpage   G Seiten-URL
  *
- * Extra fields the payload sends (company, decisionMaker, submittedAt) are
- * ignored — they're only there so this same POST body works against the
- * legacy potenzialanalyse Apps Script as a fallback.
+ * Leitfaden rows do not have "Firma" or "Inhaber" data, so:
+ *   - Firma / Betrieb          → the E-Mail address (Leitfaden's key identifier)
+ *   - Inhaber / Entscheider    → left blank
+ *   - Landingpage              → "Leitfaden Rollenspiel" (marks the row's origin)
+ *
+ * DEPLOYMENT (~2 minutes):
+ *   1. Open the "Meta Ads Leads" sheet.
+ *   2. Extensions → Apps Script.
+ *   3. Replace Code.gs with this file.
+ *   4. If the existing deployment is at
+ *        https://script.google.com/macros/s/AKfycbzyCReYrLxFN95sNd5hmHtHl8Uk4XVpPzwR5g4CJgj6y673LtsKKFe2lzRQwaM_QtM2/exec
+ *      then: Deploy → Manage deployments → pencil-edit that deployment →
+ *      Version: "New version" → Deploy. The URL stays the same, so no
+ *      env-var update needed.
+ *   5. If you want a brand-new URL: Deploy → New deployment → Web app →
+ *      Execute as "Me", Access "Anyone" → Deploy. Paste the new /exec URL
+ *      into Vercel as GOOGLE_SHEET_WEBHOOK_URL and redeploy.
  */
 
-/** Sheet tab that holds the rows. Change here if you rename the tab. */
-var TAB_NAME = 'Leitfaden';
+// Tab names — change here if you rename the tabs in the sheet.
+var TAB_LP = 'Sheet1';        // potenzialanalyse / meta-ads / LP forms
+var TAB_LEITFADEN = 'Sheet2'; // leitfaden lead magnet
 
 var HEADERS = [
   'Zeitstempel',
-  'Vorname',
-  'Telefon',
-  'E-Mail',
-  'Landing Page',
+  'Name',
+  'Telefonnummer',
+  'Firma / Betrieb',
+  'Inhaber / Entscheider',
+  'Landingpage',
   'Seiten-URL',
 ];
 
-/** HTTP entry point — called by the Next.js /api/leitfaden/subscribe route. */
+/** HTTP entry point. */
 function doPost(e) {
   try {
-    var body = JSON.parse(e.postData.contents || '{}');
-    var sheet = getOrCreateTab_();
+    var body = JSON.parse((e.postData && e.postData.contents) || '{}');
+    var isLeitfaden =
+      body.formType === 'leitfaden' ||
+      body.landingPage === 'Leitfaden Rollenspiel' ||
+      (body.email && !body.company);
+
+    var tabName = isLeitfaden ? TAB_LEITFADEN : TAB_LP;
+    var sheet = getOrCreateTab_(tabName);
     ensureHeader_(sheet);
 
-    // Strip the leading ' the server prepended (keeps it as text in Sheets)
+    // Sheets treats a leading + as a formula, so the server prefixes the
+    // phone with ' — strip it back off for display.
     var phone = String(body.phone || '');
     if (phone.charAt(0) === "'") phone = phone.slice(1);
 
-    var row = [
-      new Date(),
-      body.name || '',
-      phone,
-      body.email || '',
-      body.landingPage || 'Leitfaden Rollenspiel',
-      body.pageUrl || '',
-    ];
-    sheet.appendRow(row);
+    // Column mapping depends on the source form.
+    var row;
+    if (isLeitfaden) {
+      row = [
+        new Date(),                                    // Zeitstempel
+        body.name || '',                               // Name
+        phone,                                         // Telefonnummer
+        body.email || '',                              // Firma / Betrieb  (E-Mail placeholder)
+        '',                                            // Inhaber / Entscheider
+        body.landingPage || 'Leitfaden Rollenspiel',   // Landingpage
+        body.pageUrl || '',                            // Seiten-URL
+      ];
+    } else {
+      row = [
+        new Date(),                    // Zeitstempel
+        body.name || '',               // Name
+        phone,                         // Telefonnummer
+        body.company || '',            // Firma / Betrieb
+        body.decisionMaker || '',      // Inhaber / Entscheider
+        body.landingPage || '',        // Landingpage
+        body.pageUrl || '',            // Seiten-URL
+      ];
+    }
 
-    return json_({ ok: true });
+    sheet.appendRow(row);
+    return json_({ ok: true, tab: tabName });
   } catch (err) {
-    return json_({ ok: false, reason: String(err && err.message || err) });
+    return json_({ ok: false, reason: String((err && err.message) || err) });
   }
 }
 
 /** Health-check the deployment: GET the /exec URL and expect {ok:true}. */
 function doGet() {
-  return json_({ ok: true, note: 'leitfaden-sheet webhook alive' });
+  return json_({ ok: true, note: 'leads-router webhook alive' });
 }
 
-function getOrCreateTab_() {
+function getOrCreateTab_(name) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var s = ss.getSheetByName(TAB_NAME);
-  if (!s) s = ss.insertSheet(TAB_NAME);
+  var s = ss.getSheetByName(name);
+  if (!s) s = ss.insertSheet(name);
   return s;
 }
 
@@ -91,13 +115,13 @@ function ensureHeader_(sheet) {
     sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
     sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight('bold');
     sheet.setFrozenRows(1);
-    // Reasonable column widths
     sheet.setColumnWidth(1, 160); // Zeitstempel
-    sheet.setColumnWidth(2, 140); // Vorname
-    sheet.setColumnWidth(3, 160); // Telefon
-    sheet.setColumnWidth(4, 240); // E-Mail
-    sheet.setColumnWidth(5, 200); // Landing Page
-    sheet.setColumnWidth(6, 320); // Seiten-URL
+    sheet.setColumnWidth(2, 160); // Name
+    sheet.setColumnWidth(3, 160); // Telefonnummer
+    sheet.setColumnWidth(4, 260); // Firma / Betrieb
+    sheet.setColumnWidth(5, 180); // Inhaber / Entscheider
+    sheet.setColumnWidth(6, 260); // Landingpage
+    sheet.setColumnWidth(7, 340); // Seiten-URL
   }
 }
 

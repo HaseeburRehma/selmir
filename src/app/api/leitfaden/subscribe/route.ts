@@ -244,9 +244,12 @@ async function pushHubspot({
 }
 
 /**
- * Append the lead to the shared Google Sheet via an Apps Script webhook.
- * Best-effort — sheet errors never block the PDF delivery. The '  prefix
- * on the phone keeps Sheets from turning +49… into a formula.
+ * Append the lead to the shared "Meta Ads Leads" spreadsheet via the
+ * Apps Script webhook. The router in scripts/leitfaden-sheet.gs sees the
+ * `formType: "leitfaden"` and writes the row to Sheet2 (potenzialanalyse
+ * submissions still land in Sheet1). Best-effort — sheet errors never
+ * block the PDF delivery. The '  prefix keeps Sheets from turning
+ * +49… into a formula.
  */
 async function appendToSheet(row: {
   name: string;
@@ -257,7 +260,7 @@ async function appendToSheet(row: {
 }): Promise<void> {
   if (!SHEET_URL) {
     console.warn(
-      "[leitfaden] no sheet webhook configured — set LEITFADEN_SHEET_WEBHOOK_URL",
+      "[leitfaden] no sheet webhook configured — set GOOGLE_SHEET_WEBHOOK_URL",
     );
     return;
   }
@@ -266,14 +269,12 @@ async function appendToSheet(row: {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        ...row,
+        formType: "leitfaden",
+        name: row.name,
         phone: row.phone ? `'${row.phone}` : "",
-        // The existing potenzialanalyse Apps Script expects these two
-        // fields too; passing them keeps the sheet append working even
-        // when we fall back to the shared webhook.
-        company: row.email,
-        decisionMaker: "Leitfaden",
-        submittedAt: new Date().toISOString(),
+        email: row.email,
+        landingPage: row.landingPage,
+        pageUrl: row.pageUrl,
       }),
     });
   } catch (err) {
