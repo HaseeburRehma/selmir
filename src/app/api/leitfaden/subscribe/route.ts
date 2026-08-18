@@ -3,31 +3,40 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { Resend } from "resend";
 import { LEITFADEN } from "@/lib/leitfaden";
-import { checkVerificationCode, normalizeE164 } from "@/lib/twilio";
-import { buildVerifiedCookie, readVerifiedPhone } from "@/lib/phoneVerify";
+import { verifyTurnstile } from "@/lib/turnstile";
+// SMS verification is intentionally OFF until the client provides Twilio
+// credentials. The helpers stay imported-then-unused would fail the
+// no-unused-vars rule, so we simply skip the import here. When SMS is
+// re-enabled, re-import { checkVerificationCode, normalizeE164 } from
+// "@/lib/twilio" and { buildVerifiedCookie, readVerifiedPhone } from
+// "@/lib/phoneVerify"; the previous logic is preserved in git history.
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
  * Lead-magnet subscription: /api/leitfaden/subscribe
- *   POST { name, email }
+ *   POST { name, phone, email, turnstileToken, pageUrl }
  *
- * Fires three things in one request (all failures are logged, none block
+ * Fires four things in one request (all failures are logged, none block
  * each other):
- *  1. Upsert the contact in HubSpot with email + firstname + a source tag,
- *     then add them to list 793
+ *  1. Cloudflare Turnstile bot check.
+ *  2. Upsert the contact in HubSpot with email + firstname + phone, then
+ *     add them to list 793
  *     ("Lead Magnet - Rollenspiel Handwerks VS Agentur").
- *  2. Send the subscriber a German confirmation e-mail from Resend with
+ *  3. Send the subscriber a German confirmation e-mail from Resend with
  *     the PDF attached (falls back to a signed download link if the PDF
- *     is missing from disk).
- *  3. CC the internal inboxes (info@sh-wachstum.de + info@tylotech.de) so
- *     the sales team sees every download.
+ *     is missing from disk). Internal team is BCCed.
+ *  4. Append the row to the shared Google Sheet via the Apps Script
+ *     webhook so the sales team sees every download in one place.
  *
  * Requires env: HUBSPOT_TOKEN, RESEND_API_KEY.
- * Optional env: LEITFADEN_LIST_ID (default: 793),
- *               NOTIFY_FROM (default from src/lib/notify.ts),
- *               NOTIFY_TO   (default from src/lib/notify.ts).
+ * Optional env:
+ *   LEITFADEN_LIST_ID          (default: 793)
+ *   NOTIFY_FROM                (default: Sales Mastery Days <noreply@sh-wachstum.de>)
+ *   NOTIFY_TO                  (default: info@sh-wachstum.de,info@tylotech.de)
+ *   LEITFADEN_SHEET_WEBHOOK_URL  Apps Script /exec URL for the leitfaden sheet
+ *   GOOGLE_SHEET_WEBHOOK_URL     Fallback (the existing potenzialanalyse sheet)
  */
 
 const HS_BASE = "https://api.hubapi.com";
@@ -41,6 +50,14 @@ const CC_TO = (process.env.NOTIFY_TO ?? "info@sh-wachstum.de,info@tylotech.de")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
+
+// Google Sheet Apps Script webhook. Prefer a leitfaden-specific one if
+// set; otherwise fall back to the shared potenzialanalyse webhook so the
+// row still lands somewhere the sales team can see it.
+const SHEET_URL =
+  process.env.LEITFADEN_SHEET_WEBHOOK_URL ??
+  process.env.GOOGLE_SHEET_WEBHOOK_URL ??
+  "";
 
 function esc(s: string): string {
   return s
@@ -226,12 +243,51 @@ async function pushHubspot({
   return { ok: true, contactId };
 }
 
+/**
+ * Append the lead to the shared Google Sheet via an Apps Script webhook.
+ * Best-effort — sheet errors never block the PDF delivery. The '  prefix
+ * on the phone keeps Sheets from turning +49… into a formula.
+ */
+async function appendToSheet(row: {
+  name: string;
+  phone: string;
+  email: string;
+  pageUrl: string;
+  landingPage: string;
+}): Promise<void> {
+  if (!SHEET_URL) {
+    console.warn(
+      "[leitfaden] no sheet webhook configured — set LEITFADEN_SHEET_WEBHOOK_URL",
+    );
+    return;
+  }
+  try {
+    await fetch(SHEET_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...row,
+        phone: row.phone ? `'${row.phone}` : "",
+        // The existing potenzialanalyse Apps Script expects these two
+        // fields too; passing them keeps the sheet append working even
+        // when we fall back to the shared webhook.
+        company: row.email,
+        decisionMaker: "Leitfaden",
+        submittedAt: new Date().toISOString(),
+      }),
+    });
+  } catch (err) {
+    console.error("[leitfaden] sheet append failed:", (err as Error).message);
+  }
+}
+
 export async function POST(req: NextRequest) {
   let body: {
     name?: string;
     phone?: string;
     email?: string;
-    code?: string;
+    turnstileToken?: string;
+    pageUrl?: string;
   };
   try {
     body = await req.json();
@@ -242,18 +298,18 @@ export async function POST(req: NextRequest) {
     );
   }
   const firstName = (body.name ?? "").trim();
-  const rawPhone = (body.phone ?? "").trim();
+  const phone = (body.phone ?? "").trim();
   const email = (body.email ?? "").trim().toLowerCase();
-  const code = (body.code ?? "").trim();
-  // All fields are required. Return the first offender so the client
-  // can show a targeted error.
+  const pageUrl = (body.pageUrl ?? "").trim();
+  // All three visible fields are required. Return the first offender so
+  // the client can show a targeted error.
   if (!firstName) {
     return NextResponse.json(
       { ok: false, reason: "name is required" },
       { status: 400 },
     );
   }
-  if (!rawPhone) {
+  if (!phone) {
     return NextResponse.json(
       { ok: false, reason: "phone is required" },
       { status: 400 },
@@ -265,41 +321,25 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
   }
-  // Phone verification path A — a valid `sh_pv` cookie from a prior
-  // successful verify lets us skip Twilio entirely. Server re-computes
-  // the HMAC on every request so a tampered cookie is rejected.
-  const cookieHeader = req.headers.get("cookie");
-  const cookiePhone = readVerifiedPhone(cookieHeader);
-  const normalizedFromInput = normalizeE164(rawPhone);
-  const canUseCookie =
-    !!cookiePhone &&
-    !!normalizedFromInput &&
-    cookiePhone === normalizedFromInput;
 
-  let phone: string;
-  if (canUseCookie) {
-    phone = cookiePhone;
-  } else {
-    // Phone verification path B — fresh Twilio Verify check.
-    if (!code) {
-      return NextResponse.json(
-        {
-          ok: false,
-          reason:
-            "Bitte gib den SMS-Code ein, den wir an deine Nummer geschickt haben.",
-        },
-        { status: 400 },
-      );
-    }
-    const twilio = await checkVerificationCode(rawPhone, code);
-    if (!twilio.ok) {
-      console.warn("[leitfaden] twilio check failed:", twilio.reason);
-      return NextResponse.json(
-        { ok: false, reason: twilio.reason },
-        { status: 400 },
-      );
-    }
-    phone = twilio.phone;
+  // Cloudflare Turnstile — the sole bot check while SMS verification is
+  // off. Runs BEFORE HubSpot / Resend / Sheets so bots don't burn a
+  // HubSpot contact + a Resend email + a sheet row per hit.
+  const ip =
+    req.headers.get("cf-connecting-ip") ??
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    null;
+  const ts = await verifyTurnstile(body.turnstileToken, ip);
+  if (!ts.success) {
+    console.warn("[leitfaden] turnstile failed:", ts.reason, ts.errors);
+    return NextResponse.json(
+      {
+        ok: false,
+        reason:
+          "Sicherheitsprüfung fehlgeschlagen. Bitte lade die Seite neu und versuche es erneut.",
+      },
+      { status: 400 },
+    );
   }
 
   const origin =
@@ -314,7 +354,16 @@ export async function POST(req: NextRequest) {
   }));
   if (!hs.ok) console.warn("[leitfaden] hubspot failed:", hs.reason);
 
-  // 2. Send the PDF e-mail via Resend.
+  // 2. Google Sheet — fire-and-forget; never blocks anything.
+  void appendToSheet({
+    name: firstName,
+    phone,
+    email,
+    pageUrl,
+    landingPage: "Leitfaden Rollenspiel",
+  });
+
+  // 3. Send the PDF e-mail via Resend.
   if (!RESEND_KEY) {
     return NextResponse.json(
       { ok: false, reason: "RESEND_API_KEY not set" },
@@ -344,23 +393,12 @@ export async function POST(req: NextRequest) {
         : undefined,
     });
     if (error) throw new Error(error.message ?? JSON.stringify(error));
-
-    // Issue the "verified phone" cookie so the same browser skips the SMS
-    // step on future visits. This runs whether we used the fresh Twilio
-    // check or the existing cookie — refreshing the expiry either way.
-    const cookie = buildVerifiedCookie(phone);
-    const res = NextResponse.json({
+    return NextResponse.json({
       ok: true,
       messageId: data?.id ?? null,
       hubspotContactId: hs.ok ? hs.contactId : null,
       attached: !!pdfBase64,
-      // Client uses this hint to remember which phone it verified so the
-      // form can pre-fill on return visits. Non-sensitive — same value
-      // the user just typed.
-      verifiedPhone: phone,
     });
-    if (cookie) res.headers.set("Set-Cookie", cookie.header);
-    return res;
   } catch (err) {
     console.error("[leitfaden] resend error:", (err as Error).message);
     return NextResponse.json(
