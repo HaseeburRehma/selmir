@@ -80,6 +80,16 @@ export default function LeitfadenForm({
   const [normalizedPhone, setNormalizedPhone] = useState<string | null>(null);
   const [resendIn, setResendIn] = useState(0); // seconds until user may re-send
 
+  /**
+   * "Verified phone" cookie. When the server issued `sh_pv` on a previous
+   * successful subscribe, we skip the SMS step entirely — matching the
+   * behaviour dirkkreuter.com uses for returning visitors. The cookie
+   * body is `<base64url(phone)>.<expiresMs>.<hmacSignature>`; we decode
+   * only for UX (the server re-verifies the HMAC on every submit).
+   */
+  const cachedPhone = useReadVerifiedPhoneCookie();
+  const [skipSms, setSkipSms] = useState(false);
+
   // Cloudflare Turnstile bot-check token. Used only on the send-code call;
   // the subscribe call is protected by the Twilio approval instead.
   const [tsToken, setTsToken] = useState<string | null>(null);
@@ -127,6 +137,16 @@ export default function LeitfadenForm({
     const t = setTimeout(() => setResendIn((s) => s - 1), 1000);
     return () => clearTimeout(t);
   }, [resendIn]);
+
+  // Pre-populate the phone field on return visits and enable the skip
+  // path so the SMS button + code input never render.
+  useEffect(() => {
+    if (cachedPhone && !phone) {
+      setPhone(cachedPhone);
+      setNormalizedPhone(cachedPhone);
+      setSkipSms(true);
+    }
+  }, [cachedPhone, phone]);
 
   function resetTurnstile() {
     if (tsWidgetId.current && window.turnstile) {
@@ -183,18 +203,24 @@ export default function LeitfadenForm({
     e.preventDefault();
     if (status === "loading") return;
     if (!email) return;
-    if (!codeSent) {
-      setStatus("err");
-      setMsg(
-        "Bitte fordere zuerst den SMS-Code an und trage ihn dann hier ein.",
-      );
-      return;
+
+    // Skip path: returning visitor with a still-valid `sh_pv` cookie for
+    // this phone. Server re-verifies the HMAC before honouring it.
+    if (!skipSms) {
+      if (!codeSent) {
+        setStatus("err");
+        setMsg(
+          "Bitte fordere zuerst den SMS-Code an und trage ihn dann hier ein.",
+        );
+        return;
+      }
+      if (!/^\d{4,10}$/.test(code)) {
+        setStatus("err");
+        setMsg("Bitte gib den 6-stelligen SMS-Code ein.");
+        return;
+      }
     }
-    if (!/^\d{4,10}$/.test(code)) {
-      setStatus("err");
-      setMsg("Bitte gib den 6-stelligen SMS-Code ein.");
-      return;
-    }
+
     setStatus("loading");
     setMsg(null);
     try {
@@ -205,7 +231,8 @@ export default function LeitfadenForm({
           name,
           phone: normalizedPhone ?? phone,
           email,
-          code,
+          // Server ignores `code` when the cookie path succeeds.
+          code: skipSms ? undefined : code,
         }),
       }).then((r) => r.json());
       if (res?.ok) {
@@ -217,6 +244,9 @@ export default function LeitfadenForm({
       } else {
         setStatus("err");
         setMsg(res?.reason ?? "Etwas ist schiefgelaufen.");
+        // Cookie may have expired or been tampered with — drop the skip
+        // and force the user through the SMS flow again.
+        if (skipSms) setSkipSms(false);
       }
     } catch {
       setStatus("err");
@@ -275,37 +305,47 @@ export default function LeitfadenForm({
           <label className="font-body text-[13px] font-semibold text-white/75">
             Telefon <span className="text-purple-2">*</span>
           </label>
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div className={skipSms ? "" : "flex flex-col gap-2 sm:flex-row"}>
             <input
-              className={inputCls + " sm:flex-1"}
+              className={inputCls + (skipSms ? "" : " sm:flex-1")}
               type="tel"
               required
               value={phone}
               onChange={(e) => {
                 setPhone(e.target.value);
-                // Editing the phone invalidates any previously issued code.
+                // Editing the phone invalidates any previously issued code
+                // or verified-cookie skip.
                 if (codeSent) {
                   setCodeSent(false);
                   setCode("");
                   setNormalizedPhone(null);
                 }
+                if (skipSms) setSkipSms(false);
               }}
               placeholder={phonePlaceholder}
               autoComplete="tel"
               pattern="[0-9+\s\-()]{6,}"
               title="Bitte gib eine gültige Telefonnummer ein."
             />
-            <button
-              type="button"
-              onClick={onSendCode}
-              disabled={!canSendCode}
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-[10px] border border-purple-2/40 bg-purple-2/[0.14] px-4 font-body text-[13.5px] font-semibold text-white transition-colors hover:bg-purple-2/[0.22] disabled:pointer-events-none disabled:opacity-50 sm:h-auto"
-            >
-              <MessageSquare className="size-4" />
-              {sendCodeLabel}
-            </button>
+            {!skipSms && (
+              <button
+                type="button"
+                onClick={onSendCode}
+                disabled={!canSendCode}
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-[10px] border border-purple-2/40 bg-purple-2/[0.14] px-4 font-body text-[13.5px] font-semibold text-white transition-colors hover:bg-purple-2/[0.22] disabled:pointer-events-none disabled:opacity-50 sm:h-auto"
+              >
+                <MessageSquare className="size-4" />
+                {sendCodeLabel}
+              </button>
+            )}
           </div>
-          {codeSent && normalizedPhone && (
+          {skipSms && (
+            <span className="inline-flex items-center gap-1.5 font-body text-[12px] text-purple-2">
+              <ShieldCheck className="size-3.5" />
+              Diese Nummer ist bereits verifiziert — keine SMS nötig.
+            </span>
+          )}
+          {codeSent && !skipSms && normalizedPhone && (
             <span className="font-body text-[12px] text-white/50">
               Code gesendet an{" "}
               <span className="font-semibold text-white/75">
@@ -330,7 +370,7 @@ export default function LeitfadenForm({
           autoComplete="email"
         />
       </div>
-      {codeSent && (
+      {codeSent && !skipSms && (
         <div className="flex flex-col gap-1.5">
           <label className="font-body text-[13px] font-semibold text-white/75">
             SMS-Code <span className="text-purple-2">*</span>
@@ -359,7 +399,7 @@ export default function LeitfadenForm({
   const Submit = (
     <button
       type="submit"
-      disabled={status === "loading" || !codeSent}
+      disabled={status === "loading" || (!codeSent && !skipSms)}
       className="btn-gradient group flex h-14 w-full items-center justify-center gap-2 rounded-[10px] px-5 text-center text-black transition-transform duration-300 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-70"
     >
       <span className="font-body text-[15px] font-bold uppercase tracking-[0.6px] lg:text-[16px]">
@@ -391,7 +431,7 @@ export default function LeitfadenForm({
     return (
       <form onSubmit={onSubmit} className="flex w-full flex-col gap-3">
         {Fields}
-        {TurnstileWidget}
+        {!skipSms && TurnstileWidget}
         {Submit}
         {status === "err" && (
           <p className="font-body text-[13px] text-red-300">{msg}</p>
@@ -417,7 +457,7 @@ export default function LeitfadenForm({
         </p>
       </div>
       {Fields}
-      {TurnstileWidget}
+      {!skipSms && TurnstileWidget}
       {Submit}
       {status === "err" && (
         <p className="font-body text-[13px] text-red-300">{msg}</p>
@@ -427,4 +467,36 @@ export default function LeitfadenForm({
       </p>
     </form>
   );
+}
+
+/**
+ * Read the `sh_pv` cookie the server sets on a successful verify, decode
+ * just the phone hint, and expose it to the form. The server rechecks
+ * the HMAC on every submit — this hook is purely for UX.
+ */
+function useReadVerifiedPhoneCookie(): string | null {
+  const [phone, setPhone] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const raw = document.cookie
+      .split(/;\s*/)
+      .find((c) => c.startsWith("sh_pv="));
+    if (!raw) return;
+    const value = raw.slice("sh_pv=".length);
+    const parts = value.split(".");
+    if (parts.length !== 3) return;
+    const [phoneB64, expiresStr] = parts;
+    const expires = Number(expiresStr);
+    if (!Number.isFinite(expires) || expires < Date.now()) return;
+    try {
+      const pad = phoneB64.length % 4 === 0 ? "" : "=".repeat(4 - (phoneB64.length % 4));
+      const decoded = atob(
+        (phoneB64 + pad).replace(/-/g, "+").replace(/_/g, "/"),
+      );
+      setPhone(decoded);
+    } catch {
+      /* ignore malformed cookie */
+    }
+  }, []);
+  return phone;
 }

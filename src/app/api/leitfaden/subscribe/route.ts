@@ -3,7 +3,8 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { Resend } from "resend";
 import { LEITFADEN } from "@/lib/leitfaden";
-import { checkVerificationCode } from "@/lib/twilio";
+import { checkVerificationCode, normalizeE164 } from "@/lib/twilio";
+import { buildVerifiedCookie, readVerifiedPhone } from "@/lib/phoneVerify";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -264,29 +265,42 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
   }
-  if (!code) {
-    return NextResponse.json(
-      {
-        ok: false,
-        reason:
-          "Bitte gib den SMS-Code ein, den wir an deine Nummer geschickt haben.",
-      },
-      { status: 400 },
-    );
-  }
+  // Phone verification path A — a valid `sh_pv` cookie from a prior
+  // successful verify lets us skip Twilio entirely. Server re-computes
+  // the HMAC on every request so a tampered cookie is rejected.
+  const cookieHeader = req.headers.get("cookie");
+  const cookiePhone = readVerifiedPhone(cookieHeader);
+  const normalizedFromInput = normalizeE164(rawPhone);
+  const canUseCookie =
+    !!cookiePhone &&
+    !!normalizedFromInput &&
+    cookiePhone === normalizedFromInput;
 
-  // Twilio Verify — the sole humanness / phone-owner check. Turnstile ran
-  // on the /send-code call that produced this code; approving the code
-  // here proves the user still owns the phone.
-  const twilio = await checkVerificationCode(rawPhone, code);
-  if (!twilio.ok) {
-    console.warn("[leitfaden] twilio check failed:", twilio.reason);
-    return NextResponse.json(
-      { ok: false, reason: twilio.reason },
-      { status: 400 },
-    );
+  let phone: string;
+  if (canUseCookie) {
+    phone = cookiePhone;
+  } else {
+    // Phone verification path B — fresh Twilio Verify check.
+    if (!code) {
+      return NextResponse.json(
+        {
+          ok: false,
+          reason:
+            "Bitte gib den SMS-Code ein, den wir an deine Nummer geschickt haben.",
+        },
+        { status: 400 },
+      );
+    }
+    const twilio = await checkVerificationCode(rawPhone, code);
+    if (!twilio.ok) {
+      console.warn("[leitfaden] twilio check failed:", twilio.reason);
+      return NextResponse.json(
+        { ok: false, reason: twilio.reason },
+        { status: 400 },
+      );
+    }
+    phone = twilio.phone;
   }
-  const phone = twilio.phone; // Twilio-normalized E.164
 
   const origin =
     req.headers.get("origin") ??
@@ -330,12 +344,23 @@ export async function POST(req: NextRequest) {
         : undefined,
     });
     if (error) throw new Error(error.message ?? JSON.stringify(error));
-    return NextResponse.json({
+
+    // Issue the "verified phone" cookie so the same browser skips the SMS
+    // step on future visits. This runs whether we used the fresh Twilio
+    // check or the existing cookie — refreshing the expiry either way.
+    const cookie = buildVerifiedCookie(phone);
+    const res = NextResponse.json({
       ok: true,
       messageId: data?.id ?? null,
       hubspotContactId: hs.ok ? hs.contactId : null,
       attached: !!pdfBase64,
+      // Client uses this hint to remember which phone it verified so the
+      // form can pre-fill on return visits. Non-sensitive — same value
+      // the user just typed.
+      verifiedPhone: phone,
     });
+    if (cookie) res.headers.set("Set-Cookie", cookie.header);
+    return res;
   } catch (err) {
     console.error("[leitfaden] resend error:", (err as Error).message);
     return NextResponse.json(

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyTurnstile } from "@/lib/turnstile";
-import { sendVerificationCode } from "@/lib/twilio";
+import { lookupPhone, sendVerificationCode } from "@/lib/twilio";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -54,7 +54,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const result = await sendVerificationCode(phone);
+  // HLR / carrier lookup — kills bots that don't have a real mobile before
+  // we spend ~5¢ on an SMS. Twilio Lookup costs ~0.5¢ per call, so this
+  // pays for itself the first bot it stops.
+  const lookup = await lookupPhone(phone);
+  if (!lookup.ok) {
+    return NextResponse.json(
+      { ok: false, reason: lookup.reason },
+      { status: 400 },
+    );
+  }
+
+  const result = await sendVerificationCode(lookup.phone);
   if (!result.ok) {
     return NextResponse.json(
       { ok: false, reason: result.reason, retryAfter: result.retryAfter },

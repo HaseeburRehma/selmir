@@ -107,6 +107,68 @@ export async function sendVerificationCode(
   }
 }
 
+/**
+ * Twilio Lookup v2 — HLR check to confirm the number is a real, active
+ * mobile before we spend an SMS on it. Adds `line_type_intelligence` so
+ * we can reject landline / voip / non-existent numbers up-front.
+ *
+ * https://www.twilio.com/docs/lookup/v2-api/line-type-intelligence
+ */
+export type LookupResult =
+  | { ok: true; phone: string; lineType: string }
+  | { ok: false; reason: string };
+
+export async function lookupPhone(rawPhone: string): Promise<LookupResult> {
+  if (!ACCOUNT_SID || !AUTH_TOKEN) {
+    return { ok: false, reason: "Twilio credentials are missing." };
+  }
+  const phone = normalizeE164(rawPhone);
+  if (!phone) return { ok: false, reason: "Ungültige Telefonnummer." };
+  const url = `https://lookups.twilio.com/v2/PhoneNumbers/${encodeURIComponent(
+    phone,
+  )}?Fields=line_type_intelligence`;
+  try {
+    const res = await fetch(url, {
+      headers: { Authorization: authHeader() },
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      // 404 = number does not exist on any carrier
+      if (res.status === 404) {
+        return {
+          ok: false,
+          reason:
+            "Diese Telefonnummer scheint nicht zu existieren. Bitte prüfe die Eingabe.",
+        };
+      }
+      console.warn("[twilio] lookup failed:", res.status, text);
+      return { ok: false, reason: "Nummernprüfung fehlgeschlagen." };
+    }
+    const json = (await res.json()) as {
+      line_type_intelligence?: { type?: string };
+      valid?: boolean;
+    };
+    const lineType = json.line_type_intelligence?.type ?? "unknown";
+    // Accept mobile lines; reject anything obviously not able to receive SMS.
+    const smsCapable =
+      lineType === "mobile" ||
+      lineType === "nonFixedVoip" ||
+      lineType === "personal" ||
+      lineType === "unknown"; // some carriers don't report; be lenient
+    if (!smsCapable) {
+      return {
+        ok: false,
+        reason:
+          "Bitte gib eine Mobilnummer ein — an diese Nummer können wir keinen SMS-Code senden.",
+      };
+    }
+    return { ok: true, phone, lineType };
+  } catch (err) {
+    console.error("[twilio] lookup network error:", (err as Error).message);
+    return { ok: false, reason: "Netzwerkfehler bei der Nummernprüfung." };
+  }
+}
+
 /** Verify a code the user typed. Returns `ok: true` iff Twilio replies `approved`. */
 export async function checkVerificationCode(
   rawPhone: string,
