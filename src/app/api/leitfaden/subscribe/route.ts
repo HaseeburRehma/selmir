@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { Resend } from "resend";
 import { LEITFADEN } from "@/lib/leitfaden";
-import { verifyTurnstile } from "@/lib/turnstile";
+import { checkVerificationCode } from "@/lib/twilio";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -230,7 +230,7 @@ export async function POST(req: NextRequest) {
     name?: string;
     phone?: string;
     email?: string;
-    turnstileToken?: string;
+    code?: string;
   };
   try {
     body = await req.json();
@@ -241,9 +241,10 @@ export async function POST(req: NextRequest) {
     );
   }
   const firstName = (body.name ?? "").trim();
-  const phone = (body.phone ?? "").trim();
+  const rawPhone = (body.phone ?? "").trim();
   const email = (body.email ?? "").trim().toLowerCase();
-  // All three fields are required. Return the first offender so the client
+  const code = (body.code ?? "").trim();
+  // All fields are required. Return the first offender so the client
   // can show a targeted error.
   if (!firstName) {
     return NextResponse.json(
@@ -251,7 +252,7 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
   }
-  if (!phone) {
+  if (!rawPhone) {
     return NextResponse.json(
       { ok: false, reason: "phone is required" },
       { status: 400 },
@@ -263,27 +264,29 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
   }
-
-  // Cloudflare Turnstile — bot check. Runs BEFORE any HubSpot or Resend
-  // work so we never spend an API call on obvious spam. Cloudflare's own
-  // "always-pass" test key makes this a no-op in dev; set real keys in
-  // Vercel to enable real bot protection.
-  const ip =
-    req.headers.get("cf-connecting-ip") ??
-    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
-    null;
-  const ts = await verifyTurnstile(body.turnstileToken, ip);
-  if (!ts.success) {
-    console.warn("[leitfaden] turnstile failed:", ts.reason, ts.errors);
+  if (!code) {
     return NextResponse.json(
       {
         ok: false,
         reason:
-          "Sicherheitsprüfung fehlgeschlagen. Bitte lade die Seite neu und versuche es erneut.",
+          "Bitte gib den SMS-Code ein, den wir an deine Nummer geschickt haben.",
       },
       { status: 400 },
     );
   }
+
+  // Twilio Verify — the sole humanness / phone-owner check. Turnstile ran
+  // on the /send-code call that produced this code; approving the code
+  // here proves the user still owns the phone.
+  const twilio = await checkVerificationCode(rawPhone, code);
+  if (!twilio.ok) {
+    console.warn("[leitfaden] twilio check failed:", twilio.reason);
+    return NextResponse.json(
+      { ok: false, reason: twilio.reason },
+      { status: 400 },
+    );
+  }
+  const phone = twilio.phone; // Twilio-normalized E.164
 
   const origin =
     req.headers.get("origin") ??

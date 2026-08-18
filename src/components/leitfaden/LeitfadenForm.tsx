@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
-import { Check, Download } from "lucide-react";
+import { Check, Download, MessageSquare, ShieldCheck } from "lucide-react";
 import { TURNSTILE_SITE_KEY } from "@/lib/turnstile";
 
 /**
@@ -38,9 +38,14 @@ declare global {
 
 /**
  * Shared subscribe form for the /leitfaden page.
- * POSTs { name, email } to /api/leitfaden/subscribe which:
- *   – upserts the contact in HubSpot into list 793,
- *   – sends the PDF via Resend to the submitter.
+ *
+ * Two-step SMS verification flow:
+ *   1. User fills name + phone + email → clicks "SMS-Code senden"
+ *        → POST /api/leitfaden/phone/send-code {phone, turnstileToken}
+ *        → Twilio Verify sends a 6-digit code
+ *   2. User types the 6-digit code → clicks "Leitfaden sichern"
+ *        → POST /api/leitfaden/subscribe {name, phone, email, code}
+ *        → Twilio approves the code, HubSpot upserts, Resend delivers the PDF.
  */
 export default function LeitfadenForm({
   variant = "hero",
@@ -63,14 +68,20 @@ export default function LeitfadenForm({
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "err">(
     "idle",
   );
   const [msg, setMsg] = useState<string | null>(null);
 
-  // Cloudflare Turnstile bot-check token. The widget writes here when it
-  // solves; we resend the same token to the API and it re-verifies with
-  // Cloudflare's siteverify endpoint.
+  // SMS-verify state
+  const [sendingCode, setSendingCode] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
+  const [normalizedPhone, setNormalizedPhone] = useState<string | null>(null);
+  const [resendIn, setResendIn] = useState(0); // seconds until user may re-send
+
+  // Cloudflare Turnstile bot-check token. Used only on the send-code call;
+  // the subscribe call is protected by the Twilio approval instead.
   const [tsToken, setTsToken] = useState<string | null>(null);
   const tsContainer = useRef<HTMLDivElement | null>(null);
   const tsWidgetId = useRef<string | null>(null);
@@ -109,14 +120,79 @@ export default function LeitfadenForm({
     };
   }, []);
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email || status === "loading") return;
+  // Resend cooldown: after send-code we lock the button for 60s so a user
+  // can't spam Twilio and burn our budget.
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const t = setTimeout(() => setResendIn((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendIn]);
+
+  function resetTurnstile() {
+    if (tsWidgetId.current && window.turnstile) {
+      try {
+        window.turnstile.reset(tsWidgetId.current);
+      } catch {
+        /* noop */
+      }
+    }
+    setTsToken(null);
+  }
+
+  async function onSendCode() {
+    if (sendingCode) return;
+    if (!phone) {
+      setStatus("err");
+      setMsg("Bitte gib deine Telefonnummer ein.");
+      return;
+    }
     if (!tsToken) {
       setStatus("err");
+      setMsg("Bitte warte einen Moment — die Sicherheitsprüfung läuft noch.");
+      return;
+    }
+    setSendingCode(true);
+    setStatus("idle");
+    setMsg(null);
+    try {
+      const res = await fetch("/api/leitfaden/phone/send-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, turnstileToken: tsToken }),
+      }).then((r) => r.json());
+      if (res?.ok) {
+        setCodeSent(true);
+        setNormalizedPhone(res.phone ?? phone);
+        setResendIn(60);
+        setMsg(null);
+      } else {
+        setStatus("err");
+        setMsg(res?.reason ?? "SMS konnte nicht gesendet werden.");
+        // Reset turnstile so the next attempt has a fresh token.
+        resetTurnstile();
+      }
+    } catch {
+      setStatus("err");
+      setMsg("Netzwerkfehler. Bitte versuche es später erneut.");
+    } finally {
+      setSendingCode(false);
+    }
+  }
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (status === "loading") return;
+    if (!email) return;
+    if (!codeSent) {
+      setStatus("err");
       setMsg(
-        "Bitte warte einen Moment — die Sicherheitsprüfung läuft noch.",
+        "Bitte fordere zuerst den SMS-Code an und trage ihn dann hier ein.",
       );
+      return;
+    }
+    if (!/^\d{4,10}$/.test(code)) {
+      setStatus("err");
+      setMsg("Bitte gib den 6-stelligen SMS-Code ein.");
       return;
     }
     setStatus("loading");
@@ -127,9 +203,9 @@ export default function LeitfadenForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
-          phone,
+          phone: normalizedPhone ?? phone,
           email,
-          turnstileToken: tsToken,
+          code,
         }),
       }).then((r) => r.json());
       if (res?.ok) {
@@ -137,18 +213,10 @@ export default function LeitfadenForm({
         setName("");
         setPhone("");
         setEmail("");
+        setCode("");
       } else {
         setStatus("err");
         setMsg(res?.reason ?? "Etwas ist schiefgelaufen.");
-        // Ask Cloudflare to re-issue a fresh token so the next submit works.
-        if (tsWidgetId.current && window.turnstile) {
-          try {
-            window.turnstile.reset(tsWidgetId.current);
-          } catch {
-            /* noop */
-          }
-        }
-        setTsToken(null);
       }
     } catch {
       setStatus("err");
@@ -174,6 +242,16 @@ export default function LeitfadenForm({
     );
   }
 
+  const sendCodeLabel = sendingCode
+    ? "Wird gesendet…"
+    : codeSent
+      ? resendIn > 0
+        ? `Erneut senden in ${resendIn}s`
+        : "Code erneut senden"
+      : "SMS-Code senden";
+
+  const canSendCode = !!phone && !!tsToken && !sendingCode && resendIn === 0;
+
   const Fields = (
     <>
       {showFirstName && (
@@ -197,17 +275,45 @@ export default function LeitfadenForm({
           <label className="font-body text-[13px] font-semibold text-white/75">
             Telefon <span className="text-purple-2">*</span>
           </label>
-          <input
-            className={inputCls}
-            type="tel"
-            required
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder={phonePlaceholder}
-            autoComplete="tel"
-            pattern="[0-9+\s\-()]{6,}"
-            title="Bitte gib eine gültige Telefonnummer ein."
-          />
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              className={inputCls + " sm:flex-1"}
+              type="tel"
+              required
+              value={phone}
+              onChange={(e) => {
+                setPhone(e.target.value);
+                // Editing the phone invalidates any previously issued code.
+                if (codeSent) {
+                  setCodeSent(false);
+                  setCode("");
+                  setNormalizedPhone(null);
+                }
+              }}
+              placeholder={phonePlaceholder}
+              autoComplete="tel"
+              pattern="[0-9+\s\-()]{6,}"
+              title="Bitte gib eine gültige Telefonnummer ein."
+            />
+            <button
+              type="button"
+              onClick={onSendCode}
+              disabled={!canSendCode}
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-[10px] border border-purple-2/40 bg-purple-2/[0.14] px-4 font-body text-[13.5px] font-semibold text-white transition-colors hover:bg-purple-2/[0.22] disabled:pointer-events-none disabled:opacity-50 sm:h-auto"
+            >
+              <MessageSquare className="size-4" />
+              {sendCodeLabel}
+            </button>
+          </div>
+          {codeSent && normalizedPhone && (
+            <span className="font-body text-[12px] text-white/50">
+              Code gesendet an{" "}
+              <span className="font-semibold text-white/75">
+                {normalizedPhone}
+              </span>
+              . Trag ihn unten ein.
+            </span>
+          )}
         </div>
       )}
       <div className="flex flex-col gap-1.5">
@@ -224,13 +330,36 @@ export default function LeitfadenForm({
           autoComplete="email"
         />
       </div>
+      {codeSent && (
+        <div className="flex flex-col gap-1.5">
+          <label className="font-body text-[13px] font-semibold text-white/75">
+            SMS-Code <span className="text-purple-2">*</span>
+          </label>
+          <div className="relative">
+            <ShieldCheck className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-purple-2/80" />
+            <input
+              className={inputCls + " pl-10 tracking-[0.4em]"}
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              required
+              value={code}
+              onChange={(e) =>
+                setCode(e.target.value.replace(/\D/g, "").slice(0, 10))
+              }
+              placeholder="123456"
+              maxLength={10}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 
   const Submit = (
     <button
       type="submit"
-      disabled={status === "loading"}
+      disabled={status === "loading" || !codeSent}
       className="btn-gradient group flex h-14 w-full items-center justify-center gap-2 rounded-[10px] px-5 text-center text-black transition-transform duration-300 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-70"
     >
       <span className="font-body text-[15px] font-bold uppercase tracking-[0.6px] lg:text-[16px]">
