@@ -30,7 +30,7 @@ export default function BuchPage() {
             </div>
           </div>
 
-          <div className="container-page relative z-10 grid grid-cols-1 items-center gap-14 py-14 md:py-20 lg:grid-cols-[minmax(0,560px)_minmax(0,420px)] lg:justify-between lg:gap-10">
+          <div className="container-page relative z-10 grid grid-cols-1 items-center gap-14 py-14 md:py-20 lg:grid-cols-[minmax(0,500px)_minmax(0,720px)] lg:justify-between lg:gap-12">
             {/* LEFT: title + book facts */}
             <Reveal className="flex flex-col gap-10">
               <div className="flex flex-col gap-6">
@@ -96,7 +96,7 @@ export default function BuchPage() {
 
               {/* Full wrap image (back + spine + front) — landscape 1125x804,
                   so the wrapper is wider than the previous portrait cover. */}
-              <div className="relative mx-auto w-full max-w-[560px] lg:mx-0 lg:max-w-[640px]">
+              <div className="relative mx-auto w-full max-w-[620px] lg:mx-0 lg:max-w-[720px]">
                 <div
                   aria-hidden
                   className="pointer-events-none absolute -inset-10 rounded-full bg-purple-1/30 blur-[100px]"
