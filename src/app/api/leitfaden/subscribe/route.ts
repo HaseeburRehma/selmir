@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { Resend } from "resend";
 import { LEITFADEN } from "@/lib/leitfaden";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -225,7 +226,12 @@ async function pushHubspot({
 }
 
 export async function POST(req: NextRequest) {
-  let body: { name?: string; phone?: string; email?: string };
+  let body: {
+    name?: string;
+    phone?: string;
+    email?: string;
+    turnstileToken?: string;
+  };
   try {
     body = await req.json();
   } catch {
@@ -254,6 +260,27 @@ export async function POST(req: NextRequest) {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json(
       { ok: false, reason: "email is required" },
+      { status: 400 },
+    );
+  }
+
+  // Cloudflare Turnstile — bot check. Runs BEFORE any HubSpot or Resend
+  // work so we never spend an API call on obvious spam. Cloudflare's own
+  // "always-pass" test key makes this a no-op in dev; set real keys in
+  // Vercel to enable real bot protection.
+  const ip =
+    req.headers.get("cf-connecting-ip") ??
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    null;
+  const ts = await verifyTurnstile(body.turnstileToken, ip);
+  if (!ts.success) {
+    console.warn("[leitfaden] turnstile failed:", ts.reason, ts.errors);
+    return NextResponse.json(
+      {
+        ok: false,
+        reason:
+          "Sicherheitsprüfung fehlgeschlagen. Bitte lade die Seite neu und versuche es erneut.",
+      },
       { status: 400 },
     );
   }

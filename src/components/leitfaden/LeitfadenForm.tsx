@@ -1,7 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Script from "next/script";
 import { Check, Download } from "lucide-react";
+import { TURNSTILE_SITE_KEY } from "@/lib/turnstile";
+
+/**
+ * Cloudflare Turnstile — invisible bot check. When the widget renders,
+ * Cloudflare either auto-solves it in the background or shows the tiny
+ * managed challenge. On success it calls the global callback we register
+ * with the widget's data-callback attribute.
+ *
+ * The widget's script exposes a `window.turnstile` API — see
+ * https://developers.cloudflare.com/turnstile/ for the full surface.
+ */
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (
+        selector: string | HTMLElement,
+        options: {
+          sitekey: string;
+          callback?: (token: string) => void;
+          "error-callback"?: () => void;
+          "expired-callback"?: () => void;
+          size?: "normal" | "compact" | "flexible" | "invisible";
+          theme?: "auto" | "light" | "dark";
+          appearance?: "always" | "execute" | "interaction-only";
+        },
+      ) => string;
+      reset: (widgetId?: string) => void;
+      remove: (widgetId?: string) => void;
+    };
+    __turnstileOnLoad?: () => void;
+  }
+}
 
 /**
  * Shared subscribe form for the /leitfaden page.
@@ -35,16 +68,69 @@ export default function LeitfadenForm({
   );
   const [msg, setMsg] = useState<string | null>(null);
 
+  // Cloudflare Turnstile bot-check token. The widget writes here when it
+  // solves; we resend the same token to the API and it re-verifies with
+  // Cloudflare's siteverify endpoint.
+  const [tsToken, setTsToken] = useState<string | null>(null);
+  const tsContainer = useRef<HTMLDivElement | null>(null);
+  const tsWidgetId = useRef<string | null>(null);
+
+  // Render the widget once the script has loaded (retried a few times
+  // because the script tag is `strategy=afterInteractive` and may still
+  // be evaluating when this effect first runs).
+  useEffect(() => {
+    let cancelled = false;
+    let tries = 0;
+    const tryRender = () => {
+      if (cancelled || tsWidgetId.current) return;
+      if (window.turnstile && tsContainer.current) {
+        tsWidgetId.current = window.turnstile.render(tsContainer.current, {
+          sitekey: TURNSTILE_SITE_KEY,
+          callback: (token: string) => setTsToken(token),
+          "error-callback": () => setTsToken(null),
+          "expired-callback": () => setTsToken(null),
+          size: "flexible",
+          theme: "dark",
+        });
+        return;
+      }
+      if (tries++ < 40) setTimeout(tryRender, 250);
+    };
+    tryRender();
+    return () => {
+      cancelled = true;
+      if (tsWidgetId.current && window.turnstile) {
+        try {
+          window.turnstile.remove(tsWidgetId.current);
+        } catch {
+          /* noop */
+        }
+      }
+    };
+  }, []);
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email || status === "loading") return;
+    if (!tsToken) {
+      setStatus("err");
+      setMsg(
+        "Bitte warte einen Moment — die Sicherheitsprüfung läuft noch.",
+      );
+      return;
+    }
     setStatus("loading");
     setMsg(null);
     try {
       const res = await fetch("/api/leitfaden/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, email }),
+        body: JSON.stringify({
+          name,
+          phone,
+          email,
+          turnstileToken: tsToken,
+        }),
       }).then((r) => r.json());
       if (res?.ok) {
         setStatus("ok");
@@ -54,6 +140,15 @@ export default function LeitfadenForm({
       } else {
         setStatus("err");
         setMsg(res?.reason ?? "Etwas ist schiefgelaufen.");
+        // Ask Cloudflare to re-issue a fresh token so the next submit works.
+        if (tsWidgetId.current && window.turnstile) {
+          try {
+            window.turnstile.reset(tsWidgetId.current);
+          } catch {
+            /* noop */
+          }
+        }
+        setTsToken(null);
       }
     } catch {
       setStatus("err");
@@ -145,10 +240,29 @@ export default function LeitfadenForm({
     </button>
   );
 
+  // Cloudflare Turnstile widget slot + loader script — reused in both
+  // form variants below.
+  const TurnstileWidget = (
+    <>
+      <Script
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+        strategy="afterInteractive"
+        async
+        defer
+      />
+      <div
+        ref={tsContainer}
+        className="min-h-[65px] w-full"
+        aria-label="Sicherheitsprüfung"
+      />
+    </>
+  );
+
   if (variant === "hero") {
     return (
       <form onSubmit={onSubmit} className="flex w-full flex-col gap-3">
         {Fields}
+        {TurnstileWidget}
         {Submit}
         {status === "err" && (
           <p className="font-body text-[13px] text-red-300">{msg}</p>
@@ -174,6 +288,7 @@ export default function LeitfadenForm({
         </p>
       </div>
       {Fields}
+      {TurnstileWidget}
       {Submit}
       {status === "err" && (
         <p className="font-body text-[13px] text-red-300">{msg}</p>
