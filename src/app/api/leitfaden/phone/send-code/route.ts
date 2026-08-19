@@ -1,27 +1,84 @@
 import { NextRequest, NextResponse } from "next/server";
+import { verifyTurnstile } from "@/lib/turnstile";
+import { lookupPhone, sendVerificationCode } from "@/lib/twilio";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
  * POST /api/leitfaden/phone/send-code
+ *   body: { phone: string, turnstileToken: string }
  *
- * SMS verification is TEMPORARILY DISABLED — the client hasn't provided
- * Twilio credentials yet. The full 2-step flow (Turnstile + Twilio
- * Lookup + Twilio Verify + signed `sh_pv` skip cookie) is preserved in:
+ * Cloudflare Turnstile protects this endpoint because every hit costs an
+ * SMS on Twilio — a bot spinning it would run up real money. Turnstile is
+ * checked BEFORE we touch Twilio.
  *
- *   src/lib/twilio.ts          — Verify + Lookup wrappers
- *   src/lib/phoneVerify.ts     — HMAC cookie signer
- *   src/components/leitfaden/LeitfadenForm.tsx (git history)
- *   src/app/api/leitfaden/subscribe/route.ts   (git history)
- *
- * To re-enable, restore the two-step client + rewrite this handler back
- * to the original body (see commit `Leitfaden: add SMS verification via
- * Twilio Verify`).
+ * After the client uses the token here, the widget resets and the next
+ * subscribe call re-uses the fresh token (subscribe itself is protected
+ * by Twilio's approval instead — a bot cannot forge that).
  */
-export async function POST(_req: NextRequest) {
-  return NextResponse.json(
-    { ok: false, reason: "SMS verification is disabled." },
-    { status: 503 },
-  );
+export async function POST(req: NextRequest) {
+  let body: { phone?: string; turnstileToken?: string };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json(
+      { ok: false, reason: "invalid-json" },
+      { status: 400 },
+    );
+  }
+
+  const phone = (body.phone ?? "").trim();
+  if (!phone) {
+    return NextResponse.json(
+      { ok: false, reason: "Telefonnummer fehlt." },
+      { status: 400 },
+    );
+  }
+
+  const ip =
+    req.headers.get("cf-connecting-ip") ??
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    null;
+
+  const ts = await verifyTurnstile(body.turnstileToken, ip);
+  if (!ts.success) {
+    console.warn("[send-code] turnstile failed:", ts.reason, ts.errors);
+    return NextResponse.json(
+      {
+        ok: false,
+        reason:
+          "Sicherheitsprüfung fehlgeschlagen. Bitte lade die Seite neu und versuche es erneut.",
+      },
+      { status: 400 },
+    );
+  }
+
+  // HLR / carrier lookup — kills bots that don't have a real mobile before
+  // we spend ~5¢ on an SMS. Twilio Lookup costs ~0.5¢ per call, so this
+  // pays for itself the first bot it stops.
+  const lookup = await lookupPhone(phone);
+  if (!lookup.ok) {
+    return NextResponse.json(
+      { ok: false, reason: lookup.reason },
+      { status: 400 },
+    );
+  }
+
+  const result = await sendVerificationCode(lookup.phone);
+  if (!result.ok) {
+    return NextResponse.json(
+      { ok: false, reason: result.reason, retryAfter: result.retryAfter },
+      { status: 400 },
+    );
+  }
+
+  // Return the normalized phone so the client can display it and use it
+  // for the subsequent /subscribe call — Twilio will only approve the same
+  // E.164 form we used on send.
+  return NextResponse.json({
+    ok: true,
+    phone: result.phone,
+    status: result.status,
+  });
 }
