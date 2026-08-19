@@ -3,8 +3,13 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { Resend } from "resend";
 import { LEITFADEN } from "@/lib/leitfaden";
-import { checkVerificationCode, normalizeE164 } from "@/lib/twilio";
-import { buildVerifiedCookie, readVerifiedPhone } from "@/lib/phoneVerify";
+import { verifyTurnstile } from "@/lib/turnstile";
+// SMS verification is intentionally OFF until the client provides Twilio
+// credentials. The helpers stay imported-then-unused would fail the
+// no-unused-vars rule, so we simply skip the import here. When SMS is
+// re-enabled, re-import { checkVerificationCode, normalizeE164 } from
+// "@/lib/twilio" and { buildVerifiedCookie, readVerifiedPhone } from
+// "@/lib/phoneVerify"; the previous logic is preserved in git history.
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -282,7 +287,7 @@ export async function POST(req: NextRequest) {
     name?: string;
     phone?: string;
     email?: string;
-    code?: string;
+    turnstileToken?: string;
     pageUrl?: string;
   };
   try {
@@ -294,9 +299,8 @@ export async function POST(req: NextRequest) {
     );
   }
   const firstName = (body.name ?? "").trim();
-  const rawPhone = (body.phone ?? "").trim();
+  const phone = (body.phone ?? "").trim();
   const email = (body.email ?? "").trim().toLowerCase();
-  const code = (body.code ?? "").trim();
   const pageUrl = (body.pageUrl ?? "").trim();
   // All three visible fields are required. Return the first offender so
   // the client can show a targeted error.
@@ -306,7 +310,7 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
   }
-  if (!rawPhone) {
+  if (!phone) {
     return NextResponse.json(
       { ok: false, reason: "phone is required" },
       { status: 400 },
@@ -319,41 +323,24 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Phone verification path A — a valid `sh_pv` cookie from a prior
-  // successful verify lets us skip Twilio entirely. Server re-computes
-  // the HMAC on every request so a tampered cookie is rejected.
-  const cookieHeader = req.headers.get("cookie");
-  const cookiePhone = readVerifiedPhone(cookieHeader);
-  const normalizedFromInput = normalizeE164(rawPhone);
-  const canUseCookie =
-    !!cookiePhone &&
-    !!normalizedFromInput &&
-    cookiePhone === normalizedFromInput;
-
-  let phone: string;
-  if (canUseCookie) {
-    phone = cookiePhone;
-  } else {
-    // Phone verification path B — fresh Twilio Verify check.
-    if (!code) {
-      return NextResponse.json(
-        {
-          ok: false,
-          reason:
-            "Bitte gib den SMS-Code ein, den wir an deine Nummer geschickt haben.",
-        },
-        { status: 400 },
-      );
-    }
-    const twilio = await checkVerificationCode(rawPhone, code);
-    if (!twilio.ok) {
-      console.warn("[leitfaden] twilio check failed:", twilio.reason);
-      return NextResponse.json(
-        { ok: false, reason: twilio.reason },
-        { status: 400 },
-      );
-    }
-    phone = twilio.phone;
+  // Cloudflare Turnstile — the sole bot check while SMS verification is
+  // off. Runs BEFORE HubSpot / Resend / Sheets so bots don't burn a
+  // HubSpot contact + a Resend email + a sheet row per hit.
+  const ip =
+    req.headers.get("cf-connecting-ip") ??
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    null;
+  const ts = await verifyTurnstile(body.turnstileToken, ip);
+  if (!ts.success) {
+    console.warn("[leitfaden] turnstile failed:", ts.reason, ts.errors);
+    return NextResponse.json(
+      {
+        ok: false,
+        reason:
+          "Sicherheitsprüfung fehlgeschlagen. Bitte lade die Seite neu und versuche es erneut.",
+      },
+      { status: 400 },
+    );
   }
 
   const origin =
@@ -407,20 +394,12 @@ export async function POST(req: NextRequest) {
         : undefined,
     });
     if (error) throw new Error(error.message ?? JSON.stringify(error));
-
-    // Issue the "verified phone" cookie so the same browser skips the SMS
-    // step on future visits. Refreshes the 30-day expiry whether we used
-    // the fresh Twilio check or the existing cookie.
-    const cookie = buildVerifiedCookie(phone);
-    const res = NextResponse.json({
+    return NextResponse.json({
       ok: true,
       messageId: data?.id ?? null,
       hubspotContactId: hs.ok ? hs.contactId : null,
       attached: !!pdfBase64,
-      verifiedPhone: phone,
     });
-    if (cookie) res.headers.set("Set-Cookie", cookie.header);
-    return res;
   } catch (err) {
     console.error("[leitfaden] resend error:", (err as Error).message);
     return NextResponse.json(
