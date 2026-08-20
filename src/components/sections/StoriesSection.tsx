@@ -1,14 +1,20 @@
 import { Reveal } from "@/components/ui/Reveal";
 import { VideoCarousel } from "@/components/ui/VideoCarousel";
 
-// 6 review / success-story videos
+// 11 client success-story videos — order matches the canonical list
+// Selmir sent 2026-08-20 (WhatsApp: SH Wachstumsgesellschaft mbH).
 const REVIEW_VIDEOS = [
-  "KIfrhPyYPNA",
-  "kMeN9SY_Ld4",
-  "PDgj_f7vJu8",
-  "89Mzx7TPlzQ",
-  "Ok2j8LeBYW0",
-  "3fLDRD6aezg",
+  "kMeN9SY_Ld4", // Kadir Göksu
+  "3fLDRD6aezg", // Sarah Larissa Bruns
+  "cGuRQYDw_u4", // Leolo Zinser
+  "PDgj_f7vJu8", // Ahmet Möhür
+  "89Mzx7TPlzQ", // Dominik Langerbein
+  "Ok2j8LeBYW0", // Denis Alihodzic
+  "4Th7wYBG-PQ", // Christian Mihm
+  "w44_J-GGM7g", // Tim Segler
+  "Xl7wb2rs_FI", // Vanessa Selbach
+  "NIbQDPuY7nw", // Roland Compte
+  "9_OKA9X5D4Y", // Ciddik Cosic
 ];
 
 export default function StoriesSection() {
@@ -20,7 +26,7 @@ export default function StoriesSection() {
             Erfolgsgeschichten
           </span>
           <h2 className="max-w-[1000px] font-serif text-[30px] leading-[1.18] tracking-[-1px] text-white md:text-[50px] md:tracking-[-1.8px]">
-            6 Erfolgsgeschichten, die zeigen:{" "}
+            11 Erfolgsgeschichten, die zeigen:{" "}
             <span className="font-display">
               Dein Vertrieb geht auch ohne dich.
             </span>
