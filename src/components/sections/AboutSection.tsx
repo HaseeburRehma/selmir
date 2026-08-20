@@ -6,7 +6,7 @@ const STATS = [
   { value: "€247M", label: "247 Mio. € Umsatz verantwortet hat." },
   { value: "47 Sales Teams", label: "Über 47 Vertriebsteams aufgebaut hat." },
   {
-    value: "33 Industries",
+    value: "33 Branchen",
     label: "In 33 verschiedenen Branchen aktiv war – mit messbaren Ergebnissen.",
   },
 ];

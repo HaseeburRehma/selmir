@@ -257,7 +257,7 @@ export const ABOUT = {
   stats: [
     { value: "€247M", label: "247 Mio. € Umsatz verantwortet." },
     { value: "47 Sales Teams", label: "Über 47 Vertriebsteams aufgebaut." },
-    { value: "33 Industries", label: "In 33 Branchen mit messbaren Ergebnissen." },
+    { value: "33 Branchen", label: "In 33 Branchen mit messbaren Ergebnissen." },
   ],
 };
 
