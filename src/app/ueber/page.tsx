@@ -3,6 +3,7 @@ import Image from "next/image";
 import { ArrowUpRight, ArrowRight } from "lucide-react";
 import Navbar from "@/components/sections/Navbar";
 import FooterSection from "@/components/sections/FooterSection";
+import GoogleReviewsSection from "@/components/sections/GoogleReviewsSection";
 import FaqSection from "@/components/sections/FaqSection";
 import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
@@ -250,7 +251,8 @@ export default function UeberPage() {
           </Reveal>
         </section>
 
-        {/* FAQ (wie auf der Startseite) */}
+        {/* Google Reviews + FAQ (wie auf der Startseite) */}
+        <GoogleReviewsSection />
         <FaqSection />
 
         {/* Sprich mit Selmir — CTA */}

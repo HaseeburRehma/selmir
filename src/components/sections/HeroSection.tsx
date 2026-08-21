@@ -111,17 +111,14 @@ export default function HeroSection() {
                 </a>
               ))}
 
-              {/* Google review badge — sits alongside the Gast Speaker chips
-                  so it reads as a social-proof CTA in the hero. Links to
-                  Selmir's Google Business Profile so visitors can leave a
-                  review, growing the Google rating over time. Profile is
-                  managed under tylotech0@gmail.com. Once ≥5 reviews land
-                  we can swap this for a real review-slider widget. */}
+              {/* Google review badge — sits alongside the Gast Speaker
+                  chips as a top-of-page trust signal. Jumps down to the
+                  full Google Reviews section (4.9★ · 79 reviews). Cmd-click
+                  opens the underlying Business Profile in a new tab, but
+                  the primary path keeps the visitor on-page. */}
               <a
-                href="https://www.google.com/search?q=Selmir+Suljkanovic+Essen&hl=de"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Selmir Suljkanovic auf Google bewerten (öffnet Google-Business-Profil)"
+                href="#rezensionen"
+                aria-label="4,9 Sterne bei 79 Google-Rezensionen — zu den Bewertungen springen"
                 className="group inline-flex w-fit items-center gap-4 rounded-full border border-white/20 bg-white/[0.03] p-2 pr-7 transition-colors duration-300 hover:border-white/50 hover:bg-white/[0.06]"
               >
                 <span className="grid size-14 shrink-0 place-items-center rounded-full bg-white">
@@ -153,10 +150,10 @@ export default function HeroSection() {
                 </span>
                 <span className="flex flex-col">
                   <span className="font-body text-[13px] italic tracking-[0.2px] text-white/55">
-                    Auf Google
+                    4,9 ★ auf Google
                   </span>
                   <span className="font-display text-[20px] leading-tight tracking-[-0.3px] text-white">
-                    Bewerten
+                    79 Rezensionen
                   </span>
                 </span>
               </a>

@@ -8,6 +8,7 @@ import CaseStudiesSection from "@/components/sections/CaseStudiesSection";
 import AboutSection from "@/components/sections/AboutSection";
 import TeamSection from "@/components/sections/TeamSection";
 import GallerySection from "@/components/sections/GallerySection";
+import GoogleReviewsSection from "@/components/sections/GoogleReviewsSection";
 import FaqSection from "@/components/sections/FaqSection";
 import FinalCtaSection from "@/components/sections/FinalCtaSection";
 import FooterSection from "@/components/sections/FooterSection";
@@ -26,6 +27,7 @@ export default function Home() {
         <AboutSection />
         <TeamSection />
         <GallerySection />
+        <GoogleReviewsSection />
         <FaqSection />
         <FinalCtaSection />
       </main>

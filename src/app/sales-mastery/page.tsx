@@ -8,6 +8,7 @@ import PricingSection from "@/components/sections/PricingSection";
 import CaseStudiesSection from "@/components/sections/CaseStudiesSection";
 import AboutSection from "@/components/sections/AboutSection";
 import GallerySection from "@/components/sections/GallerySection";
+import GoogleReviewsSection from "@/components/sections/GoogleReviewsSection";
 import FaqSection from "@/components/sections/FaqSection";
 import FinalCtaSection from "@/components/sections/FinalCtaSection";
 import FooterSection from "@/components/sections/FooterSection";
@@ -31,6 +32,7 @@ export default function SalesMasteryPage() {
         <CaseStudiesSection />
         <AboutSection />
         <GallerySection />
+        <GoogleReviewsSection />
         <FaqSection />
         <FinalCtaSection />
       </main>
