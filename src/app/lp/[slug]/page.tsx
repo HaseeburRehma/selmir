@@ -15,6 +15,7 @@ import LpOffer from "@/components/landing/LpOffer";
 import LpFaq from "@/components/landing/LpFaq";
 import LpFinalCta from "@/components/landing/LpFinalCta";
 import FooterSection from "@/components/sections/FooterSection";
+import GoogleReviewsSection from "@/components/sections/GoogleReviewsSection";
 
 import { CASE_STUDIES, LANDING_PAGES, getLandingPage } from "@/lib/landing-pages";
 
@@ -82,6 +83,9 @@ export default async function LandingPage({
         <LpSteps />
         <LpAudience />
         <LpAbout />
+        {/* Google reviews land right before the offer — social proof
+            primes the decision immediately before the price appears. */}
+        <GoogleReviewsSection />
         <LpOffer pageName={page.name} />
         <LpFaq />
         <LpFinalCta />
