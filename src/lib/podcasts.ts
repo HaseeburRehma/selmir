@@ -66,7 +66,60 @@ export const PODCASTS: PodcastEpisode[] = [
     counterpart: "Uncut Interviews",
   },
 
-  // CEON Unternehmer Podcast — Selmir hosts
+  // CEON Unternehmer Podcast — Selmir hosts (playlist:
+  //   https://www.youtube.com/playlist?list=PLs_1HqLccQU20alsvpE0QHl6Vmex8CpsA )
+  {
+    id: "IlPsAIpQD-E",
+    title: "Dein Unternehmen ist nichts wert, wenn's nur durch dich läuft",
+    show: "CEON Unternehmer Podcast",
+    role: "host",
+  },
+  {
+    id: "-RkGAe5NKJI",
+    title: "Ex-Hells Angel packt aus — Hinter Gittern begann der Weg zum Erfolg (Teil 1)",
+    show: "CEON Unternehmer Podcast",
+    role: "host",
+    counterpart: "Ex-Hells-Angel",
+  },
+  {
+    id: "cZ43a_Mzp1Y",
+    title: "Ex-Hells Angel enthüllt seinen Weg aus der Dunkelheit (Teil 2)",
+    show: "CEON Unternehmer Podcast",
+    role: "host",
+    counterpart: "Ex-Hells-Angel",
+  },
+  {
+    id: "OKctKeWdpgI",
+    title: "Vom Vater angeschossen — vom Boxsport zur Unternehmerin",
+    show: "CEON Unternehmer Podcast",
+    role: "host",
+    counterpart: "Rola El-Halabi",
+  },
+  {
+    id: "n0c0ca2dmEM",
+    title: "Vom Traum zur Stadion-Werbung — So baute er Profina Deutschland auf",
+    show: "CEON Unternehmer Podcast",
+    role: "host",
+    counterpart: "Sejdin Sejdini",
+  },
+  {
+    id: "00uMaUlUrz0",
+    title: "KI WIRD DICH ERSETZEN — das Zeitalter der KI",
+    show: "CEON Unternehmer Podcast",
+    role: "host",
+  },
+  {
+    id: "yac7LQXXhXU",
+    title: "Frauen im Verkauf — zwischen Vorurteilen und Millionen",
+    show: "CEON Unternehmer Podcast",
+    role: "host",
+  },
+  {
+    id: "KIfrhPyYPNA",
+    title: "Von 4 auf 18 Mio. € — wie ein SHK-Familienbetrieb seinen Umsatz vervierfachte",
+    show: "CEON Unternehmer Podcast",
+    role: "host",
+  },
   {
     id: "6FnEG4oXp4A",
     title: "Marco Huck von NICHTS zum MULTIMILLIONÄR — Straßenkämpfe, Fame & Business-Erfolg",
