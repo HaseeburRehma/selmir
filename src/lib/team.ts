@@ -44,6 +44,10 @@ export const TEAM: TeamMember[] = [
     name: "Fernando Ferreira",
     role: "Wachstumsmanager",
     photo: "/figma/team/fernando.jpg",
+    linkedin: {
+      url: "https://www.linkedin.com/in/issa-fernando-ferreira-53a183427/",
+      handle: "Fernando Ferreira",
+    },
     bio: "Fernando bringt über 10 Jahre Vertriebserfahrung mit, vom Direktvertrieb bis zu Spitzenpositionen im hochpreisigen B2C- und B2B-Geschäft. Als Sales Operator in der Unternehmensberatung erzielte er eigenständig über zwei Jahre einen siebenstelligen Verkaufsumsatz. Zudem bringt er Erfahrung im KI-Vertrieb mit Fokus auf Geschäftsführer aus der Immobilienbranche mit.",
   },
   {
