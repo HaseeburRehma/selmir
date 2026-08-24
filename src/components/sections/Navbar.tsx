@@ -13,6 +13,7 @@ const LINKS = [
   { label: "Case Studies", href: "/#cases" },
   { label: "Über", href: "/ueber" },
   { label: "Buch", href: "/buch" },
+  { label: "Podcast", href: "/podcast" },
   { label: "Karriere", href: "/#footer" },
   { label: "Kontakt", href: "/kontakt" },
 ];
