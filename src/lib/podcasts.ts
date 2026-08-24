@@ -44,6 +44,27 @@ export const PODCASTS: PodcastEpisode[] = [
     role: "guest",
     counterpart: "Ungefiltert on Fire",
   },
+  {
+    id: "59t89OOR5ew",
+    title: "Als Angestellter zum Einkommensmillionär — Selmirs Weg",
+    show: "Erfolg ist kein Zufall — Maurice Bork",
+    role: "guest",
+    counterpart: "Maurice Bork",
+  },
+  {
+    id: "thGOCXEDq30",
+    title: "Ich bin aus Jugoslawien geflohen!",
+    show: "Uncut Interviews",
+    role: "guest",
+    counterpart: "Uncut Interviews",
+  },
+  {
+    id: "Od8uJ5-W6q0",
+    title: "40.000 € war ein schlechter Monat!",
+    show: "Uncut Interviews",
+    role: "guest",
+    counterpart: "Uncut Interviews",
+  },
 
   // CEON Unternehmer Podcast — Selmir hosts
   {
