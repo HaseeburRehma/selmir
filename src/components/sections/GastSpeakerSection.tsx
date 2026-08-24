@@ -23,8 +23,15 @@ const SPEAKERS = [
     claim: { serif: "", display: "Spezialist für digitales Marketing" },
     image: "/figma/speakers/arafat-alves.jpg",
     alt: "Arafat Alves — Spezialist für digitales Marketing",
+    // Arafat is framed sitting low-left in the source photo, so the
+    // default object-top crop pushes him to the bottom of the card and
+    // clips his knee. Shift the focal point up and left, and zoom the
+    // image so his upper body reads as the subject.
+    imagePosition: "30% 40%",
+    imageScale: 1.18,
+    subtitle: "Über 1.300.000 Social Media Abonnenten.",
   },
-];
+] as const;
 
 export default function GastSpeakerSection() {
   return (
@@ -75,7 +82,13 @@ export default function GastSpeakerSection() {
                       alt={s.alt}
                       fill
                       sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 360px"
-                      className="object-cover object-top"
+                      className="object-cover"
+                      style={{
+                        objectPosition:
+                          "imagePosition" in s ? s.imagePosition : "top",
+                        transform:
+                          "imageScale" in s ? `scale(${s.imageScale})` : undefined,
+                      }}
                     />
                   </div>
                 </div>
@@ -90,6 +103,12 @@ export default function GastSpeakerSection() {
                 <p className="font-serif text-[19px] tracking-[-0.4px] text-white/85 md:text-[22px]">
                   {s.name}
                 </p>
+
+                {"subtitle" in s && (
+                  <p className="font-body text-[14px] leading-[1.4] text-purple-2 md:text-[15px]">
+                    {s.subtitle}
+                  </p>
+                )}
               </div>
             </Reveal>
           ))}
