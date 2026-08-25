@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
-import { Check, Download } from "lucide-react";
+import { Check, Download, MessageSquare, ShieldCheck } from "lucide-react";
 import { TURNSTILE_SITE_KEY } from "@/lib/turnstile";
 
 /**
@@ -39,17 +39,13 @@ declare global {
 /**
  * Shared subscribe form for the /leitfaden page.
  *
- * Current single-step flow (SMS temporarily off — see NOTE below):
- *   POST { name, phone, email, turnstileToken } → /api/leitfaden/subscribe
- *     → HubSpot upsert + list-793 membership
- *     → Resend PDF to the submitter
- *     → append the row to the internal Google Sheet
- *
- * NOTE: the two-step SMS-verify flow (Twilio Verify + HLR + `sh_pv`
- * cookie) is preserved server-side in `src/lib/twilio.ts`,
- * `src/lib/phoneVerify.ts`, and the `/phone/send-code` route so it can be
- * re-enabled once the client provides Twilio credentials — nothing to
- * rebuild, only re-wire this component.
+ * Two-step SMS verification flow:
+ *   1. User fills name + phone + email → clicks "SMS-Code senden"
+ *        → POST /api/leitfaden/phone/send-code {phone, turnstileToken}
+ *        → Twilio Verify sends a 6-digit code
+ *   2. User types the 6-digit code → clicks "Leitfaden sichern"
+ *        → POST /api/leitfaden/subscribe {name, phone, email, code}
+ *        → Twilio approves the code, HubSpot upserts, Resend delivers the PDF.
  */
 export default function LeitfadenForm({
   variant = "hero",
@@ -72,12 +68,30 @@ export default function LeitfadenForm({
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "err">(
     "idle",
   );
   const [msg, setMsg] = useState<string | null>(null);
 
-  // Cloudflare Turnstile bot-check token — required on subscribe.
+  // SMS-verify state
+  const [sendingCode, setSendingCode] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
+  const [normalizedPhone, setNormalizedPhone] = useState<string | null>(null);
+  const [resendIn, setResendIn] = useState(0); // seconds until user may re-send
+
+  /**
+   * "Verified phone" cookie. When the server issued `sh_pv` on a previous
+   * successful subscribe, we skip the SMS step entirely — matching the
+   * behaviour dirkkreuter.com uses for returning visitors. The cookie
+   * body is `<base64url(phone)>.<expiresMs>.<hmacSignature>`; we decode
+   * only for UX (the server re-verifies the HMAC on every submit).
+   */
+  const cachedPhone = useReadVerifiedPhoneCookie();
+  const [skipSms, setSkipSms] = useState(false);
+
+  // Cloudflare Turnstile bot-check token. Used only on the send-code call;
+  // the subscribe call is protected by the Twilio approval instead.
   const [tsToken, setTsToken] = useState<string | null>(null);
   const tsContainer = useRef<HTMLDivElement | null>(null);
   const tsWidgetId = useRef<string | null>(null);
@@ -116,6 +130,24 @@ export default function LeitfadenForm({
     };
   }, []);
 
+  // Resend cooldown: after send-code we lock the button for 60s so a user
+  // can't spam Twilio and burn our budget.
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const t = setTimeout(() => setResendIn((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendIn]);
+
+  // Pre-populate the phone field on return visits and enable the skip
+  // path so the SMS button + code input never render.
+  useEffect(() => {
+    if (cachedPhone && !phone) {
+      setPhone(cachedPhone);
+      setNormalizedPhone(cachedPhone);
+      setSkipSms(true);
+    }
+  }, [cachedPhone, phone]);
+
   function resetTurnstile() {
     if (tsWidgetId.current && window.turnstile) {
       try {
@@ -127,16 +159,68 @@ export default function LeitfadenForm({
     setTsToken(null);
   }
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email || status === "loading") return;
-    if (!tsToken) {
+  async function onSendCode() {
+    if (sendingCode) return;
+    if (!phone) {
       setStatus("err");
-      setMsg(
-        "Bitte warte einen Moment — die Sicherheitsprüfung läuft noch.",
-      );
+      setMsg("Bitte gib deine Telefonnummer ein.");
       return;
     }
+    if (!tsToken) {
+      setStatus("err");
+      setMsg("Bitte warte einen Moment — die Sicherheitsprüfung läuft noch.");
+      return;
+    }
+    setSendingCode(true);
+    setStatus("idle");
+    setMsg(null);
+    try {
+      const res = await fetch("/api/leitfaden/phone/send-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, turnstileToken: tsToken }),
+      }).then((r) => r.json());
+      if (res?.ok) {
+        setCodeSent(true);
+        setNormalizedPhone(res.phone ?? phone);
+        setResendIn(60);
+        setMsg(null);
+      } else {
+        setStatus("err");
+        setMsg(res?.reason ?? "SMS konnte nicht gesendet werden.");
+        // Reset turnstile so the next attempt has a fresh token.
+        resetTurnstile();
+      }
+    } catch {
+      setStatus("err");
+      setMsg("Netzwerkfehler. Bitte versuche es später erneut.");
+    } finally {
+      setSendingCode(false);
+    }
+  }
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (status === "loading") return;
+    if (!email) return;
+
+    // Skip path: returning visitor with a still-valid `sh_pv` cookie for
+    // this phone. Server re-verifies the HMAC before honouring it.
+    if (!skipSms) {
+      if (!codeSent) {
+        setStatus("err");
+        setMsg(
+          "Bitte fordere zuerst den SMS-Code an und trage ihn dann hier ein.",
+        );
+        return;
+      }
+      if (!/^\d{4,10}$/.test(code)) {
+        setStatus("err");
+        setMsg("Bitte gib den 6-stelligen SMS-Code ein.");
+        return;
+      }
+    }
+
     setStatus("loading");
     setMsg(null);
     try {
@@ -145,13 +229,10 @@ export default function LeitfadenForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
-          phone,
+          phone: normalizedPhone ?? phone,
           email,
-          turnstileToken: tsToken,
-          // Where the visitor came from — logged to the Google Sheet so
-          // the sales team can trace which page the lead entered on.
-          pageUrl:
-            typeof window !== "undefined" ? window.location.href : undefined,
+          // Server ignores `code` when the cookie path succeeds.
+          code: skipSms ? undefined : code,
         }),
       }).then((r) => r.json());
       if (res?.ok) {
@@ -159,11 +240,13 @@ export default function LeitfadenForm({
         setName("");
         setPhone("");
         setEmail("");
+        setCode("");
       } else {
         setStatus("err");
         setMsg(res?.reason ?? "Etwas ist schiefgelaufen.");
-        // Turnstile tokens are single-use; force a new one for the retry.
-        resetTurnstile();
+        // Cookie may have expired or been tampered with — drop the skip
+        // and force the user through the SMS flow again.
+        if (skipSms) setSkipSms(false);
       }
     } catch {
       setStatus("err");
@@ -189,6 +272,16 @@ export default function LeitfadenForm({
     );
   }
 
+  const sendCodeLabel = sendingCode
+    ? "Wird gesendet…"
+    : codeSent
+      ? resendIn > 0
+        ? `Erneut senden in ${resendIn}s`
+        : "Code erneut senden"
+      : "SMS-Code senden";
+
+  const canSendCode = !!phone && !!tsToken && !sendingCode && resendIn === 0;
+
   const Fields = (
     <>
       {showFirstName && (
@@ -212,17 +305,55 @@ export default function LeitfadenForm({
           <label className="font-body text-[13px] font-semibold text-white/75">
             Telefon <span className="text-purple-2">*</span>
           </label>
-          <input
-            className={inputCls}
-            type="tel"
-            required
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder={phonePlaceholder}
-            autoComplete="tel"
-            pattern="[0-9+\s\-()]{6,}"
-            title="Bitte gib eine gültige Telefonnummer ein."
-          />
+          <div className={skipSms ? "" : "flex flex-col gap-2 sm:flex-row"}>
+            <input
+              className={inputCls + (skipSms ? "" : " sm:flex-1")}
+              type="tel"
+              required
+              value={phone}
+              onChange={(e) => {
+                setPhone(e.target.value);
+                // Editing the phone invalidates any previously issued code
+                // or verified-cookie skip.
+                if (codeSent) {
+                  setCodeSent(false);
+                  setCode("");
+                  setNormalizedPhone(null);
+                }
+                if (skipSms) setSkipSms(false);
+              }}
+              placeholder={phonePlaceholder}
+              autoComplete="tel"
+              pattern="[0-9+\s\-()]{6,}"
+              title="Bitte gib eine gültige Telefonnummer ein."
+            />
+            {!skipSms && (
+              <button
+                type="button"
+                onClick={onSendCode}
+                disabled={!canSendCode}
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-[10px] border border-purple-2/40 bg-purple-2/[0.14] px-4 font-body text-[13.5px] font-semibold text-white transition-colors hover:bg-purple-2/[0.22] disabled:pointer-events-none disabled:opacity-50 sm:h-auto"
+              >
+                <MessageSquare className="size-4" />
+                {sendCodeLabel}
+              </button>
+            )}
+          </div>
+          {skipSms && (
+            <span className="inline-flex items-center gap-1.5 font-body text-[12px] text-purple-2">
+              <ShieldCheck className="size-3.5" />
+              Diese Nummer ist bereits verifiziert — keine SMS nötig.
+            </span>
+          )}
+          {codeSent && !skipSms && normalizedPhone && (
+            <span className="font-body text-[12px] text-white/50">
+              Code gesendet an{" "}
+              <span className="font-semibold text-white/75">
+                {normalizedPhone}
+              </span>
+              . Trag ihn unten ein.
+            </span>
+          )}
         </div>
       )}
       <div className="flex flex-col gap-1.5">
@@ -239,13 +370,36 @@ export default function LeitfadenForm({
           autoComplete="email"
         />
       </div>
+      {codeSent && !skipSms && (
+        <div className="flex flex-col gap-1.5">
+          <label className="font-body text-[13px] font-semibold text-white/75">
+            SMS-Code <span className="text-purple-2">*</span>
+          </label>
+          <div className="relative">
+            <ShieldCheck className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-purple-2/80" />
+            <input
+              className={inputCls + " pl-10 tracking-[0.4em]"}
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              required
+              value={code}
+              onChange={(e) =>
+                setCode(e.target.value.replace(/\D/g, "").slice(0, 10))
+              }
+              placeholder="123456"
+              maxLength={10}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 
   const Submit = (
     <button
       type="submit"
-      disabled={status === "loading"}
+      disabled={status === "loading" || (!codeSent && !skipSms)}
       className="btn-gradient group flex h-14 w-full items-center justify-center gap-2 rounded-[10px] px-5 text-center text-black transition-transform duration-300 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-70"
     >
       <span className="font-body text-[15px] font-bold uppercase tracking-[0.6px] lg:text-[16px]">
@@ -277,7 +431,7 @@ export default function LeitfadenForm({
     return (
       <form onSubmit={onSubmit} className="flex w-full flex-col gap-3">
         {Fields}
-        {TurnstileWidget}
+        {!skipSms && TurnstileWidget}
         {Submit}
         {status === "err" && (
           <p className="font-body text-[13px] text-red-300">{msg}</p>
@@ -303,7 +457,7 @@ export default function LeitfadenForm({
         </p>
       </div>
       {Fields}
-      {TurnstileWidget}
+      {!skipSms && TurnstileWidget}
       {Submit}
       {status === "err" && (
         <p className="font-body text-[13px] text-red-300">{msg}</p>
@@ -313,4 +467,36 @@ export default function LeitfadenForm({
       </p>
     </form>
   );
+}
+
+/**
+ * Read the `sh_pv` cookie the server sets on a successful verify, decode
+ * just the phone hint, and expose it to the form. The server rechecks
+ * the HMAC on every submit — this hook is purely for UX.
+ */
+function useReadVerifiedPhoneCookie(): string | null {
+  const [phone, setPhone] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const raw = document.cookie
+      .split(/;\s*/)
+      .find((c) => c.startsWith("sh_pv="));
+    if (!raw) return;
+    const value = raw.slice("sh_pv=".length);
+    const parts = value.split(".");
+    if (parts.length !== 3) return;
+    const [phoneB64, expiresStr] = parts;
+    const expires = Number(expiresStr);
+    if (!Number.isFinite(expires) || expires < Date.now()) return;
+    try {
+      const pad = phoneB64.length % 4 === 0 ? "" : "=".repeat(4 - (phoneB64.length % 4));
+      const decoded = atob(
+        (phoneB64 + pad).replace(/-/g, "+").replace(/_/g, "/"),
+      );
+      setPhone(decoded);
+    } catch {
+      /* ignore malformed cookie */
+    }
+  }, []);
+  return phone;
 }
