@@ -37,7 +37,7 @@ export const HERO = {
     "Geschäftsführer von IT-Unternehmen mit Sales-Teams aus Settern und Closern",
   ],
   formTag: {
-    title: "E-Book (PDF)",
+    title: "E-Book für Entscheider",
     subtitle: "16 Seiten · Vertriebsführung",
   },
   submitLabel: "E-Book kostenlos sichern",
@@ -46,7 +46,7 @@ export const HERO = {
 
 /** Right-column PDF mockup cover text — mirrors the actual PDF cover. */
 export const COVER = {
-  eyebrow: "E-Book für Entscheider",
+  eyebrow: "E-Book (PDF)",
   titleSerif: "Dein Vertrieb",
   titleBreak: "erreicht alle",
   titleDisplay: "Ziele.",
