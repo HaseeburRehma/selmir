@@ -6,7 +6,7 @@
  * /e-book page shares the same layout template as /leitfaden.
  */
 
-export const EBOOK_SLUG = "/e-book";
+export const EBOOK_SLUG = "/e-book/fuehrungskraefte";
 export const EBOOK_PDF_PATH = "public/ebook/dein-vertrieb-erreicht-alle-ziele.pdf";
 export const EBOOK_PDF_URL = "/ebook/dein-vertrieb-erreicht-alle-ziele.pdf";
 export const EBOOK_PDF_FILENAME = "Dein-Vertrieb-erreicht-alle-Ziele.pdf";

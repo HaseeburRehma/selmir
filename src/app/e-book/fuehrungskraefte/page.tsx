@@ -11,12 +11,12 @@ export const metadata: Metadata = {
   title: "E-Book: Dein Vertrieb erreicht alle Ziele — Selmir Suljkanovic",
   description:
     "Kostenloses E-Book für Führungskräfte: die 7 Führungsfehler, die Betriebe jedes Jahr ein Vermögen kosten — und wie du sie in 30 Tagen abstellst. Sofort per E-Mail als PDF.",
-  alternates: { canonical: "/e-book" },
+  alternates: { canonical: "/e-book/fuehrungskraefte" },
   openGraph: {
     title: "E-Book: Dein Vertrieb erreicht alle Ziele — Selmir Suljkanovic",
     description:
       "Die 7 Führungsfehler im Vertrieb — kostenloses E-Book von Selmir Suljkanovic.",
-    url: "/e-book",
+    url: "/e-book/fuehrungskraefte",
     siteName: "Selmir Suljkanovic",
     locale: "de_DE",
     type: "website",
