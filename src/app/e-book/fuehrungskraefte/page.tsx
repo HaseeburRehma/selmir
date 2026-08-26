@@ -209,15 +209,25 @@ export default function EbookPage() {
                       height={42}
                       className="h-[38px] w-auto lg:h-[42px]"
                     />
-                    <span className="flex items-center gap-2.5">
-                      <span
-                        aria-hidden
-                        className="h-[2px] w-[32px] shrink-0 rounded-full bg-purple-2"
-                      />
-                      <span className="font-body text-[11px] font-semibold uppercase tracking-[1.8px] text-purple-2 lg:text-[12px]">
-                        {COVER.eyebrow}
+                    {/* Same "E-Book (PDF)" badge chip used on the form
+                        column — icon + two lines — placed inside the cover
+                        to reinforce what the visitor is downloading. */}
+                    <div className="inline-flex w-fit items-center gap-3 rounded-[12px] border border-white/[0.10] bg-white/[0.05] px-3 py-2.5">
+                      <span className="grid size-[36px] place-items-center rounded-[9px] bg-purple-2/[0.16]">
+                        <FileText
+                          className="size-[18px] text-purple-2"
+                          strokeWidth={1.75}
+                        />
                       </span>
-                    </span>
+                      <div className="flex flex-col leading-tight">
+                        <span className="font-body text-[13px] font-semibold tracking-[-0.2px] text-white">
+                          {COVER.eyebrow}
+                        </span>
+                        <span className="font-body text-[11.5px] tracking-[-0.1px] text-white/50">
+                          {HERO.formTag.subtitle}
+                        </span>
+                      </div>
+                    </div>
                     <p className="font-serif text-[28px] leading-[1.15] tracking-[-1.1px] text-white lg:text-[34px] lg:tracking-[-1.4px]">
                       {COVER.titleSerif}
                       <br />
