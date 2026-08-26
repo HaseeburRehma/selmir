@@ -143,11 +143,14 @@ export default function EbookPage() {
                 proportional inside the section. */}
             <Reveal
               delay={0.1}
-              className="order-2 mx-auto flex w-full min-w-0 max-w-[260px] flex-col sm:max-w-[380px] lg:mx-0 lg:ml-auto lg:max-w-[560px]"
+              className="order-2 mx-auto flex w-full min-w-0 max-w-[320px] flex-col sm:max-w-[400px] lg:mx-0 lg:ml-auto lg:max-w-[560px]"
             >
+              {/* Taller aspect so the cover has enough vertical room for
+                  logo + badge + 3-line title + subtitle + footer without
+                  the last-line clip that appeared on iPhone 16 Pro Max. */}
               <div
                 className="relative w-full overflow-visible"
-                style={{ aspectRatio: "500 / 620" }}
+                style={{ aspectRatio: "500 / 700" }}
               >
                 {/* soft purple bloom directly behind the cover */}
                 <div
@@ -183,13 +186,13 @@ export default function EbookPage() {
                         "linear-gradient(180deg, rgba(176,137,255,0.20) 0%, rgba(176,137,255,0) 100%)",
                     }}
                   />
-                  <div className="relative flex flex-col gap-5 lg:gap-6">
+                  <div className="relative flex flex-col gap-3.5 sm:gap-5 lg:gap-6">
                     <Image
                       src="/logo-red-dark.svg"
                       alt="Selmir"
                       width={130}
                       height={42}
-                      className="h-[38px] w-auto lg:h-[42px]"
+                      className="h-[30px] w-auto sm:h-[36px] lg:h-[42px]"
                     />
                     {/* Badge chip inside the cover — sized to fit even on
                         narrow phone widths without the subtitle wrapping. */}
@@ -209,22 +212,22 @@ export default function EbookPage() {
                         </span>
                       </div>
                     </div>
-                    <p className="font-serif text-[28px] leading-[1.15] tracking-[-1.1px] text-white lg:text-[34px] lg:tracking-[-1.4px]">
+                    <p className="font-serif text-[22px] leading-[1.15] tracking-[-0.9px] text-white sm:text-[26px] sm:tracking-[-1.1px] lg:text-[34px] lg:tracking-[-1.4px]">
                       {COVER.titleSerif}
                       <br />
                       {COVER.titleBreak}{" "}
                       <span className="font-display">{COVER.titleDisplay}</span>
                     </p>
-                    <p className="font-body text-[15px] leading-[1.55] tracking-[-0.15px] text-white/72 lg:text-[16px]">
+                    <p className="font-body text-[12.5px] leading-[1.45] tracking-[-0.15px] text-white/72 sm:text-[14px] lg:text-[16px]">
                       {COVER.subtitleHigh}{" "}
                       <span className="font-bold text-purple-2">
                         {COVER.subtitleLow}
                       </span>
                     </p>
                   </div>
-                  <div className="relative flex flex-col gap-3">
+                  <div className="relative flex flex-col gap-2 sm:gap-3">
                     <div aria-hidden className="h-px w-full bg-white/[0.14]" />
-                    <div className="flex items-center justify-between font-body text-[11.5px] uppercase tracking-[1.5px] lg:text-[12px]">
+                    <div className="flex items-center justify-between font-body text-[10px] uppercase tracking-[1.2px] sm:text-[11.5px] sm:tracking-[1.5px] lg:text-[12px]">
                       <span className="font-semibold text-white/70">
                         {COVER.footerL}
                       </span>
