@@ -122,24 +122,6 @@ export default function EbookPage() {
                 {HERO.lead}
               </p>
 
-              {/* PDF file badge */}
-              <div className="inline-flex w-fit items-center gap-3.5 rounded-[14px] border border-white/[0.09] bg-white/[0.03] px-4 py-3.5">
-                <span className="grid size-[42px] place-items-center rounded-[11px] bg-purple-2/[0.16]">
-                  <FileText
-                    className="size-[22px] text-purple-2"
-                    strokeWidth={1.75}
-                  />
-                </span>
-                <div className="flex flex-col leading-tight">
-                  <span className="font-body text-[15px] font-semibold tracking-[-0.2px] text-white">
-                    {HERO.formTag.title}
-                  </span>
-                  <span className="font-body text-[13.5px] tracking-[-0.1px] text-white/50">
-                    {HERO.formTag.subtitle}
-                  </span>
-                </div>
-              </div>
-
               {/* Hero form — Vorname + E-Mail + Telefon + Turnstile + gradient CTA */}
               <div className="w-full">
                 <EbookForm />
