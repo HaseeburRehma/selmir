@@ -1,13 +1,8 @@
 /**
  * "Dein Vertrieb erreicht alle Ziele" — Führungskräfte e-book lead magnet.
  *
- * Same architecture as src/lib/leitfaden.ts. This file only carries the
- * copy + PDF path + delivery config; the actual page and API route
- * reuse the leitfaden pipeline (HubSpot upsert, Resend, Google Sheet).
- *
- * Client-side Meta Pixel `Lead` event fires on submit success. Server-side
- * CAPI is a follow-up (needs META_CAPI_ACCESS_TOKEN + pixel setup on the
- * Meta side — see comment in src/app/api/ebook/subscribe/route.ts).
+ * Copy mirrors the Rollenspiel-Leitfaden HERO shape 1:1 so the /e-book
+ * page can share the same layout template as /leitfaden.
  */
 
 /** URL path visitors see. */
@@ -22,35 +17,45 @@ export const EBOOK_PDF_URL = "/ebook/dein-vertrieb-erreicht-alle-ziele.pdf";
 /** Filename shown in the mail attachment / download prompt. */
 export const EBOOK_PDF_FILENAME = "Dein-Vertrieb-erreicht-alle-Ziele.pdf";
 
-/** HubSpot list — auto-created via /crm/v3/lists 2026-08-26 as
- *  "E-Book – Führungskräfte" (list_id 816). Change here if renamed. */
+/** HubSpot list — auto-created 2026-08-26 as
+ *  "E-Book – Führungskräfte" via /crm/v3/lists API. */
 export const EBOOK_HUBSPOT_LIST_ID = "816";
 
-/** Value written to the "Landing Page" column in the Google Sheet + the
- *  contact source tag used to tell these leads apart in HubSpot. */
+/** Written to the Google Sheet's Landingpage column + tags the lead in HubSpot. */
 export const EBOOK_SOURCE_LABEL = "E-Book Führungskräfte";
 
-/** Copy — mirrors the mockup in the dev-handover PDF exactly. */
-export const EBOOK_COPY = {
+/** Copy — matches the mockup in Ili's dev-handover PDF. Mirrors the HERO
+ *  shape of leitfaden.ts so the /e-book page uses the same layout. */
+export const HERO = {
   eyebrow: "Kostenloses E-Book",
   headline: {
-    line1Serif: "Dein Vertrieb erreicht alle Ziele.",
-    line2Display: "Genau das ist das Problem.",
+    line1: "Dein Vertrieb erreicht alle Ziele.",
+    line2Serif: "Genau das ist",
+    line2Display: "das Problem.",
   },
   lead:
-    "Die 7 Führungsfehler, die Betriebe jedes Jahr ein Vermögen kosten – und wie du sie in 30 Tagen abstellst.",
-  bullets: [
-    "Warum dein Team seine Ziele verfehlt — und was du sofort daran ändern kannst.",
-    "Die 7 typischen Führungsfehler im Vertrieb, die Unternehmern jedes Jahr Umsatz kosten.",
-    "Konkrete Werkzeuge, um Struktur, Verantwortung und Ergebnisse zurück ins Team zu bringen.",
-    "Ein 30-Tage-Plan, der bereits ab Woche 1 messbare Ergebnisse liefert.",
-  ],
+    "Die 7 Führungsfehler, die Betriebe jedes Jahr ein Vermögen kosten – und wie du sie in 30 Tagen abstellst. Sofort per E-Mail als PDF.",
+  formTag: {
+    title: "E-Book (PDF)",
+    subtitle: "Für Führungskräfte im Vertrieb",
+  },
   submitLabel: "E-Book kostenlos sichern",
-  footerNote: "Kein Spam. Jederzeit abbestellbar.",
+  audience: "Für Vertriebsleiter & Geschäftsführer",
 } as const;
 
-/** Email subject + body copy for the automated Resend fallback (until
- *  the HubSpot workflow is set up by Ili). */
+/** Right-column PDF mockup cover text. */
+export const COVER = {
+  eyebrow: "Führung",
+  titleSerif: "Dein Vertrieb",
+  titleBreak: "erreicht alle",
+  titleDisplay: "Ziele.",
+  subtitleHigh: "Die 7 Führungsfehler",
+  subtitleLow: "im Vertrieb",
+  footerL: "E-Book",
+  footerR: "16 Seiten",
+} as const;
+
+/** Email subject + body copy for the automated Resend send. */
 export const EBOOK_EMAIL = {
   subject: "Dein E-Book: Dein Vertrieb erreicht alle Ziele",
   heading: "Dein E-Book ist da.",

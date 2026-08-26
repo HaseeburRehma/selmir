@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import { Check, Download } from "lucide-react";
 import { TURNSTILE_SITE_KEY } from "@/lib/turnstile";
-import { EBOOK_COPY } from "@/lib/ebook";
+import { HERO } from "@/lib/ebook";
 
 /**
  * Cloudflare Turnstile — invisible bot check. Same widget the leitfaden
@@ -216,7 +216,7 @@ export default function EbookForm() {
         className="btn-gradient group mt-1 flex h-14 w-full items-center justify-center gap-2 rounded-[12px] px-5 text-center text-black transition-transform duration-300 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-70"
       >
         <span className="font-body text-[15px] font-bold uppercase tracking-[0.6px] lg:text-[16px]">
-          {status === "loading" ? "Wird gesendet…" : EBOOK_COPY.submitLabel}
+          {status === "loading" ? "Wird gesendet…" : HERO.submitLabel}
         </span>
         <Download className="size-[20px] opacity-90 transition-transform group-hover:translate-y-0.5" />
       </button>
@@ -224,8 +224,8 @@ export default function EbookForm() {
       {status === "err" && (
         <p className="font-body text-[13px] text-red-300">{msg}</p>
       )}
-      <p className="text-center font-body text-[12px] text-white/45">
-        {EBOOK_COPY.footerNote}{" "}
+      <p className="font-body text-[12px] text-white/40">
+        Kein Spam. Jederzeit abbestellbar.{" "}
         <a
           href="/datenschutz"
           className="underline underline-offset-2 hover:text-white/70"

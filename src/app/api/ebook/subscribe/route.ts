@@ -4,13 +4,13 @@ import path from "node:path";
 import { Resend } from "resend";
 import { verifyTurnstile } from "@/lib/turnstile";
 import {
-  EBOOK_COPY,
   EBOOK_EMAIL,
   EBOOK_HUBSPOT_LIST_ID,
   EBOOK_PDF_FILENAME,
   EBOOK_PDF_PATH,
   EBOOK_PDF_URL,
   EBOOK_SOURCE_LABEL,
+  HERO as EBOOK_HERO,
 } from "@/lib/ebook";
 
 export const runtime = "nodejs";
@@ -360,7 +360,7 @@ export async function POST(req: NextRequest) {
       // a Lead event with the hashed email to Meta Pixel.
       email,
       // Extra copy the client shows on success — mirrors the hero eyebrow.
-      copyEyebrow: EBOOK_COPY.eyebrow,
+      copyEyebrow: EBOOK_HERO.eyebrow,
     });
   } catch (err) {
     console.error("[ebook] resend error:", (err as Error).message);
