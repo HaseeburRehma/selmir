@@ -99,10 +99,9 @@ export default function EbookPage() {
           />
 
           <div className="relative mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-14 lg:grid-cols-[540px_1fr] lg:gap-[90px]">
-            {/* LEFT column on desktop, SECOND on mobile — the PDF mockup
-                above the form makes more sense on a phone (visual first,
-                copy + form second). On lg+ they sit side-by-side as before. */}
-            <Reveal className="order-2 flex flex-col gap-6 lg:order-1">
+            {/* Left on desktop, FIRST on mobile — form up top, PDF mockup
+                stacks below. On lg+ they sit side-by-side as before. */}
+            <Reveal className="order-1 flex flex-col gap-6">
               <span className="flex items-center gap-[14px] font-body text-[13px] font-semibold uppercase leading-[16px] tracking-[2px] text-purple-2">
                 <span
                   aria-hidden
@@ -139,11 +138,12 @@ export default function EbookPage() {
               </div>
             </Reveal>
 
-            {/* RIGHT column on desktop, FIRST on mobile (order-1) so the
-                cover mockup leads the fold on a phone. */}
+            {/* Right on desktop, SECOND on mobile — mockup stacks below
+                the form. Slightly smaller mobile max-width so it feels
+                proportional inside the section. */}
             <Reveal
               delay={0.1}
-              className="order-1 mx-auto flex w-full min-w-0 max-w-[300px] flex-col sm:max-w-[420px] lg:order-2 lg:mx-0 lg:ml-auto lg:max-w-[560px]"
+              className="order-2 mx-auto flex w-full min-w-0 max-w-[260px] flex-col sm:max-w-[380px] lg:mx-0 lg:ml-auto lg:max-w-[560px]"
             >
               <div
                 className="relative w-full overflow-visible"
@@ -191,21 +191,20 @@ export default function EbookPage() {
                       height={42}
                       className="h-[38px] w-auto lg:h-[42px]"
                     />
-                    {/* Same "E-Book (PDF)" badge chip used on the form
-                        column — icon + two lines — placed inside the cover
-                        to reinforce what the visitor is downloading. */}
-                    <div className="inline-flex w-fit items-center gap-3 rounded-[12px] border border-white/[0.10] bg-white/[0.05] px-3 py-2.5">
-                      <span className="grid size-[36px] place-items-center rounded-[9px] bg-purple-2/[0.16]">
+                    {/* Badge chip inside the cover — sized to fit even on
+                        narrow phone widths without the subtitle wrapping. */}
+                    <div className="inline-flex w-fit items-center gap-2.5 rounded-[10px] border border-white/[0.10] bg-white/[0.05] px-2.5 py-2">
+                      <span className="grid size-[30px] shrink-0 place-items-center rounded-[8px] bg-purple-2/[0.16] lg:size-[34px]">
                         <FileText
-                          className="size-[18px] text-purple-2"
+                          className="size-[15px] text-purple-2 lg:size-[17px]"
                           strokeWidth={1.75}
                         />
                       </span>
-                      <div className="flex flex-col leading-tight">
-                        <span className="font-body text-[13px] font-semibold tracking-[-0.2px] text-white">
+                      <div className="flex min-w-0 flex-col leading-tight">
+                        <span className="whitespace-nowrap font-body text-[11.5px] font-semibold tracking-[-0.2px] text-white lg:text-[13px]">
                           {COVER.eyebrow}
                         </span>
-                        <span className="font-body text-[11.5px] tracking-[-0.1px] text-white/50">
+                        <span className="whitespace-nowrap font-body text-[10.5px] tracking-[-0.1px] text-white/50 lg:text-[11.5px]">
                           {HERO.formTag.subtitle}
                         </span>
                       </div>
