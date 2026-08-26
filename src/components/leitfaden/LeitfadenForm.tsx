@@ -110,7 +110,11 @@ export default function LeitfadenForm({
           callback: (token: string) => setTsToken(token),
           "error-callback": () => setTsToken(null),
           "expired-callback": () => setTsToken(null),
-          size: "flexible",
+          // Invisible mode — Cloudflare auto-solves in the background,
+          // no green "Success!" banner or Cloudflare branding appears
+          // inline. If a real challenge is ever needed CF renders it in
+          // a modal instead.
+          size: "invisible",
           theme: "dark",
         });
         return;
@@ -419,11 +423,9 @@ export default function LeitfadenForm({
         async
         defer
       />
-      <div
-        ref={tsContainer}
-        className="min-h-[65px] w-full"
-        aria-label="Sicherheitsprüfung"
-      />
+      {/* Invisible slot — Turnstile mounts here but produces no visible
+          UI. Kept in the tree so CF can attach a challenge modal target. */}
+      <div ref={tsContainer} aria-hidden className="hidden" />
     </>
   );
 

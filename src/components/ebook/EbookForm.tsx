@@ -85,7 +85,9 @@ export default function EbookForm() {
           callback: (token) => setTsToken(token),
           "error-callback": () => setTsToken(null),
           "expired-callback": () => setTsToken(null),
-          size: "flexible",
+          // Invisible mode — no visible widget / Cloudflare banner.
+          // See LeitfadenForm.tsx for the same choice.
+          size: "invisible",
           theme: "dark",
         });
         return;
@@ -380,14 +382,9 @@ export default function EbookForm() {
         </div>
       )}
 
-      {/* Turnstile — hidden on the skip path */}
-      {!skipSms && (
-        <div
-          ref={tsContainer}
-          className="min-h-[65px] w-full"
-          aria-label="Sicherheitsprüfung"
-        />
-      )}
+      {/* Invisible Turnstile — no visible UI. Kept in the tree so CF
+          has a mount point if it needs to render a challenge modal. */}
+      {!skipSms && <div ref={tsContainer} aria-hidden className="hidden" />}
 
       <button
         type="submit"
