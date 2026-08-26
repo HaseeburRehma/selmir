@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { Resend } from "resend";
-import { verifyTurnstile } from "@/lib/turnstile";
+import { checkVerificationCode, normalizeE164 } from "@/lib/twilio";
+import { buildVerifiedCookie, readVerifiedPhone } from "@/lib/phoneVerify";
 import {
   EBOOK_EMAIL,
   EBOOK_HUBSPOT_LIST_ID,
@@ -260,7 +261,7 @@ export async function POST(req: NextRequest) {
     name?: string;
     phone?: string;
     email?: string;
-    turnstileToken?: string;
+    code?: string;
     pageUrl?: string;
   };
   try {
@@ -272,8 +273,9 @@ export async function POST(req: NextRequest) {
     );
   }
   const firstName = (body.name ?? "").trim();
-  const phone = (body.phone ?? "").trim();
+  const rawPhone = (body.phone ?? "").trim();
   const email = (body.email ?? "").trim().toLowerCase();
+  const code = (body.code ?? "").trim();
   const pageUrl = (body.pageUrl ?? "").trim();
 
   if (!firstName) {
@@ -282,7 +284,7 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
   }
-  if (!phone) {
+  if (!rawPhone) {
     return NextResponse.json(
       { ok: false, reason: "phone is required" },
       { status: 400 },
@@ -295,22 +297,42 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Cloudflare Turnstile — bot check first.
-  const ip =
-    req.headers.get("cf-connecting-ip") ??
-    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
-    null;
-  const ts = await verifyTurnstile(body.turnstileToken, ip);
-  if (!ts.success) {
-    console.warn("[ebook] turnstile failed:", ts.reason, ts.errors);
-    return NextResponse.json(
-      {
-        ok: false,
-        reason:
-          "Sicherheitsprüfung fehlgeschlagen. Bitte lade die Seite neu und versuche es erneut.",
-      },
-      { status: 400 },
-    );
+  // Phone verification path A — a valid `sh_pv` cookie from a prior
+  // successful verify (any form) skips Twilio entirely. Server re-checks
+  // the HMAC on every request so a tampered cookie is rejected.
+  const cookieHeader = req.headers.get("cookie");
+  const cookiePhone = readVerifiedPhone(cookieHeader);
+  const normalizedFromInput = normalizeE164(rawPhone);
+  const canUseCookie =
+    !!cookiePhone &&
+    !!normalizedFromInput &&
+    cookiePhone === normalizedFromInput;
+
+  let phone: string;
+  if (canUseCookie) {
+    phone = cookiePhone;
+  } else {
+    // Path B — fresh Twilio Verify check on the 6-digit code that
+    // /api/leitfaden/phone/send-code just sent to the user's phone.
+    if (!code) {
+      return NextResponse.json(
+        {
+          ok: false,
+          reason:
+            "Bitte gib den SMS-Code ein, den wir an deine Nummer geschickt haben.",
+        },
+        { status: 400 },
+      );
+    }
+    const twilio = await checkVerificationCode(rawPhone, code);
+    if (!twilio.ok) {
+      console.warn("[ebook] twilio check failed:", twilio.reason);
+      return NextResponse.json(
+        { ok: false, reason: twilio.reason },
+        { status: 400 },
+      );
+    }
+    phone = twilio.phone;
   }
 
   const origin =
@@ -351,7 +373,10 @@ export async function POST(req: NextRequest) {
     });
     if (error) throw new Error(error.message ?? JSON.stringify(error));
 
-    return NextResponse.json({
+    // Issue the "verified phone" cookie so this browser skips the SMS
+    // step on future e-book / leitfaden submits — same 30-day cookie.
+    const cookie = buildVerifiedCookie(phone);
+    const jsonRes = NextResponse.json({
       ok: true,
       messageId: data?.id ?? null,
       hubspotContactId: hs.ok ? hs.contactId : null,
@@ -361,7 +386,10 @@ export async function POST(req: NextRequest) {
       email,
       // Extra copy the client shows on success — mirrors the hero eyebrow.
       copyEyebrow: EBOOK_HERO.eyebrow,
+      verifiedPhone: phone,
     });
+    if (cookie) jsonRes.headers.set("Set-Cookie", cookie.header);
+    return jsonRes;
   } catch (err) {
     console.error("[ebook] resend error:", (err as Error).message);
     return NextResponse.json(
