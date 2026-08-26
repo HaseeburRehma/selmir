@@ -99,8 +99,10 @@ export default function EbookPage() {
           />
 
           <div className="relative mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-14 lg:grid-cols-[540px_1fr] lg:gap-[90px]">
-            {/* LEFT: eyebrow, headline, lead, PDF chip, form, trust row */}
-            <Reveal className="flex flex-col gap-6">
+            {/* LEFT column on desktop, SECOND on mobile — the PDF mockup
+                above the form makes more sense on a phone (visual first,
+                copy + form second). On lg+ they sit side-by-side as before. */}
+            <Reveal className="order-2 flex flex-col gap-6 lg:order-1">
               <span className="flex items-center gap-[14px] font-body text-[13px] font-semibold uppercase leading-[16px] tracking-[2px] text-purple-2">
                 <span
                   aria-hidden
@@ -155,10 +157,11 @@ export default function EbookPage() {
               </div>
             </Reveal>
 
-            {/* RIGHT: BIG PDF mockup — 3-sheet stack, floating badge. */}
+            {/* RIGHT column on desktop, FIRST on mobile (order-1) so the
+                cover mockup leads the fold on a phone. */}
             <Reveal
               delay={0.1}
-              className="mx-auto flex w-full min-w-0 max-w-[300px] flex-col sm:max-w-[420px] lg:mx-0 lg:ml-auto lg:max-w-[560px]"
+              className="order-1 mx-auto flex w-full min-w-0 max-w-[300px] flex-col sm:max-w-[420px] lg:order-2 lg:mx-0 lg:ml-auto lg:max-w-[560px]"
             >
               <div
                 className="relative w-full overflow-visible"
