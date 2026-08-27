@@ -7,9 +7,9 @@ import { Reveal } from "@/components/ui/Reveal";
 /**
  * Homepage hero — "Erfolg durch Klarheit" (Figma node 3721:2862).
  *
- * Two-column layout: copy on the left, Selmir portrait on the right.
- * Below the hero: the same partner-logo marquee the Sales Mastery hero
- * uses, so the trust bar carries across both pages.
+ * Portrait is a transparent-background PNG downloaded from the Figma
+ * design so it floats over the section without a rounded card border.
+ * Buttons render in a single row on all viewports (no wrap).
  */
 
 const PARTNER_LOGOS = [
@@ -27,7 +27,7 @@ export default function HomeHero() {
       id="home-hero"
       className="relative overflow-hidden bg-bg px-6 pb-16 pt-[120px] md:px-12 md:pb-24 md:pt-[160px] lg:px-[120px] lg:pt-[180px]"
     >
-      {/* Purple bloom + faint grid — same treatment as /leitfaden hero */}
+      {/* Radial vignette + faint grid + purple blooms */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
@@ -54,7 +54,7 @@ export default function HomeHero() {
       />
 
       <div className="container-page relative z-10">
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,620px)_minmax(0,540px)] lg:gap-[80px]">
+        <div className="grid grid-cols-1 items-center gap-10 md:gap-14 lg:grid-cols-[minmax(0,620px)_minmax(0,540px)] lg:gap-[80px]">
           {/* Left — copy */}
           <Reveal className="flex flex-col gap-8">
             <div className="flex flex-col gap-3">
@@ -75,7 +75,7 @@ export default function HomeHero() {
                 />
                 Grenzen überwinden
               </span>
-              <p className="max-w-[540px] font-body text-[16px] leading-[1.65] text-white/70 md:text-[17px]">
+              <p className="max-w-[540px] font-body text-[15.5px] leading-[1.65] text-white/70 md:text-[17px]">
                 Willkommen bei Selmir Suljkanovic — deinem Wegbereiter für
                 systematisierten Vertrieb, klare Führung und ein Umfeld, das
                 immer gewinnt. Von der ersten Struktur bis zur skalierten
@@ -83,50 +83,53 @@ export default function HomeHero() {
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-4">
-              <Button href="/kontakt" icon={<ArrowUpRight className="size-5" />}>
-                Potenzialanalyse sichern
+            {/* Buttons stay in one row on every viewport. Below 380px they
+                shrink text/padding rather than wrap — no line-break either. */}
+            <div className="flex flex-nowrap items-center gap-3 sm:gap-4">
+              <Button
+                href="/kontakt"
+                icon={<ArrowUpRight className="size-4 shrink-0 sm:size-5" />}
+                className="whitespace-nowrap !px-4 !text-[11px] sm:!px-6 sm:!text-[13px]"
+              >
+                Kontakt aufnehmen
               </Button>
               <Button
                 href="#leistungen"
                 variant="secondary"
-                icon={<ArrowRight className="size-5" />}
+                icon={<ArrowRight className="size-4 shrink-0 sm:size-5" />}
+                className="whitespace-nowrap !px-4 !text-[11px] sm:!px-6 sm:!text-[13px]"
               >
-                Leistungen ansehen
+                Über Selmir
               </Button>
             </div>
           </Reveal>
 
-          {/* Right — Selmir portrait */}
+          {/* Right — floating portrait (transparent PNG, no card) */}
           <Reveal
             delay={0.1}
-            className="relative mx-auto w-full max-w-[420px] lg:mx-0 lg:ml-auto lg:max-w-[540px]"
+            className="relative mx-auto w-full max-w-[380px] sm:max-w-[440px] lg:mx-0 lg:ml-auto lg:max-w-[560px]"
           >
-            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[24px] border border-purple-2/40 shadow-[0_40px_100px_-20px_rgba(112,77,255,0.45)]">
+            {/* Soft purple glow behind the portrait */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute left-1/2 top-1/2 size-[85%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-2/30 blur-[80px]"
+            />
+            <div className="relative aspect-[4/5] w-full">
               <Image
-                src="/figma/about/selmir-portrait.jpg"
-                alt="Selmir Suljkanovic — Portrait"
+                src="/figma/home/selmir-hero.png"
+                alt="Selmir Suljkanovic"
                 fill
                 priority
-                sizes="(max-width: 1024px) 90vw, 540px"
-                className="object-cover object-top"
-              />
-              {/* soft top rim */}
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-x-0 top-0 h-[35%]"
-                style={{
-                  background:
-                    "linear-gradient(180deg, rgba(9,7,17,0.28) 0%, rgba(9,7,17,0) 100%)",
-                }}
+                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 440px, 560px"
+                className="object-contain object-bottom"
               />
             </div>
           </Reveal>
         </div>
 
         {/* Trust bar */}
-        <div className="mt-20 flex flex-col items-center gap-6 md:mt-24">
-          <p className="text-center font-label text-[14px] font-bold uppercase tracking-wide text-white/60 lg:text-[16px]">
+        <div className="mt-16 flex flex-col items-center gap-6 md:mt-20">
+          <p className="text-center font-label text-[13px] font-bold uppercase tracking-[2px] text-white/60 lg:text-[15px]">
             Vertraut von führenden Unternehmen
           </p>
           <Marquee gap={88} className="max-w-full opacity-60">

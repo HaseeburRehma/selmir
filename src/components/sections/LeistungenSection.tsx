@@ -1,66 +1,92 @@
-import {
-  Brain,
-  Compass,
-  Crown,
-  GraduationCap,
-  MessageSquare,
-  Users,
-  type LucideIcon,
-} from "lucide-react";
+import Image from "next/image";
 import { Reveal } from "@/components/ui/Reveal";
 
 /**
- * "Leistungen — Womit wir dein Wachstum bauen"
- * (Figma node 3724:2875).
+ * "Leistungen — Womit wir dein Wachstum bauen"  (Figma node 3724:2875).
  *
- * Six programs in a 1/2/3-column responsive grid. Each card has a
- * purple-glow icon disc, name, and 2-line description.
+ * Six services in a 2x3 grid (mobile: 1 col, tablet: 2, desktop: 3),
+ * separated by thin dividers just like the Figma. Each card uses the
+ * neon-glow icon exported from Figma sitting inside 3 concentric halo
+ * rings — assets live in /figma/leistungen/.
  */
 
 type Service = {
-  icon: LucideIcon;
+  icon: string;
   name: string;
   body: string;
 };
 
 const SERVICES: Service[] = [
   {
-    icon: MessageSquare,
+    icon: "/figma/leistungen/vertrieb.png",
     name: "Vertrieb",
     body:
       "Gesprächsstrukturen, Einwandbehandlung und Abschlusstechniken, die nicht vom Bauchgefühl abhängen, sondern vom System.",
   },
   {
-    icon: Brain,
+    icon: "/figma/leistungen/persoenlichkeit.png",
     name: "Persönlichkeitsentwicklung",
     body:
       "Management und persönliche Entwicklung gehen Hand in Hand – hier arbeitest du an Haltung, Fokus und Führung.",
   },
   {
-    icon: Compass,
+    icon: "/figma/leistungen/wachstum.png",
     name: "Wachstumsmentoring",
     body:
       "Dein Navigator in der Welt des systematisierten Erfolgs: begleitetes Wachstum vom Marketing bis zur Auslieferung.",
   },
   {
-    icon: GraduationCap,
+    icon: "/figma/leistungen/sales-academy.png",
     name: "Sales Academy",
     body:
       "Über 12 Jahre Management-Wissen als Programm für dich und deine Führungskräfte – strukturiert und wiederholbar.",
   },
   {
-    icon: Crown,
+    icon: "/figma/leistungen/elite-club.png",
     name: "Elite Club",
     body:
       "Das Umfeld gewinnt immer. Ein Netzwerk aus Unternehmern, Vertrieblern und Machern, das dich weiterträgt.",
   },
   {
-    icon: Users,
+    icon: "/figma/leistungen/fuehrungsseminar.png",
     name: "Führungsseminar",
     body:
       "Klare Führung, strukturierte Prozesse: so entwickelst du nicht nur ein Business, sondern auch Menschen.",
   },
 ];
+
+/** Icon well: concentric halo rings + the neon icon centered on top.
+ *  The halos are pure CSS radial gradients so we don't need to ship
+ *  the Figma SVG masks separately. */
+function IconWell({ src, alt }: { src: string; alt: string }) {
+  return (
+    <div className="relative flex h-[220px] w-full items-center justify-center sm:h-[240px] lg:h-[260px]">
+      {/* Halo — outer / mid / inner */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute size-[220px] rounded-full border border-purple-2/[0.12] sm:size-[240px]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute size-[160px] rounded-full border border-purple-2/[0.18] sm:size-[170px]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute size-[110px] rounded-full bg-[radial-gradient(circle,rgba(116,84,243,0.18)_0%,rgba(116,84,243,0)_70%)]"
+      />
+      {/* Neon icon */}
+      <div className="relative size-[130px] sm:size-[150px] lg:size-[170px]">
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes="170px"
+          className="object-contain"
+        />
+      </div>
+    </div>
+  );
+}
 
 export default function LeistungenSection() {
   return (
@@ -96,32 +122,37 @@ export default function LeistungenSection() {
           </p>
         </Reveal>
 
-        <div className="mt-14 grid grid-cols-1 gap-5 md:mt-16 md:grid-cols-2 lg:mt-[72px] lg:grid-cols-3 lg:gap-6">
-          {SERVICES.map((s, i) => {
-            const Icon = s.icon;
-            return (
+        {/* Bordered card grid — dividers between rows/cols, matching Figma */}
+        <div className="mt-14 overflow-hidden rounded-[8px] border border-white/[0.09] bg-white/[0.02] md:mt-16 lg:mt-[72px]">
+          <div className="grid grid-cols-1 divide-y divide-white/[0.09] md:grid-cols-2 md:divide-x lg:grid-cols-3">
+            {SERVICES.map((s, i) => (
               <Reveal
                 key={s.name}
                 delay={i * 0.05}
-                className="group flex h-full flex-col gap-5 rounded-[20px] border border-white/[0.09] bg-white/[0.02] p-7 transition-colors duration-300 hover:border-purple-2/50 hover:bg-white/[0.04] lg:p-8"
+                className={
+                  // Bottom border on all but the last row (mobile), plus col
+                  // dividers via divide-x on md+ — grid handles the rest.
+                  "flex h-full flex-col items-stretch " +
+                  // Reapply top-border tint on wrapped cells (grid divide
+                  // handles cols but rows need explicit borders on lg).
+                  (i >= 3 ? "lg:border-t lg:border-white/[0.09] " : "") +
+                  // The `divide-x` on md+ conflicts with lg grid rows; use
+                  // manual left-border for the 4th/5th/6th cell on lg only.
+                  (i % 3 !== 0 ? "lg:border-l lg:border-white/[0.09] " : "")
+                }
               >
-                <span className="grid size-[54px] shrink-0 place-items-center rounded-[14px] border border-purple-2/25 bg-purple-2/[0.14] shadow-[inset_0_0_28px_rgba(116,84,243,0.35)]">
-                  <Icon
-                    className="size-[22px] text-purple-2"
-                    strokeWidth={1.75}
-                  />
-                </span>
-                <div className="flex flex-col gap-3">
-                  <h3 className="font-serif text-[22px] leading-[1.2] tracking-[-0.4px] text-white lg:text-[24px]">
+                <IconWell src={s.icon} alt={s.name} />
+                <div className="flex flex-col gap-3.5 px-8 pb-10 pt-6 lg:px-10 lg:pb-12 lg:pt-8">
+                  <h3 className="font-body text-[18px] font-semibold tracking-[-0.3px] text-white lg:text-[19px]">
                     {s.name}
                   </h3>
-                  <p className="font-body text-[14.5px] leading-[1.55] text-white/60 lg:text-[15px]">
+                  <p className="font-body text-[14.5px] leading-[1.6] tracking-[-0.15px] text-white/60 lg:text-[15px]">
                     {s.body}
                   </p>
                 </div>
               </Reveal>
-            );
-          })}
+            ))}
+          </div>
         </div>
       </div>
     </section>
