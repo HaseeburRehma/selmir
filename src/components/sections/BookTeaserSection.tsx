@@ -1,90 +1,155 @@
 import Image from "next/image";
-import { ShoppingBag } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import Link from "next/link";
+import { CalendarDays } from "lucide-react";
 import { Reveal } from "@/components/ui/Reveal";
 
 /**
- * Book teaser — mirrors the /buch hero at homepage scale.
- * (Figma section 3737:3492 — "Section - Ueber Selmir" (second occurrence),
- * used as the book callout row.)
+ * Homepage "Kostenloser Leitfaden" teaser  (Figma node 3737:3492).
  *
- * Left: title cluster + CTA. Right: full-wrap cover image.
+ * Two-column layout:
+ *   LEFT   Physical book mockup — SEIN. TUN. HABEN. front cover with
+ *          purple halo behind and floor shadow underneath. Spine
+ *          gradient + gloss overlay make it read as a 3D book.
+ *   RIGHT  Eyebrow, serif+display heading, body copy, purple-gradient
+ *          "LERNE SELMIR KENNEN" CTA linking to /leitfaden.
+ *
+ * Whole section sits over a faint grid-image background at 50 % opacity
+ * (same asset the Figma design uses).
  */
+
+const LEITFADEN_HREF = "/leitfaden";
+
 export default function BookTeaserSection() {
   return (
     <section
-      id="buch-teaser"
-      className="relative overflow-hidden bg-bg px-6 py-24 md:px-12 md:py-28 lg:px-[120px] lg:py-[130px]"
+      id="leitfaden-teaser"
+      className="relative overflow-hidden bg-bg px-6 py-24 md:px-12 md:py-28 lg:px-[120px] lg:py-[140px]"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-24 top-1/2 h-[520px] w-[520px] -translate-y-1/2 rounded-full bg-purple-2/20 blur-[150px]"
-      />
+      {/* Faint grid background — matches Figma image 1 at 50% opacity */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-50">
+        <Image
+          src="/figma/leitfaden-teaser/bg-grid.png"
+          alt=""
+          fill
+          sizes="100vw"
+          className="object-cover"
+        />
+      </div>
 
-      <div className="container-page relative">
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,500px)_minmax(0,640px)] lg:gap-16">
-          {/* Left — title + CTA */}
-          <Reveal className="flex flex-col gap-8">
-            <div className="flex flex-col gap-5">
-              <span className="flex items-center gap-3 font-body text-[13px] font-semibold uppercase tracking-[2px] text-purple-2">
-                <span
-                  aria-hidden
-                  className="h-[2px] w-10 rounded-full bg-purple-2"
-                />
-                Das Buch
-              </span>
-              <h2 className="flex flex-col text-white">
-                <span className="font-serif text-[44px] leading-[0.95] tracking-[-1.5px] sm:text-[56px] lg:text-[64px] lg:tracking-[-2.4px]">
-                  Sein.
-                </span>
-                <span className="font-display text-[40px] leading-[0.95] tracking-[-1.5px] sm:text-[50px] lg:text-[58px] lg:tracking-[-2.4px]">
-                  TUN.
-                </span>
-                <span className="font-display text-[44px] leading-[0.95] tracking-[-1.5px] sm:text-[56px] lg:text-[64px] lg:tracking-[-2.8px]">
-                  HABEN.
-                </span>
-              </h2>
-              <p className="max-w-[420px] font-serif text-[20px] leading-[1.3] tracking-[-0.4px] text-white/85 sm:text-[22px]">
-                Unaufhaltsam. Im Krieg geboren.
-                <br />
-                Im Vertrieb gewonnen.
-              </p>
-              <p className="max-w-[440px] font-body text-[15.5px] leading-[1.6] text-white/60 md:text-[16.5px]">
-                Die Biografie von Selmir Suljkanovic — über Verlust, Disziplin
-                und den Weg vom Kriegsflüchtling zum Unternehmer.
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-4">
-              <Button href="/buch" icon={<ShoppingBag className="size-5" />}>
-                Zum Buch
-              </Button>
-              <span className="font-body text-[13px] text-white/45">
-                Hardcover · 190 Seiten · ISBN 978-3-98256066-3
-              </span>
-            </div>
+      <div className="container-page relative z-10">
+        <div className="grid grid-cols-1 items-center gap-14 lg:grid-cols-[minmax(0,440px)_minmax(0,640px)] lg:gap-[53px]">
+          {/* LEFT — 3D book mockup */}
+          <Reveal className="relative mx-auto flex w-full max-w-[340px] items-center justify-center lg:mx-0 lg:max-w-[440px]">
+            <BookMockup />
           </Reveal>
 
-          {/* Right — full-wrap cover */}
-          <Reveal delay={0.1}>
-            <div className="relative mx-auto w-full max-w-[560px] lg:mx-0 lg:ml-auto lg:max-w-[640px]">
-              <div
+          {/* RIGHT — copy + CTA */}
+          <Reveal delay={0.1} className="flex flex-col gap-6 lg:gap-7">
+            <span className="flex items-center gap-3.5 font-body text-[13px] font-semibold uppercase tracking-[2px] text-purple-2">
+              <span
                 aria-hidden
-                className="pointer-events-none absolute -inset-8 rounded-full bg-purple-1/25 blur-[100px]"
+                className="h-[2px] w-10 rounded-full bg-purple-2"
               />
-              <div className="relative overflow-hidden rounded-2xl border border-purple-2/40 shadow-[0_30px_80px_-20px_rgba(116,84,243,0.55)]">
-                <Image
-                  src="/figma/buch/buchcover-v3.png"
-                  alt="SEIN. TUN. HABEN. — Buchumschlag"
-                  width={1125}
-                  height={804}
-                  sizes="(max-width: 1024px) 90vw, 640px"
-                  className="h-auto w-full"
-                />
-              </div>
+              Kostenloser Leitfaden
+            </span>
+
+            <h2 className="font-serif text-[36px] leading-[1.15] tracking-[-1.2px] text-white sm:text-[44px] md:text-[50px] lg:text-[50px] lg:leading-[1.18] lg:tracking-[-1.8px]">
+              Der Verkaufsleitfaden
+              <br />
+              aus dem{" "}
+              <span className="font-display">Rollenspiel-Video.</span>
+            </h2>
+
+            <p className="max-w-[600px] font-body text-[15.5px] leading-[1.5] tracking-[-0.2px] text-white/70 md:text-[17px] md:leading-[1.5]">
+              Genau der Gesprächsleitfaden, den du im YouTube-Rollenspiel
+              gesehen hast – Schritt für Schritt: Begrüßung, die richtigen
+              Fragen, Einwandbehandlung und Abschluss. Trag dich ein und du
+              bekommst die komplette PDF sofort per E-Mail.
+            </p>
+
+            <div>
+              <Link
+                href={LEITFADEN_HREF}
+                className="btn-gradient group inline-flex h-14 items-center justify-center gap-2.5 rounded-[10px] px-6 text-center text-black transition-transform duration-300 hover:-translate-y-0.5"
+              >
+                <span className="font-body text-[14px] font-bold uppercase tracking-[0.6px]">
+                  Lerne Selmir kennen
+                </span>
+                <CalendarDays className="size-[20px] opacity-90 transition-transform group-hover:translate-y-0.5" />
+              </Link>
             </div>
           </Reveal>
         </div>
       </div>
     </section>
+  );
+}
+
+/**
+ * The book mockup — front cover image + spine gradient + floor shadow +
+ * purple halo, layered so the whole thing reads as a physical book
+ * catching light from the top-right.
+ */
+function BookMockup() {
+  return (
+    <div className="relative aspect-[440/638] w-full">
+      {/* Halo behind the book */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-[42%] size-[130%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(176,137,255,0.35)_0%,rgba(116,84,243,0.14)_45%,rgba(10,8,18,0)_75%)] blur-[40px]"
+      />
+
+      {/* Floor shadow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-[6%] bottom-[2%] h-[8%] rounded-[50%] bg-[radial-gradient(ellipse,rgba(0,0,0,0.55)_0%,rgba(0,0,0,0)_65%)] blur-[10px]"
+      />
+
+      {/* Side / page block visible on the right edge (gives depth) */}
+      <div
+        aria-hidden
+        className="absolute left-[8.5%] top-[3.5%] h-[85%] w-[85%] rounded-[4px]"
+        style={{
+          background:
+            "linear-gradient(90deg, rgb(41,33,66) 0%, rgb(41,33,66) 86%, rgb(122,115,158) 93%, rgb(61,51,92) 100%)",
+        }}
+      />
+
+      {/* Front cover image */}
+      <div
+        className="absolute left-[7%] top-[2.5%] h-[90%] w-[86%] overflow-hidden rounded-l-[2px] rounded-r-[4px]"
+        style={{
+          boxShadow:
+            "-18px 0px 50px 0px rgba(115,84,242,0.35), 26px 34px 60px 0px rgba(0,0,0,0.65)",
+        }}
+      >
+        <Image
+          src="/figma/leitfaden-teaser/buch-cover.png"
+          alt="SEIN. TUN. HABEN. — Buchcover"
+          fill
+          sizes="(max-width: 1024px) 90vw, 440px"
+          className="object-cover"
+          priority={false}
+        />
+        {/* Gloss highlight sweeping across the cover */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(56deg, rgba(255,255,255,0.14) 14%, rgba(255,255,255,0) 46%, rgba(115,84,242,0.12) 86%)",
+          }}
+        />
+        {/* Binding shadow on the left edge */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 left-0 w-[7%]"
+          style={{
+            background:
+              "linear-gradient(90deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.18) 55%, rgba(255,255,255,0.06) 100%)",
+          }}
+        />
+      </div>
+    </div>
   );
 }
