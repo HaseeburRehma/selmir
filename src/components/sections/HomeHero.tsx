@@ -54,32 +54,27 @@ export default function HomeHero() {
       />
 
       <div className="container-page relative z-10">
-        <div className="grid grid-cols-1 items-center gap-10 md:gap-14 lg:grid-cols-[minmax(0,620px)_minmax(0,540px)] lg:gap-[80px]">
+        <div className="grid grid-cols-1 items-center gap-10 md:gap-14 lg:grid-cols-[minmax(0,720px)_minmax(0,520px)] lg:gap-[64px]">
           {/* Left — copy */}
           <Reveal className="flex flex-col gap-8">
-            <div className="flex flex-col gap-3">
-              <h1 className="font-serif text-[42px] leading-[1.05] tracking-[-1.5px] text-white sm:text-[56px] md:text-[68px] lg:text-[72px] lg:tracking-[-2.5px]">
-                Erfolg durch{" "}
-                <span className="font-display">Klarheit.</span>
+            <div className="flex flex-col gap-4">
+              <h1 className="text-[40px] leading-[1.05] tracking-[-1.2px] text-white sm:text-[52px] md:text-[60px] lg:whitespace-nowrap lg:text-[66px] lg:tracking-[-2.2px]">
+                <span className="font-serif italic font-normal">Erfolg durch</span>{" "}
+                <span className="font-body font-extrabold tracking-[-2px]">Klarheit</span>
               </h1>
-              <p className="font-serif text-[22px] leading-[1.25] tracking-[-0.5px] text-white/85 sm:text-[26px] md:text-[30px] lg:text-[34px]">
+              <p className="font-serif italic text-[22px] leading-[1.25] tracking-[-0.5px] text-white/85 sm:text-[26px] md:text-[30px] lg:text-[32px]">
                 Strategien, die bewegen.
               </p>
             </div>
 
             <div className="flex flex-col gap-4">
-              <span className="flex items-center gap-3.5 font-body text-[13px] font-semibold uppercase tracking-[2px] text-purple-2">
-                <span
-                  aria-hidden
-                  className="h-[2px] w-10 rounded-full bg-purple-2"
-                />
-                Grenzen überwinden
-              </span>
-              <p className="max-w-[540px] font-body text-[15.5px] leading-[1.65] text-white/70 md:text-[17px]">
-                Willkommen bei Selmir Suljkanovic — deinem Wegbereiter für
-                systematisierten Vertrieb, klare Führung und ein Umfeld, das
-                immer gewinnt. Von der ersten Struktur bis zur skalierten
-                Vertriebsmannschaft: hier bekommst du Klarheit statt Chaos.
+              <p className="font-body text-[15px] font-bold tracking-[-0.2px] text-white md:text-[16px]">
+                Grenzen überwinden - Wachstum kann so einfach sein.
+              </p>
+              <p className="max-w-[560px] font-body text-[15px] leading-[1.65] text-white/70 md:text-[16px]">
+                Willkommen auf der Plattform, wo Visionen Wirklichkeit werden – wo
+                Management und persönliche Entwicklung Hand in Hand gehen, um
+                dein Business nicht nur zu skalieren, sondern zu revolutionieren.
               </p>
             </div>
 
@@ -107,20 +102,20 @@ export default function HomeHero() {
           {/* Right — floating portrait (transparent PNG, no card) */}
           <Reveal
             delay={0.1}
-            className="relative mx-auto w-full max-w-[380px] sm:max-w-[440px] lg:mx-0 lg:ml-auto lg:max-w-[560px]"
+            className="relative mx-auto w-full max-w-[420px] sm:max-w-[500px] lg:mx-0 lg:ml-auto lg:-mt-16 lg:max-w-[640px]"
           >
             {/* Soft purple glow behind the portrait */}
             <div
               aria-hidden
               className="pointer-events-none absolute left-1/2 top-1/2 size-[85%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-2/30 blur-[80px]"
             />
-            <div className="relative aspect-[4/5] w-full">
+            <div className="relative aspect-[3/4] w-full">
               <Image
                 src="/figma/home/selmir-hero.png"
                 alt="Selmir Suljkanovic"
                 fill
                 priority
-                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 440px, 560px"
+                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 500px, 640px"
                 className="object-contain object-bottom"
               />
             </div>

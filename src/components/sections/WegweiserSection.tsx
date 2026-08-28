@@ -57,9 +57,11 @@ export default function WegweiserSection() {
             />
             Wegweiser
           </span>
-          <h2 className="max-w-[880px] font-serif text-[32px] leading-[1.15] tracking-[-1px] text-white md:text-[44px] lg:text-[52px] lg:tracking-[-1.6px]">
-            Dein Einstieg in{" "}
-            <span className="font-display">systematisierten Erfolg.</span>
+          <h2 className="max-w-[960px] text-[32px] leading-[1.12] tracking-[-1px] text-white md:text-[46px] lg:text-[56px] lg:tracking-[-1.8px]">
+            <span className="font-serif italic font-normal">Dein Einstieg in</span>{" "}
+            <span className="font-body font-extrabold tracking-[-1.5px]">
+              systematisierten Erfolg.
+            </span>
           </h2>
           <p className="max-w-[720px] font-body text-[15.5px] leading-[1.6] text-white/60 md:text-[16.5px]">
             Vier Wege, ein Ziel: Klarheit, Struktur und planbares Wachstum für
@@ -78,10 +80,10 @@ export default function WegweiserSection() {
                 aria-hidden
                 className="pointer-events-none absolute inset-x-0 top-0 h-[30%] bg-[radial-gradient(120%_100%_at_50%_0%,rgba(116,84,243,0.16)_0%,rgba(10,8,18,0)_75%)]"
               />
-              <span className="relative font-display text-[42px] leading-none tracking-[-1.5px] text-purple-2 lg:text-[52px]">
+              <span className="relative font-body font-extrabold text-[44px] leading-none tracking-[-2px] text-purple-2 lg:text-[54px]">
                 {p.n}
               </span>
-              <h3 className="relative font-serif text-[24px] leading-[1.2] tracking-[-0.6px] text-white lg:text-[28px]">
+              <h3 className="relative font-serif italic text-[24px] leading-[1.2] tracking-[-0.6px] text-white lg:text-[28px]">
                 {p.title}
               </h3>
               <p className="relative font-body text-[14.5px] leading-[1.55] text-white/60 lg:text-[15px]">
@@ -89,7 +91,7 @@ export default function WegweiserSection() {
               </p>
               <Link
                 href={p.href}
-                className="relative mt-auto inline-flex items-center gap-2 font-body text-[13.5px] font-semibold uppercase tracking-[1.2px] text-purple-2 transition-colors hover:text-white"
+                className="relative mt-auto inline-flex items-center gap-2 font-body text-[14px] font-semibold text-purple-2 transition-colors hover:text-white"
               >
                 Mehr erfahren
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
