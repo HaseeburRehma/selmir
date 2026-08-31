@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CalendarDays } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { Reveal } from "@/components/ui/Reveal";
 
 /**
@@ -17,7 +17,7 @@ import { Reveal } from "@/components/ui/Reveal";
  * (same asset the Figma design uses).
  */
 
-const LEITFADEN_HREF = "/leitfaden";
+const BUCH_HREF = "/buch";
 
 export default function BookTeaserSection() {
   return (
@@ -50,32 +50,35 @@ export default function BookTeaserSection() {
                 aria-hidden
                 className="h-[2px] w-10 rounded-full bg-purple-2"
               />
-              Kostenloser Leitfaden
+              Das Buch
             </span>
 
-            <h2 className="font-serif text-[36px] leading-[1.15] tracking-[-1.2px] text-white sm:text-[44px] md:text-[50px] lg:text-[50px] lg:leading-[1.18] lg:tracking-[-1.8px]">
-              Der Verkaufsleitfaden
+            <h2 className="text-[36px] leading-[1.12] tracking-[-1.2px] text-white sm:text-[44px] md:text-[50px] lg:leading-[1.14] lg:tracking-[-1.8px]">
+              <span className="font-serif italic font-normal">
+                Sein. Tun. Haben.
+              </span>
               <br />
-              aus dem{" "}
-              <span className="font-display">Rollenspiel-Video.</span>
+              <span className="font-body font-extrabold tracking-[-1.6px]">
+                Das Buch von Selmir Suljkanovic.
+              </span>
             </h2>
 
-            <p className="max-w-[600px] font-body text-[15.5px] leading-[1.5] tracking-[-0.2px] text-white/70 md:text-[17px] md:leading-[1.5]">
-              Genau der Gesprächsleitfaden, den du im YouTube-Rollenspiel
-              gesehen hast – Schritt für Schritt: Begrüßung, die richtigen
-              Fragen, Einwandbehandlung und Abschluss. Trag dich ein und du
-              bekommst die komplette PDF sofort per E-Mail.
+            <p className="max-w-[600px] font-body text-[15.5px] leading-[1.55] tracking-[-0.2px] text-white/70 md:text-[17px]">
+              Der Weg vom Bauchgefühl zum planbaren Wachstum – Prinzipien,
+              Struktur und Vertrieb in einem Buch, das Inhaber und Führungs­kräfte
+              seit Jahren nutzen, um ihren Betrieb vom Kopf auf die Systeme zu
+              stellen. Gemeinsam mit Christian Schommers.
             </p>
 
             <div>
               <Link
-                href={LEITFADEN_HREF}
+                href={BUCH_HREF}
                 className="btn-gradient group inline-flex h-14 items-center justify-center gap-2.5 rounded-[10px] px-6 text-center text-black transition-transform duration-300 hover:-translate-y-0.5"
               >
                 <span className="font-body text-[14px] font-bold uppercase tracking-[0.6px]">
-                  Lerne Selmir kennen
+                  Jetzt zum Buch
                 </span>
-                <CalendarDays className="size-[20px] opacity-90 transition-transform group-hover:translate-y-0.5" />
+                <ArrowUpRight className="size-[20px] opacity-90 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </Link>
             </div>
           </Reveal>

@@ -58,23 +58,23 @@ export default function HomeHero() {
           {/* Left — copy */}
           <Reveal className="flex flex-col gap-8">
             <div className="flex flex-col gap-4">
-              <h1 className="text-[40px] leading-[1.05] tracking-[-1.2px] text-white sm:text-[52px] md:text-[60px] lg:whitespace-nowrap lg:text-[66px] lg:tracking-[-2.2px]">
-                <span className="font-serif italic font-normal">Erfolg durch</span>{" "}
-                <span className="font-body font-extrabold tracking-[-2px]">Klarheit</span>
+              <h1 className="text-[34px] leading-[1.1] tracking-[-1px] text-white sm:text-[42px] md:text-[50px] lg:text-[56px] lg:leading-[1.08] lg:tracking-[-1.8px]">
+                <span className="font-serif italic font-normal">Struktur & Vertrieb</span>{" "}
+                <span className="font-body font-extrabold tracking-[-1.6px]">
+                  für inhabergeführte Betriebe
+                </span>
               </h1>
-              <p className="font-serif italic text-[22px] leading-[1.25] tracking-[-0.5px] text-white/85 sm:text-[26px] md:text-[30px] lg:text-[32px]">
-                Strategien, die bewegen.
+              <p className="font-serif italic text-[20px] leading-[1.3] tracking-[-0.4px] text-white/85 sm:text-[24px] md:text-[28px] lg:text-[30px]">
+                Dein Betrieb läuft. Aber nur, wenn du selbst dranstehst.
               </p>
             </div>
 
             <div className="flex flex-col gap-4">
-              <p className="font-body text-[15px] font-bold tracking-[-0.2px] text-white md:text-[16px]">
-                Grenzen überwinden - Wachstum kann so einfach sein.
-              </p>
-              <p className="max-w-[560px] font-body text-[15px] leading-[1.65] text-white/70 md:text-[16px]">
-                Willkommen auf der Plattform, wo Visionen Wirklichkeit werden – wo
-                Management und persönliche Entwicklung Hand in Hand gehen, um
-                dein Business nicht nur zu skalieren, sondern zu revolutionieren.
+              <p className="max-w-[600px] font-body text-[15px] leading-[1.65] text-white/70 md:text-[16.5px]">
+                Wir helfen Inhabern & Führungskräften, ihren Vertrieb und ihre
+                Struktur so aufzustellen, dass der Betrieb wächst – ohne dass
+                sie noch mehr Stunden reinstecken. Klare Prozesse, planbare
+                Zahlen, ein Betrieb, der auch ohne dich funktioniert.
               </p>
             </div>
 

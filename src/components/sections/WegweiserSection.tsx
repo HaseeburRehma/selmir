@@ -14,31 +14,31 @@ import { Reveal } from "@/components/ui/Reveal";
 const PILLARS = [
   {
     n: "01",
-    title: "Über Selmir",
+    title: "Vertrieb, der ohne dich verkauft",
     body:
-      "Die Reise vom Kriegsflüchtling zum Wachstumsmentor — Werte, Prinzipien und Haltung, die dieses Umfeld tragen.",
-    href: "/ueber",
+      "Ein sauberer Prozess von der Anfrage bis zum Abschluss – kein Lead geht mehr verloren, kein Auftrag stirbt in der Funkstille nach dem Angebot.",
+    href: "#leistungen",
   },
   {
     n: "02",
-    title: "Vision",
+    title: "Struktur, die Wachstum trägt",
     body:
-      "Visionen werden Wirklichkeit: klare Führung, strukturierte Prozesse und ein Umfeld, das immer gewinnt.",
-    href: "/#leistungen",
+      "Klare Zuständigkeiten und Zahlen, an denen jeder sieht, wo er steht. Damit mehr Umsatz nicht automatisch mehr Chaos bedeutet.",
+    href: "#leistungen",
   },
   {
     n: "03",
-    title: "Leistungen",
+    title: "Führung, die entlastet",
     body:
-      "Vertrieb, Persönlichkeitsentwicklung, Wachstumsmentoring und Seminare – alles aus einer Hand.",
+      "Eine Ebene, die selbst entscheidet und liefert – damit nicht jede Frage über deinen Tisch läuft und du wieder Zeit für das Wesentliche hast.",
     href: "#leistungen",
   },
   {
     n: "04",
-    title: "Karriere",
+    title: "Ergebnisse, die planbar sind",
     body:
-      "Werde Teil eines Teams, das Menschen genauso konsequent entwickelt wie Zahlen.",
-    href: "#footer",
+      "Weg vom Bauchgefühl, hin zu Zahlen, auf die du dich verlassen kannst. Umsatz, der nicht mehr zwischen Boom und Funkstille schwankt.",
+    href: "#leistungen",
   },
 ];
 
@@ -60,12 +60,12 @@ export default function WegweiserSection() {
           <h2 className="max-w-[960px] text-[32px] leading-[1.12] tracking-[-1px] text-white md:text-[46px] lg:text-[56px] lg:tracking-[-1.8px]">
             <span className="font-serif italic font-normal">Dein Einstieg in</span>{" "}
             <span className="font-body font-extrabold tracking-[-1.5px]">
-              systematisierten Erfolg.
+              planbaren Erfolg.
             </span>
           </h2>
           <p className="max-w-[720px] font-body text-[15.5px] leading-[1.6] text-white/60 md:text-[16.5px]">
-            Vier Wege, ein Ziel: Klarheit, Struktur und planbares Wachstum für
-            dich und dein Unternehmen.
+            Vier Hebel, ein Ziel: ein Betrieb, der wächst, ohne dass alles an dir
+            hängt.
           </p>
         </Reveal>
 
