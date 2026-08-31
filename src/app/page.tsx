@@ -4,6 +4,8 @@ import WegweiserSection from "@/components/sections/WegweiserSection";
 import LeistungenSection from "@/components/sections/LeistungenSection";
 import NetzwerkerSection from "@/components/sections/NetzwerkerSection";
 import CaseStudiesSection from "@/components/sections/CaseStudiesSection";
+import PodcastTeaserSection from "@/components/sections/PodcastTeaserSection";
+import PricingSection from "@/components/sections/PricingSection";
 import BookTeaserSection from "@/components/sections/BookTeaserSection";
 import GallerySection from "@/components/sections/GallerySection";
 import TeamSection from "@/components/sections/TeamSection";
@@ -29,7 +31,17 @@ export default function Home() {
         <WegweiserSection />
         <LeistungenSection />
         <NetzwerkerSection />
-        <CaseStudiesSection />
+        {/*
+          Case studies with the podcast teaser slotted between the
+          Jürgen Hohnen and Hörmann cases (Figma comment: "we need a
+          section linking to podcast pages"). Ticket pricing comes
+          straight after the last case study (Figma comment: "Add Ticket
+          section here from sales mastery page").
+        */}
+        <CaseStudiesSection
+          insertAfter={{ Hohnen: <PodcastTeaserSection /> }}
+        />
+        <PricingSection />
         <BookTeaserSection />
         <GallerySection />
         <TeamSection />

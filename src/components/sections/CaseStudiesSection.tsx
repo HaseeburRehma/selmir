@@ -1,3 +1,4 @@
+import { Fragment, type ReactNode } from "react";
 import { Reveal } from "@/components/ui/Reveal";
 import LpCaseStudy from "@/components/landing/LpCaseStudy";
 import { CASE_STUDIES } from "@/lib/landing-pages";
@@ -6,10 +7,17 @@ import { CASE_STUDIES } from "@/lib/landing-pages";
  * Homepage "Case Studies" section. Same four big cards used on every
  * landing page (LpCaseStudy) — ebork, Geerkens, Jürgen Hohnen, Hörmann —
  * so the story stays consistent everywhere the visitor lands.
- * The card CTA points at the homepage ticket pricing (#tickets) instead
- * of the landing-page offer form (#analyse).
+ *
+ * `insertAfter` lets the caller drop an arbitrary node between two case
+ * studies (keyed by a substring of the study's eyebrow, e.g. "Hohnen").
+ * The homepage uses it to slot a podcast teaser between Jürgen Hohnen
+ * and Hörmann per Figma feedback.
  */
-export default function CaseStudiesSection() {
+type Props = {
+  insertAfter?: Record<string, ReactNode>;
+};
+
+export default function CaseStudiesSection({ insertAfter }: Props = {}) {
   return (
     <section id="cases">
       <div className="bg-bg px-6 pt-24 md:px-12 md:pt-32 lg:px-[120px] lg:pt-[140px]">
@@ -28,15 +36,24 @@ export default function CaseStudiesSection() {
         </div>
       </div>
 
-      {CASE_STUDIES.map((study) => (
-        <LpCaseStudy
-          key={study.eyebrow}
-          study={study}
-          ctaHref="#tickets"
-          ctaLabel="Jetzt Ticket sichern"
-          ctaSub="Sales Mastery Days · 21. – 22.11.2026"
-        />
-      ))}
+      {CASE_STUDIES.map((study) => {
+        const injected =
+          insertAfter &&
+          Object.entries(insertAfter).find(([key]) =>
+            study.eyebrow.includes(key),
+          )?.[1];
+        return (
+          <Fragment key={study.eyebrow}>
+            <LpCaseStudy
+              study={study}
+              ctaHref="#tickets"
+              ctaLabel="Jetzt Ticket sichern"
+              ctaSub="Sales Mastery Days · 21. – 22.11.2026"
+            />
+            {injected}
+          </Fragment>
+        );
+      })}
     </section>
   );
 }
