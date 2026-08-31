@@ -97,8 +97,11 @@ export default function LpCaseStudy({
 }: {
   study: CaseStudy;
   /** Anchor for the "Jetzt Erstgespräch vereinbaren" button. Defaults to
-   *  the landing-page offer form (#analyse); homepage passes #tickets. */
-  ctaHref?: string;
+   *  the landing-page offer form (#analyse); homepage passes #tickets.
+   *  Pass `null` to hide the CTA entirely (used on the homepage where
+   *  the single #tickets pricing block below the case studies replaces
+   *  the per-card CTA). */
+  ctaHref?: string | null;
   ctaLabel?: string;
   ctaSub?: string;
 }) {
@@ -170,18 +173,20 @@ export default function LpCaseStudy({
               })}
             </ul>
 
-            <a
-              href={ctaHref}
-              onClick={scrollToAnchor(ctaHref)}
-              className="btn-gradient group flex flex-col items-center justify-center rounded-[10px] px-6 py-[18px] text-center text-black transition-transform duration-300 hover:-translate-y-0.5"
-            >
-              <span className="font-body text-[16px] font-semibold leading-normal lg:text-[18px]">
-                {ctaLabel}
-              </span>
-              <span className="mt-[3px] font-body text-[12px] leading-normal text-black/70 lg:text-[14px]">
-                {ctaSub}
-              </span>
-            </a>
+            {ctaHref !== null && (
+              <a
+                href={ctaHref}
+                onClick={scrollToAnchor(ctaHref)}
+                className="btn-gradient group flex flex-col items-center justify-center rounded-[10px] px-6 py-[18px] text-center text-black transition-transform duration-300 hover:-translate-y-0.5"
+              >
+                <span className="font-body text-[16px] font-semibold leading-normal lg:text-[18px]">
+                  {ctaLabel}
+                </span>
+                <span className="mt-[3px] font-body text-[12px] leading-normal text-black/70 lg:text-[14px]">
+                  {ctaSub}
+                </span>
+              </a>
+            )}
           </Reveal>
         </div>
       </LpContainer>

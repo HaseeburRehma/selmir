@@ -89,7 +89,7 @@ export default function HomeHero() {
                 Kontakt aufnehmen
               </Button>
               <Button
-                href="#leistungen"
+                href="/ueber"
                 variant="secondary"
                 icon={<ArrowRight className="size-4 shrink-0 sm:size-5" />}
                 className="whitespace-nowrap !px-4 !text-[11px] sm:!px-6 sm:!text-[13px]"
@@ -99,24 +99,36 @@ export default function HomeHero() {
             </div>
           </Reveal>
 
-          {/* Right — floating portrait (transparent PNG, no card) */}
+          {/* Right — floating portrait (transparent PNG, no card).
+              The PNG bleeds all the way to its own right edge (his
+              right elbow sits on the bitmap boundary), so we give the
+              container a taller aspect and a bit more inner padding on
+              lg so nothing reads as a hard crop against the section
+              padding — plus a soft radial fade behind the base of the
+              portrait to feather the bottom edge. */}
           <Reveal
             delay={0.1}
-            className="relative mx-auto w-full max-w-[420px] sm:max-w-[500px] lg:mx-0 lg:ml-auto lg:-mt-16 lg:max-w-[640px]"
+            className="relative mx-auto w-full max-w-[400px] sm:max-w-[480px] lg:mx-0 lg:ml-auto lg:max-w-[560px]"
           >
             {/* Soft purple glow behind the portrait */}
             <div
               aria-hidden
               className="pointer-events-none absolute left-1/2 top-1/2 size-[85%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-2/30 blur-[80px]"
             />
-            <div className="relative aspect-[3/4] w-full">
+            {/* Bottom feather — softens the natural PNG edge */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-[-4%] bottom-[-4%] h-[24%] bg-[radial-gradient(ellipse_at_center,rgba(9,7,17,0.85)_0%,rgba(9,7,17,0)_75%)]"
+            />
+            <div className="relative aspect-[4/5] w-full">
               <Image
                 src="/figma/home/selmir-hero.png"
                 alt="Selmir Suljkanovic"
                 fill
                 priority
-                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 500px, 640px"
-                className="object-contain object-bottom"
+                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 480px, 560px"
+                style={{ objectPosition: "center bottom" }}
+                className="object-contain"
               />
             </div>
           </Reveal>

@@ -44,12 +44,9 @@ export default function CaseStudiesSection({ insertAfter }: Props = {}) {
           )?.[1];
         return (
           <Fragment key={study.eyebrow}>
-            <LpCaseStudy
-              study={study}
-              ctaHref="#tickets"
-              ctaLabel="Jetzt Ticket sichern"
-              ctaSub="Sales Mastery Days · 21. – 22.11.2026"
-            />
+            {/* CTA on each card removed — the dedicated #tickets pricing
+                block that follows the last case study replaces it. */}
+            <LpCaseStudy study={study} ctaHref={null} />
             {injected}
           </Fragment>
         );
