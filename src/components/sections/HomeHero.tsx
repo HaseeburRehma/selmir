@@ -25,7 +25,7 @@ export default function HomeHero() {
   return (
     <section
       id="home-hero"
-      className="relative overflow-hidden bg-bg px-6 pb-16 pt-[120px] md:px-12 md:pb-24 md:pt-[160px] lg:px-[120px] lg:pt-[180px]"
+      className="relative overflow-hidden bg-bg px-6 pb-16 pt-[88px] md:px-12 md:pb-24 md:pt-[104px] lg:px-[120px] lg:pt-[120px]"
     >
       {/* Near-black base (matches Figma). Section itself is already
           `bg-bg` (#090711). Purple glow parked on the LEFT side of the
