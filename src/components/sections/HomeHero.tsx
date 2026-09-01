@@ -27,34 +27,37 @@ export default function HomeHero() {
       id="home-hero"
       className="relative overflow-hidden bg-bg px-6 pb-16 pt-[120px] md:px-12 md:pb-24 md:pt-[160px] lg:px-[120px] lg:pt-[180px]"
     >
-      {/* Radial vignette + faint grid + purple blooms */}
+      {/* Rich saturated purple background — matches Figma. A single
+          radial from a deep violet centre fading to near-black at the
+          edges gives the whole section one cohesive tone instead of the
+          old grid + multiple blob layers. */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(120% 90% at 78% 22%, rgba(116,84,243,0.30) 0%, rgba(37,20,72,0.55) 30%, rgba(15,10,28,0.85) 60%, #090711 100%)",
+            "radial-gradient(130% 90% at 55% 45%, #3a1f7a 0%, #26155a 28%, #180d3f 55%, #0d0725 80%, #090615 100%)",
         }}
       />
+      {/* Very faint grid, kept intentionally subtle so the deep purple
+          reads as the primary surface (Figma barely has this at all). */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.35]"
+        className="pointer-events-none absolute inset-0 opacity-[0.12]"
         style={{
           backgroundImage:
-            "repeating-linear-gradient(to right, rgba(255,255,255,0.045) 0 1px, transparent 1px 96px), repeating-linear-gradient(to bottom, rgba(255,255,255,0.045) 0 1px, transparent 1px 96px)",
+            "repeating-linear-gradient(to right, rgba(255,255,255,0.05) 0 1px, transparent 1px 96px), repeating-linear-gradient(to bottom, rgba(255,255,255,0.05) 0 1px, transparent 1px 96px)",
         }}
       />
+      {/* Warm accent glow behind the portrait — mirrors the reddish rim
+          light on Selmir in the source photo. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -left-40 top-16 h-[560px] w-[560px] rounded-full bg-purple-1/30 blur-[160px]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-24 top-0 h-[520px] w-[520px] rounded-full bg-purple-2/25 blur-[150px]"
+        className="pointer-events-none absolute right-[-6%] top-[10%] h-[520px] w-[520px] rounded-full bg-purple-2/30 blur-[150px] lg:right-[8%]"
       />
 
       <div className="container-page relative z-10">
-        <div className="grid grid-cols-1 items-center gap-10 md:gap-14 lg:grid-cols-[minmax(0,720px)_minmax(0,520px)] lg:gap-[64px]">
+        <div className="grid grid-cols-1 items-center gap-10 md:gap-14 lg:grid-cols-[minmax(0,640px)_minmax(0,600px)] lg:gap-[56px]">
           {/* Left — copy */}
           <Reveal className="flex flex-col gap-8">
             <div className="flex flex-col gap-4">
@@ -99,42 +102,36 @@ export default function HomeHero() {
             </div>
           </Reveal>
 
-          {/* Right — floating portrait (transparent PNG, no card).
-              The PNG bleeds to its own right/bottom edges (his elbow
-              sits on the bitmap boundary). Instead of trying to hide
-              the crop, we lean into it: a tall linear gradient fades
-              the lower ~45% of the portrait into the section background
-              — same "torso dissolves into darkness" treatment the
-              reference mockup uses. The head + shoulders stay crisp,
-              everything below chest fades out cleanly. */}
+          {/* Right — portrait (transparent PNG). Sized to match the
+              Figma proportions: portrait fills its column, torso &
+              arms remain fully visible. A small (~18 %) bottom fade
+              feathers only the very edge of the PNG into the purple
+              background so the natural crop at his hands doesn't read
+              as a hard line — nothing more aggressive than that. */}
           <Reveal
             delay={0.1}
-            className="relative mx-auto w-full max-w-[400px] sm:max-w-[480px] lg:mx-0 lg:ml-auto lg:max-w-[560px]"
+            className="relative mx-auto w-full max-w-[440px] sm:max-w-[520px] lg:mx-0 lg:ml-auto lg:max-w-[620px]"
           >
-            {/* Soft purple glow behind the portrait */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute left-1/2 top-1/2 size-[85%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-2/30 blur-[80px]"
-            />
             <div className="relative aspect-[4/5] w-full">
               <Image
                 src="/figma/home/selmir-hero.png"
                 alt="Selmir Suljkanovic"
                 fill
                 priority
-                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 480px, 560px"
+                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 520px, 620px"
                 style={{ objectPosition: "center bottom" }}
                 className="object-contain"
               />
-              {/* Bottom fade — dissolves the lower half of the portrait
-                  into the section background so the natural PNG crop at
-                  his forearms/hands never reads as a hard edge. */}
+              {/* Subtle bottom feather — matches the deep-purple base of
+                  the section, using its actual mid-tone colour so the
+                  fade blends invisibly rather than looking like a
+                  darker overlay on top of the purple. */}
               <div
                 aria-hidden
-                className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%]"
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-[18%]"
                 style={{
                   background:
-                    "linear-gradient(to top, #090711 6%, rgba(9,7,17,0.92) 22%, rgba(9,7,17,0.55) 48%, rgba(9,7,17,0) 100%)",
+                    "linear-gradient(to top, rgba(24,13,63,1) 0%, rgba(24,13,63,0.55) 55%, rgba(24,13,63,0) 100%)",
                 }}
               />
             </div>
