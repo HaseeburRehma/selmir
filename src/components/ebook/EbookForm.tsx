@@ -50,6 +50,7 @@ declare global {
 
 export default function EbookForm() {
   const [name, setName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -199,6 +200,7 @@ export default function EbookForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
+          lastName,
           phone: normalizedPhone ?? phone,
           email,
           code: skipSms ? undefined : code,
@@ -220,6 +222,7 @@ export default function EbookForm() {
         }
         setStatus("ok");
         setName("");
+        setLastName("");
         setPhone("");
         setEmail("");
         setCode("");
@@ -271,20 +274,39 @@ export default function EbookForm() {
         defer
       />
 
-      {/* Vorname */}
-      <div className="flex flex-col gap-1.5">
-        <label className="font-body text-[13px] font-semibold text-white/75">
-          Vorname <span className="text-purple-2">*</span>
-        </label>
-        <input
-          className={inputCls}
-          type="text"
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Max"
-          autoComplete="given-name"
-        />
+      {/* Vorname + Nachname — same row on ≥sm, stack on mobile.
+          Nachname is optional per client request; we keep it separate
+          from Vorname so HubSpot's `firstname` / `lastname` fields map
+          cleanly instead of guessing a split from a single string. */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="flex flex-col gap-1.5">
+          <label className="font-body text-[13px] font-semibold text-white/75">
+            Vorname <span className="text-purple-2">*</span>
+          </label>
+          <input
+            className={inputCls}
+            type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Max"
+            autoComplete="given-name"
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label className="font-body text-[13px] font-semibold text-white/75">
+            Nachname{" "}
+            <span className="font-normal text-white/45">(optional)</span>
+          </label>
+          <input
+            className={inputCls}
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder="Mustermann"
+            autoComplete="family-name"
+          />
+        </div>
       </div>
 
       {/* Telefon + SMS-Code senden button */}

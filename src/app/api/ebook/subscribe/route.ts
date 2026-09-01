@@ -232,10 +232,13 @@ async function hsCreateOrUpdate({
  */
 async function pushHubspot({
   firstName,
+  lastName,
   phone,
   email,
 }: {
   firstName: string;
+  /** Optional — the form field is not required; empty strings are skipped. */
+  lastName: string;
   phone: string;
   email: string;
 }): Promise<{ ok: boolean; contactId?: string; reason?: string }> {
@@ -262,6 +265,7 @@ async function pushHubspot({
     lead_magnet: "Fuehrungskraefte E-Book",
   };
   if (firstName) properties.firstname = firstName;
+  if (lastName) properties.lastname = lastName;
   if (phone) properties.phone = phone;
 
   let contactId: string | undefined;
@@ -315,6 +319,7 @@ async function appendToSheet(row: {
 export async function POST(req: NextRequest) {
   let body: {
     name?: string;
+    lastName?: string;
     phone?: string;
     email?: string;
     code?: string;
@@ -329,6 +334,7 @@ export async function POST(req: NextRequest) {
     );
   }
   const firstName = (body.name ?? "").trim();
+  const lastName = (body.lastName ?? "").trim();
   const rawPhone = (body.phone ?? "").trim();
   const email = (body.email ?? "").trim().toLowerCase();
   const code = (body.code ?? "").trim();
@@ -396,13 +402,20 @@ export async function POST(req: NextRequest) {
     `https://${req.headers.get("host") ?? "www.selmir-suljkanovic.de"}`;
   const downloadUrl = `${origin.replace(/\/$/, "")}${EBOOK_PDF_URL}`;
 
-  const hs = await pushHubspot({ firstName, phone, email }).catch((err) => ({
+  const hs = await pushHubspot({ firstName, lastName, phone, email }).catch((err) => ({
     ok: false as const,
     reason: (err as Error).message,
   }));
   if (!hs.ok) console.warn("[ebook] hubspot failed:", hs.reason);
 
-  void appendToSheet({ name: firstName, phone, email, pageUrl });
+  void appendToSheet({
+    // Display first + last together in the sheet's "Name" column when the
+    // optional Nachname is present; otherwise fall back to Vorname alone.
+    name: lastName ? `${firstName} ${lastName}` : firstName,
+    phone,
+    email,
+    pageUrl,
+  });
 
   if (!RESEND_KEY) {
     // No mail credentials — return ok anyway so the client shows success.
