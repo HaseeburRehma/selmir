@@ -28,15 +28,16 @@ export default function HomeHero() {
       className="relative overflow-hidden bg-bg px-6 pb-16 pt-[120px] md:px-12 md:pb-24 md:pt-[160px] lg:px-[120px] lg:pt-[180px]"
     >
       {/* Near-black base (matches Figma). Section itself is already
-          `bg-bg` (#090711); only a very soft purple glow bleeds in from
-          the right, behind the portrait, so the surface reads black
-          everywhere except where Selmir's rim-light needs backdrop. */}
+          `bg-bg` (#090711). Purple glow parked on the LEFT side of the
+          section (behind the copy column) per client feedback — softer
+          than the previous right-side placement, so the surface reads
+          black everywhere except where the ambient purple bleeds in. */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(80% 70% at 82% 30%, rgba(76,46,180,0.28) 0%, rgba(37,20,72,0.18) 35%, rgba(9,7,17,0) 70%)",
+            "radial-gradient(70% 65% at 18% 45%, rgba(116,84,243,0.32) 0%, rgba(76,46,180,0.18) 35%, rgba(9,7,17,0) 70%)",
         }}
       />
       {/* Faint grid — same subtle 96px lines Figma uses on the dark
@@ -55,8 +56,16 @@ export default function HomeHero() {
           {/* Left — copy */}
           <Reveal className="flex flex-col gap-8">
             <div className="flex flex-col gap-4">
-              <h1 className="text-[34px] leading-[1.1] tracking-[-1px] text-white sm:text-[42px] md:text-[50px] lg:text-[56px] lg:leading-[1.08] lg:tracking-[-1.8px]">
-                <span className="font-serif italic font-normal">Struktur & Vertrieb</span>{" "}
+              {/* Two-line headline on desktop: italic serif line 1,
+                  bold sans line 2. Explicit `<br />` forces the break so
+                  the column can be narrow (matching Figma) without the
+                  headline collapsing into 4+ short lines. Mobile keeps
+                  natural wrap. */}
+              <h1 className="text-balance text-[34px] leading-[1.08] tracking-[-1px] text-white sm:text-[42px] md:text-[50px] lg:text-[56px] lg:leading-[1.06] lg:tracking-[-1.8px]">
+                <span className="font-serif italic font-normal">
+                  Struktur & Vertrieb
+                </span>
+                <br />
                 <span className="font-body font-extrabold tracking-[-1.6px]">
                   für inhabergeführte Betriebe
                 </span>
