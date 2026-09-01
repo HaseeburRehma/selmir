@@ -100,12 +100,13 @@ export default function HomeHero() {
           </Reveal>
 
           {/* Right — floating portrait (transparent PNG, no card).
-              The PNG bleeds all the way to its own right edge (his
-              right elbow sits on the bitmap boundary), so we give the
-              container a taller aspect and a bit more inner padding on
-              lg so nothing reads as a hard crop against the section
-              padding — plus a soft radial fade behind the base of the
-              portrait to feather the bottom edge. */}
+              The PNG bleeds to its own right/bottom edges (his elbow
+              sits on the bitmap boundary). Instead of trying to hide
+              the crop, we lean into it: a tall linear gradient fades
+              the lower ~45% of the portrait into the section background
+              — same "torso dissolves into darkness" treatment the
+              reference mockup uses. The head + shoulders stay crisp,
+              everything below chest fades out cleanly. */}
           <Reveal
             delay={0.1}
             className="relative mx-auto w-full max-w-[400px] sm:max-w-[480px] lg:mx-0 lg:ml-auto lg:max-w-[560px]"
@@ -114,11 +115,6 @@ export default function HomeHero() {
             <div
               aria-hidden
               className="pointer-events-none absolute left-1/2 top-1/2 size-[85%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-2/30 blur-[80px]"
-            />
-            {/* Bottom feather — softens the natural PNG edge */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-x-[-4%] bottom-[-4%] h-[24%] bg-[radial-gradient(ellipse_at_center,rgba(9,7,17,0.85)_0%,rgba(9,7,17,0)_75%)]"
             />
             <div className="relative aspect-[4/5] w-full">
               <Image
@@ -129,6 +125,17 @@ export default function HomeHero() {
                 sizes="(max-width: 640px) 90vw, (max-width: 1024px) 480px, 560px"
                 style={{ objectPosition: "center bottom" }}
                 className="object-contain"
+              />
+              {/* Bottom fade — dissolves the lower half of the portrait
+                  into the section background so the natural PNG crop at
+                  his forearms/hands never reads as a hard edge. */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%]"
+                style={{
+                  background:
+                    "linear-gradient(to top, #090711 6%, rgba(9,7,17,0.92) 22%, rgba(9,7,17,0.55) 48%, rgba(9,7,17,0) 100%)",
+                }}
               />
             </div>
           </Reveal>
