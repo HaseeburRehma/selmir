@@ -156,6 +156,76 @@ async function loadPdfBase64(): Promise<string | null> {
 }
 
 /**
+ * Best-effort HubSpot upsert.
+ *
+ * Tries the write with the full property set; if HubSpot rejects with a
+ * 400 that mentions `lead_source` / `lead_magnet` (i.e. the two-level
+ * tagging properties haven't been created in the portal yet), the
+ * problematic keys are stripped and the write is retried. Lead capture
+ * keeps flowing while the portal admin creates the properties.
+ *
+ * We do NOT retry on generic 400s — only when a missing custom property
+ * is the culprit — so real validation errors still surface.
+ */
+async function hsCreateOrUpdate({
+  email,
+  properties,
+  headers,
+}: {
+  email: string;
+  properties: Record<string, string>;
+  headers: Record<string, string>;
+}): Promise<{ ok: boolean; contactId?: string; reason?: string }> {
+  const attempt = async (
+    props: Record<string, string>,
+  ): Promise<{
+    status: number;
+    text: string;
+    contactId?: string;
+  }> => {
+    const create = await fetch(`${HS_BASE}/crm/v3/objects/contacts`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ properties: props }),
+    });
+    if (create.ok) {
+      const j = (await create.json()) as { id: string };
+      return { status: create.status, text: "", contactId: j.id };
+    }
+    if (create.status === 409) {
+      const patch = await fetch(
+        `${HS_BASE}/crm/v3/objects/contacts/${encodeURIComponent(email)}?idProperty=email`,
+        { method: "PATCH", headers, body: JSON.stringify({ properties: props }) },
+      );
+      if (patch.ok) {
+        const j = (await patch.json()) as { id: string };
+        return { status: patch.status, text: "", contactId: j.id };
+      }
+      return { status: patch.status, text: await patch.text() };
+    }
+    return { status: create.status, text: await create.text() };
+  };
+
+  const first = await attempt(properties);
+  if (first.contactId) return { ok: true, contactId: first.contactId };
+
+  const missingProp = first.status === 400 && /lead_source|lead_magnet/i.test(first.text);
+  if (missingProp) {
+    console.warn(
+      "[ebook] hubspot rejected lead_source/lead_magnet — retrying without them; create these two custom contact properties in HubSpot to enable two-level tagging.",
+    );
+    const { lead_source: _s, lead_magnet: _m, ...rest } = properties;
+    void _s;
+    void _m;
+    const retry = await attempt(rest);
+    if (retry.contactId) return { ok: true, contactId: retry.contactId };
+    return { ok: false, reason: `hubspot retry: ${retry.status} ${retry.text}` };
+  }
+
+  return { ok: false, reason: `hubspot: ${first.status} ${first.text}` };
+}
+
+/**
  * HubSpot: upsert by email, then add to the E-Book list. Tags the contact
  * with a custom source string so Selmir can filter these leads in HubSpot
  * separately from the Rollenspiel-Leitfaden batch.
@@ -180,38 +250,24 @@ async function pushHubspot({
     email,
     lifecyclestage: "lead",
     hs_lead_status: "NEW",
+    // Two-level origin tagging (custom contact properties created in
+    // HubSpot Settings → Properties). Broad `lead_source` says WHERE
+    // the lead came from; specific `lead_magnet` says WHAT they
+    // downloaded. Together they replace the mis-tag on
+    // `Record source detail` that used to leak the service-key name.
+    // These are stripped on the retry below if HubSpot rejects them
+    // (400), so lead capture keeps working while the properties are
+    // still being created in the portal.
+    lead_source: "Website",
+    lead_magnet: "Fuehrungskraefte E-Book",
   };
   if (firstName) properties.firstname = firstName;
   if (phone) properties.phone = phone;
 
   let contactId: string | undefined;
-  const create = await fetch(`${HS_BASE}/crm/v3/objects/contacts`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ properties }),
-  });
-  if (create.ok) {
-    const j = await create.json();
-    contactId = j.id;
-  } else if (create.status === 409) {
-    const patch = await fetch(
-      `${HS_BASE}/crm/v3/objects/contacts/${encodeURIComponent(email)}?idProperty=email`,
-      { method: "PATCH", headers, body: JSON.stringify({ properties }) },
-    );
-    if (!patch.ok) {
-      return {
-        ok: false,
-        reason: `hubspot patch: ${patch.status} ${await patch.text()}`,
-      };
-    }
-    const j = await patch.json();
-    contactId = j.id;
-  } else {
-    return {
-      ok: false,
-      reason: `hubspot create: ${create.status} ${await create.text()}`,
-    };
-  }
+  const create = await hsCreateOrUpdate({ email, properties, headers });
+  if (!create.ok) return { ok: false, reason: create.reason };
+  contactId = create.contactId;
 
   if (contactId) {
     const add = await fetch(

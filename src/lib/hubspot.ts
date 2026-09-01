@@ -35,6 +35,11 @@ async function upsertContact(sale: TicketSale): Promise<string> {
     smd2026_purchase_date: sale.purchaseDate.slice(0, 10),
     smd2026_stripe_session: sale.stripeSessionId,
     lifecyclestage: "customer",
+    // Two-level origin tagging — ticket buyers are the ONE audience
+    // that legitimately carries the SMD2026 label. `lead_magnet` stays
+    // empty for buyers (they didn't download something, they bought).
+    lead_source: "SMD2026 Ticket",
+    lead_magnet: "",
   };
 
   // Only set these when Stripe actually collected them (don't overwrite an
@@ -46,54 +51,87 @@ async function upsertContact(sale: TicketSale): Promise<string> {
   // Billing email — the same address, copied into the custom billing field.
   if (sale.email) properties.rechnungs_emailadresse = sale.email;
 
-  // Try create first
-  const createRes = await fetch(`${BASE}/crm/v3/objects/contacts`, {
-    method: "POST",
-    headers: authHeaders(),
-    body: JSON.stringify({ properties }),
-  });
+  return await createOrUpdateWithFallback(properties, sale.email);
+}
 
-  if (createRes.ok) {
-    const data = (await createRes.json()) as { id: string };
-    return data.id;
-  }
-
-  // 409 = already exists → find id and PATCH
-  if (createRes.status === 409) {
-    const searchRes = await fetch(
-      `${BASE}/crm/v3/objects/contacts/search`,
-      {
+/**
+ * Core create-or-patch loop with a one-shot fallback for the new
+ * `lead_source` / `lead_magnet` custom properties.
+ *
+ * If HubSpot 400s specifically because those two properties don't exist
+ * yet in the portal, the tags are stripped and the write is retried
+ * once — so ticket sales and LP leads keep landing while the properties
+ * are being created in Settings → Properties. Any other 400 (a real
+ * validation error) is surfaced verbatim.
+ *
+ * Dedup key is `email` when supplied, else the caller relies on the
+ * default upsert behavior of the object.
+ */
+async function createOrUpdateWithFallback(
+  properties: Record<string, string>,
+  emailForDedup?: string,
+): Promise<string> {
+  const attempt = async (
+    props: Record<string, string>,
+  ): Promise<
+    | { id: string }
+    | { failedStatus: number; failedText: string }
+  > => {
+    const createRes = await fetch(`${BASE}/crm/v3/objects/contacts`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ properties: props }),
+    });
+    if (createRes.ok) {
+      const data = (await createRes.json()) as { id: string };
+      return { id: data.id };
+    }
+    if (createRes.status === 409 && emailForDedup) {
+      const searchRes = await fetch(`${BASE}/crm/v3/objects/contacts/search`, {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify({
           filterGroups: [
             {
               filters: [
-                { propertyName: "email", operator: "EQ", value: sale.email },
+                { propertyName: "email", operator: "EQ", value: emailForDedup },
               ],
             },
           ],
           properties: ["email"],
           limit: 1,
         }),
-      },
-    );
-    const found = (await searchRes.json()) as { results?: { id: string }[] };
-    const id = found.results?.[0]?.id;
-    if (!id) throw new Error(`Contact exists but not found: ${sale.email}`);
-
-    const patchRes = await fetch(`${BASE}/crm/v3/objects/contacts/${id}`, {
-      method: "PATCH",
-      headers: authHeaders(),
-      body: JSON.stringify({ properties }),
-    });
-    if (!patchRes.ok) {
-      throw new Error(`HubSpot PATCH failed: ${await patchRes.text()}`);
+      });
+      const found = (await searchRes.json()) as { results?: { id: string }[] };
+      const id = found.results?.[0]?.id;
+      if (!id) throw new Error(`Contact exists but not found: ${emailForDedup}`);
+      const patchRes = await fetch(`${BASE}/crm/v3/objects/contacts/${id}`, {
+        method: "PATCH",
+        headers: authHeaders(),
+        body: JSON.stringify({ properties: props }),
+      });
+      if (patchRes.ok) return { id };
+      return { failedStatus: patchRes.status, failedText: await patchRes.text() };
     }
-    return id;
+    return { failedStatus: createRes.status, failedText: await createRes.text() };
+  };
+
+  const first = await attempt(properties);
+  if ("id" in first) return first.id;
+
+  if (first.failedStatus === 400 && /lead_source|lead_magnet/i.test(first.failedText)) {
+    console.warn(
+      "[hubspot] portal missing lead_source/lead_magnet — retrying without them; create these two custom contact properties in HubSpot Settings → Properties to enable two-level tagging.",
+    );
+    const { lead_source: _s, lead_magnet: _m, ...rest } = properties;
+    void _s;
+    void _m;
+    const retry = await attempt(rest);
+    if ("id" in retry) return retry.id;
+    throw new Error(`HubSpot retry failed: ${retry.failedStatus} ${retry.failedText}`);
   }
 
-  throw new Error(`HubSpot create failed: ${await createRes.text()}`);
+  throw new Error(`HubSpot failed: ${first.failedStatus} ${first.failedText}`);
 }
 
 /**
@@ -170,6 +208,11 @@ export async function submitLeadToHubSpot(
     // "Landingpage & Ads" property group — the filterable half.
     lp_landing_page: lead.landingPage,
     lp_submitted_at: new Date().toISOString(),
+    // Two-level origin tagging (custom contact properties). LP is a
+    // Website form → no lead magnet; the landing page copy already
+    // lives in `lp_landing_page`, so `lead_magnet` stays empty here.
+    lead_source: "Website",
+    lead_magnet: "",
   };
 
   // Ad attribution, when the click carried any. Only non-empty values are sent
@@ -194,28 +237,52 @@ export async function submitLeadToHubSpot(
 
   const existingId = await findContactIdByPhone(lead.phone);
 
-  if (existingId) {
-    const patchRes = await fetch(`${BASE}/crm/v3/objects/contacts/${existingId}`, {
-      method: "PATCH",
-      headers: authHeaders(),
-      body: JSON.stringify({ properties }),
-    });
-    if (!patchRes.ok) {
-      throw new Error(`HubSpot lead PATCH failed: ${await patchRes.text()}`);
+  // Same retry-on-missing-property guard as ticket sales: if the portal
+  // hasn't got lead_source / lead_magnet yet, we strip them and try again
+  // so a phone dedup-match still lands cleanly.
+  const patchOrCreate = async (
+    id: string | null,
+    props: Record<string, string>,
+  ): Promise<{ id: string } | { failedStatus: number; failedText: string }> => {
+    if (id) {
+      const patchRes = await fetch(`${BASE}/crm/v3/objects/contacts/${id}`, {
+        method: "PATCH",
+        headers: authHeaders(),
+        body: JSON.stringify({ properties: props }),
+      });
+      if (patchRes.ok) return { id };
+      return { failedStatus: patchRes.status, failedText: await patchRes.text() };
     }
-    return existingId;
+    const createRes = await fetch(`${BASE}/crm/v3/objects/contacts`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ properties: props }),
+    });
+    if (createRes.ok) {
+      const created = (await createRes.json()) as { id: string };
+      return { id: created.id };
+    }
+    return { failedStatus: createRes.status, failedText: await createRes.text() };
+  };
+
+  const first = await patchOrCreate(existingId, properties);
+  if ("id" in first) return first.id;
+
+  if (first.failedStatus === 400 && /lead_source|lead_magnet/i.test(first.failedText)) {
+    console.warn(
+      "[hubspot] portal missing lead_source/lead_magnet — retrying LP lead without them.",
+    );
+    const { lead_source: _s, lead_magnet: _m, ...rest } = properties;
+    void _s;
+    void _m;
+    const retry = await patchOrCreate(existingId, rest);
+    if ("id" in retry) return retry.id;
+    throw new Error(
+      `HubSpot lead retry failed: ${retry.failedStatus} ${retry.failedText}`,
+    );
   }
 
-  const createRes = await fetch(`${BASE}/crm/v3/objects/contacts`, {
-    method: "POST",
-    headers: authHeaders(),
-    body: JSON.stringify({ properties }),
-  });
-  if (!createRes.ok) {
-    throw new Error(`HubSpot lead create failed: ${await createRes.text()}`);
-  }
-  const created = (await createRes.json()) as { id: string };
-  return created.id;
+  throw new Error(`HubSpot lead failed: ${first.failedStatus} ${first.failedText}`);
 }
 
 /** Finds a contact by phone number, or null. Used instead of email dedup. */

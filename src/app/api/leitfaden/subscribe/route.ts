@@ -184,41 +184,69 @@ async function pushHubspot({
     email,
     lifecyclestage: "lead",
     hs_lead_status: "NEW",
+    // Two-level origin tagging (custom contact properties). See the
+    // matching block in src/app/api/ebook/subscribe/route.ts for why.
+    lead_source: "Website",
+    lead_magnet: "Rollenspiel Leitfaden",
   };
   if (firstName) properties.firstname = firstName;
   if (phone) properties.phone = phone;
 
   // Try create; on 409 (already exists) fall through to patch by email.
-  let contactId: string | undefined;
-  const create = await fetch(`${HS_BASE}/crm/v3/objects/contacts`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ properties }),
-  });
-  if (create.ok) {
-    const j = await create.json();
-    contactId = j.id;
-  } else if (create.status === 409) {
-    // Update the existing contact keyed by email
-    const patch = await fetch(
-      `${HS_BASE}/crm/v3/objects/contacts/${encodeURIComponent(
-        email,
-      )}?idProperty=email`,
-      { method: "PATCH", headers, body: JSON.stringify({ properties }) },
-    );
-    if (!patch.ok) {
+  // If HubSpot rejects with 400 because lead_source / lead_magnet don't
+  // exist as portal properties yet, the tags are stripped and the write
+  // is retried once — so lead capture keeps flowing while the two
+  // properties are being created in HubSpot Settings → Properties.
+  const attempt = async (
+    props: Record<string, string>,
+  ): Promise<{ status: number; text: string; contactId?: string }> => {
+    const c = await fetch(`${HS_BASE}/crm/v3/objects/contacts`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ properties: props }),
+    });
+    if (c.ok) {
+      const j = (await c.json()) as { id: string };
+      return { status: c.status, text: "", contactId: j.id };
+    }
+    if (c.status === 409) {
+      const p = await fetch(
+        `${HS_BASE}/crm/v3/objects/contacts/${encodeURIComponent(email)}?idProperty=email`,
+        { method: "PATCH", headers, body: JSON.stringify({ properties: props }) },
+      );
+      if (p.ok) {
+        const j = (await p.json()) as { id: string };
+        return { status: p.status, text: "", contactId: j.id };
+      }
+      return { status: p.status, text: await p.text() };
+    }
+    return { status: c.status, text: await c.text() };
+  };
+
+  const first = await attempt(properties);
+  let contactId = first.contactId;
+  if (!contactId) {
+    if (first.status === 400 && /lead_source|lead_magnet/i.test(first.text)) {
+      console.warn(
+        "[leitfaden] hubspot rejected lead_source/lead_magnet — retrying without them; create these two custom contact properties in HubSpot to enable two-level tagging.",
+      );
+      const { lead_source: _s, lead_magnet: _m, ...rest } = properties;
+      void _s;
+      void _m;
+      const retry = await attempt(rest);
+      if (!retry.contactId) {
+        return {
+          ok: false,
+          reason: `hubspot retry: ${retry.status} ${retry.text}`,
+        };
+      }
+      contactId = retry.contactId;
+    } else {
       return {
         ok: false,
-        reason: `hubspot patch: ${patch.status} ${await patch.text()}`,
+        reason: `hubspot: ${first.status} ${first.text}`,
       };
     }
-    const j = await patch.json();
-    contactId = j.id;
-  } else {
-    return {
-      ok: false,
-      reason: `hubspot create: ${create.status} ${await create.text()}`,
-    };
   }
 
   if (contactId) {
