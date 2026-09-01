@@ -27,33 +27,27 @@ export default function HomeHero() {
       id="home-hero"
       className="relative overflow-hidden bg-bg px-6 pb-16 pt-[120px] md:px-12 md:pb-24 md:pt-[160px] lg:px-[120px] lg:pt-[180px]"
     >
-      {/* Rich saturated purple background — matches Figma. A single
-          radial from a deep violet centre fading to near-black at the
-          edges gives the whole section one cohesive tone instead of the
-          old grid + multiple blob layers. */}
+      {/* Near-black base (matches Figma). Section itself is already
+          `bg-bg` (#090711); only a very soft purple glow bleeds in from
+          the right, behind the portrait, so the surface reads black
+          everywhere except where Selmir's rim-light needs backdrop. */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(130% 90% at 55% 45%, #3a1f7a 0%, #26155a 28%, #180d3f 55%, #0d0725 80%, #090615 100%)",
+            "radial-gradient(80% 70% at 82% 30%, rgba(76,46,180,0.28) 0%, rgba(37,20,72,0.18) 35%, rgba(9,7,17,0) 70%)",
         }}
       />
-      {/* Very faint grid, kept intentionally subtle so the deep purple
-          reads as the primary surface (Figma barely has this at all). */}
+      {/* Faint grid — same subtle 96px lines Figma uses on the dark
+          surface, ~10% opacity so it reads as texture, not decoration. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.12]"
+        className="pointer-events-none absolute inset-0 opacity-[0.10]"
         style={{
           backgroundImage:
-            "repeating-linear-gradient(to right, rgba(255,255,255,0.05) 0 1px, transparent 1px 96px), repeating-linear-gradient(to bottom, rgba(255,255,255,0.05) 0 1px, transparent 1px 96px)",
+            "repeating-linear-gradient(to right, rgba(255,255,255,0.06) 0 1px, transparent 1px 96px), repeating-linear-gradient(to bottom, rgba(255,255,255,0.06) 0 1px, transparent 1px 96px)",
         }}
-      />
-      {/* Warm accent glow behind the portrait — mirrors the reddish rim
-          light on Selmir in the source photo. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute right-[-6%] top-[10%] h-[520px] w-[520px] rounded-full bg-purple-2/30 blur-[150px] lg:right-[8%]"
       />
 
       <div className="container-page relative z-10">
@@ -122,16 +116,15 @@ export default function HomeHero() {
                 style={{ objectPosition: "center bottom" }}
                 className="object-contain"
               />
-              {/* Subtle bottom feather — matches the deep-purple base of
-                  the section, using its actual mid-tone colour so the
-                  fade blends invisibly rather than looking like a
-                  darker overlay on top of the purple. */}
+              {/* Subtle bottom feather into the near-black section
+                  background so the PNG's crop at his hands blends in
+                  invisibly instead of reading as a hard edge. */}
               <div
                 aria-hidden
                 className="pointer-events-none absolute inset-x-0 bottom-0 h-[18%]"
                 style={{
                   background:
-                    "linear-gradient(to top, rgba(24,13,63,1) 0%, rgba(24,13,63,0.55) 55%, rgba(24,13,63,0) 100%)",
+                    "linear-gradient(to top, #090711 0%, rgba(9,7,17,0.55) 55%, rgba(9,7,17,0) 100%)",
                 }}
               />
             </div>
