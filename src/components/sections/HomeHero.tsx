@@ -56,18 +56,25 @@ export default function HomeHero() {
           {/* Left — copy */}
           <Reveal className="flex flex-col gap-8">
             <div className="flex flex-col gap-4">
-              {/* Two-line headline on desktop: italic serif line 1,
-                  bold sans line 2. Explicit `<br />` forces the break so
-                  the column can be narrow (matching Figma) without the
-                  headline collapsing into 4+ short lines. Mobile keeps
-                  natural wrap. */}
-              <h1 className="text-balance text-[34px] leading-[1.08] tracking-[-1px] text-white sm:text-[42px] md:text-[50px] lg:text-[56px] lg:leading-[1.06] lg:tracking-[-1.8px]">
+              {/* Three-line headline (explicit breaks so it can't
+                  collapse to 4+ stubby lines when the copy column is
+                  narrow):
+                    1  Struktur & Vertrieb         (italic serif)
+                    2  für inhabergeführte         (bold sans)
+                    3  Betriebe                    (bold sans)
+                  Font size sits at 48px on lg — comfortable within a
+                  620px column, room to spare. */}
+              <h1 className="text-[32px] leading-[1.08] tracking-[-1px] text-white sm:text-[38px] md:text-[44px] lg:text-[48px] lg:leading-[1.06] lg:tracking-[-1.6px]">
                 <span className="font-serif italic font-normal">
                   Struktur & Vertrieb
                 </span>
                 <br />
-                <span className="font-body font-extrabold tracking-[-1.6px]">
-                  für inhabergeführte Betriebe
+                <span className="font-body font-extrabold tracking-[-1.4px]">
+                  für inhabergeführte
+                </span>
+                <br />
+                <span className="font-body font-extrabold tracking-[-1.4px]">
+                  Betriebe
                 </span>
               </h1>
               <p className="font-serif italic text-[20px] leading-[1.3] tracking-[-0.4px] text-white/85 sm:text-[24px] md:text-[28px] lg:text-[30px]">
