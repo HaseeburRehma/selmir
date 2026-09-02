@@ -32,129 +32,132 @@ export default function BuchPage() {
           </div>
 
           {/*
-            Flattened into individual grid items so mobile and desktop
-            can order the content independently:
+            Layout uses `display: contents` on the two column wrappers
+            for mobile and switches them to `flex flex-col` at lg. That
+            way mobile has all five items as direct children of the
+            outer flex (order-1..5 sets the mobile stack) while desktop
+            gets two independent column stacks with their own natural
+            heights — no forced row-alignment between columns, so no
+            more empty gap above the CTA in the right column.
 
-              Mobile   (grid-cols-1, order utilities)
+              Mobile   (outer flex flex-col, wrappers = contents)
                 1  Book cover
-                2  Header block (eyebrow + Sein.TUN.HABEN. + subtitle + facts)
+                2  Header block (eyebrow + SEIN.TUN.HABEN. + subtitle + facts)
                 3  Description paragraph
                 4  "Jetzt Buch sichern" button
-                5  Video (last, under the button)
+                5  Video (very last, under the button)
 
-              Desktop  (2-col grid, explicit col-start / row-start)
-                col 1 (LEFT)          col 2 (RIGHT)
-                row 1  Header          row 1  Description
-                row 2  Video           row 2  Button
-                                       row 3  Book cover
+              Desktop  (outer lg:grid 2-cols, wrappers = flex-col)
+                LEFT  Header block → Video
+                RIGHT Description → Button → Book cover
           */}
-          <div className="container-page relative z-10 grid grid-cols-1 gap-10 py-14 md:py-20 lg:grid-cols-[minmax(0,500px)_minmax(0,720px)] lg:items-start lg:gap-x-12 lg:gap-y-10">
-            {/* 1. BOOK COVER — mobile first, desktop right col row 3 */}
-            <Reveal className="order-1 lg:order-none lg:col-start-2 lg:row-start-3">
-              <div className="relative mx-auto w-full max-w-[520px] sm:max-w-[560px] lg:mx-0 lg:max-w-[720px]">
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -inset-10 rounded-full bg-purple-1/30 blur-[100px]"
-                />
-                <div className="relative overflow-hidden rounded-2xl border border-purple-2/40 shadow-[0_30px_80px_-20px_rgba(116,84,243,0.55)]">
-                  <Image
-                    src="/figma/buch/buchcover-v3.png"
-                    alt="SEIN. TUN. HABEN. — Buchumschlag von Selmir Suljkanovic"
-                    width={1125}
-                    height={804}
-                    priority
-                    sizes="(max-width: 1024px) 90vw, 640px"
-                    className="h-auto w-full"
+          <div className="container-page relative z-10 flex flex-col gap-10 py-14 md:py-20 lg:grid lg:grid-cols-[minmax(0,500px)_minmax(0,720px)] lg:items-start lg:gap-x-12 lg:gap-y-0">
+            {/* LEFT column wrapper */}
+            <div className="contents lg:flex lg:flex-col lg:gap-10 lg:col-start-1">
+              {/* 2. HEADER + FACTS — mobile order-2, desktop stack top */}
+              <Reveal className="order-2 flex flex-col gap-6 lg:order-none">
+                <div className="flex items-center gap-3.5">
+                  <span className="h-0.5 w-10 bg-purple-2" />
+                  <span className="font-body text-[13px] font-semibold uppercase tracking-[2px] text-purple-2">
+                    Selmir Suljkanovic präsentiert
+                  </span>
+                </div>
+
+                <h1 className="flex flex-col text-white">
+                  <span className="font-serif text-[48px] leading-[0.95] tracking-[-1.5px] sm:text-[60px] lg:text-[72px] lg:tracking-[-2.5px]">
+                    Sein.
+                  </span>
+                  <span className="font-display text-[44px] leading-[0.95] tracking-[-1.5px] sm:text-[54px] lg:text-[64px] lg:tracking-[-2.5px]">
+                    TUN.
+                  </span>
+                  <span className="font-display text-[48px] leading-[0.95] tracking-[-1.5px] sm:text-[60px] lg:text-[72px] lg:tracking-[-3px]">
+                    HABEN.
+                  </span>
+                </h1>
+
+                <p className="max-w-[480px] font-serif text-[22px] leading-[1.3] tracking-[-0.5px] text-white sm:text-[26px]">
+                  Unaufhaltsam. Im Krieg geboren.
+                  <br />
+                  Im Vertrieb gewonnen.
+                </p>
+
+                <div className="mt-2 flex flex-col gap-2">
+                  <span className="font-body text-[13px] font-semibold uppercase tracking-[2px] text-purple-2">
+                    Jetzt erhältlich
+                  </span>
+                  <p className="font-body text-[17px] font-semibold text-white">
+                    Hardcover
+                    <span className="mx-2 text-purple-2">•</span>
+                    190 Seiten
+                    <span className="mx-2 text-purple-2">•</span>
+                    Borgmeier Media Gruppe
+                  </p>
+                  <p className="font-body text-[14px] text-white/45">
+                    Mit Christian Schommers · ISBN 978-3-98256066-3
+                  </p>
+                </div>
+              </Reveal>
+
+              {/* 5. VIDEO — mobile order-5 (very last), desktop stack bottom */}
+              <Reveal
+                delay={0.2}
+                className="order-5 flex flex-col gap-3 lg:order-none"
+              >
+                <span className="font-body text-[12px] font-semibold uppercase tracking-[2px] text-purple-2">
+                  Die Geschichte hinter dem Buch
+                </span>
+                <div className="w-full max-w-[380px] overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.02] p-1.5">
+                  <YouTubeLite
+                    videoId="ccaBJffUv0s"
+                    title="Mit 3.500 Euro Kredit zum Millionen-Business — Selmir Suljkanovic bei Maurice Bork"
+                    className="rounded-lg"
                   />
                 </div>
-              </div>
-            </Reveal>
+              </Reveal>
+            </div>
 
-            {/* 2. HEADER + FACTS — mobile 2, desktop left col row 1 */}
-            <Reveal className="order-2 flex flex-col gap-6 lg:order-none lg:col-start-1 lg:row-start-1">
-              <div className="flex items-center gap-3.5">
-                <span className="h-0.5 w-10 bg-purple-2" />
-                <span className="font-body text-[13px] font-semibold uppercase tracking-[2px] text-purple-2">
-                  Selmir Suljkanovic präsentiert
-                </span>
-              </div>
-
-              <h1 className="flex flex-col text-white">
-                <span className="font-serif text-[48px] leading-[0.95] tracking-[-1.5px] sm:text-[60px] lg:text-[72px] lg:tracking-[-2.5px]">
-                  Sein.
-                </span>
-                <span className="font-display text-[44px] leading-[0.95] tracking-[-1.5px] sm:text-[54px] lg:text-[64px] lg:tracking-[-2.5px]">
-                  TUN.
-                </span>
-                <span className="font-display text-[48px] leading-[0.95] tracking-[-1.5px] sm:text-[60px] lg:text-[72px] lg:tracking-[-3px]">
-                  HABEN.
-                </span>
-              </h1>
-
-              <p className="max-w-[480px] font-serif text-[22px] leading-[1.3] tracking-[-0.5px] text-white sm:text-[26px]">
-                Unaufhaltsam. Im Krieg geboren.
-                <br />
-                Im Vertrieb gewonnen.
-              </p>
-
-              <div className="mt-2 flex flex-col gap-2">
-                <span className="font-body text-[13px] font-semibold uppercase tracking-[2px] text-purple-2">
-                  Jetzt erhältlich
-                </span>
-                <p className="font-body text-[17px] font-semibold text-white">
-                  Hardcover
-                  <span className="mx-2 text-purple-2">•</span>
-                  190 Seiten
-                  <span className="mx-2 text-purple-2">•</span>
-                  Borgmeier Media Gruppe
+            {/* RIGHT column wrapper */}
+            <div className="contents lg:flex lg:flex-col lg:gap-8 lg:col-start-2">
+              {/* 3. DESCRIPTION — mobile order-3, desktop stack top */}
+              <Reveal delay={0.1} className="order-3 lg:order-none">
+                <p className="max-w-[480px] font-body text-[17px] leading-[1.6] tracking-[-0.2px] text-white/70">
+                  Manche Geschichten beginnen mit einem Traum. Seine begann im
+                  Krieg. Eine Biografie über Verlust, Disziplin und den Weg vom
+                  Kriegsflüchtling zum Unternehmer.
                 </p>
-                <p className="font-body text-[14px] text-white/45">
-                  Mit Christian Schommers · ISBN 978-3-98256066-3
-                </p>
-              </div>
-            </Reveal>
+              </Reveal>
 
-            {/* 3. DESCRIPTION — mobile 3, desktop right col row 1 */}
-            <Reveal
-              delay={0.1}
-              className="order-3 lg:order-none lg:col-start-2 lg:row-start-1"
-            >
-              <p className="max-w-[480px] font-body text-[17px] leading-[1.6] tracking-[-0.2px] text-white/70">
-                Manche Geschichten beginnen mit einem Traum. Seine begann im
-                Krieg. Eine Biografie über Verlust, Disziplin und den Weg vom
-                Kriegsflüchtling zum Unternehmer.
-              </p>
-            </Reveal>
+              {/* 4. BUTTON — mobile order-4, desktop stack middle */}
+              <Reveal delay={0.15} className="order-4 lg:order-none">
+                <Button
+                  href="https://www.amazon.de/dp/3982560667"
+                  icon={<ShoppingBag className="size-5" />}
+                >
+                  Jetzt Buch sichern
+                </Button>
+              </Reveal>
 
-            {/* 4. BUTTON — mobile 4, desktop right col row 2 */}
-            <Reveal
-              delay={0.15}
-              className="order-4 lg:order-none lg:col-start-2 lg:row-start-2"
-            >
-              <Button
-                href="https://www.amazon.de/dp/3982560667"
-                icon={<ShoppingBag className="size-5" />}
-              >
-                Jetzt Buch sichern
-              </Button>
-            </Reveal>
-
-            {/* 5. VIDEO — mobile 5 (very end), desktop left col row 2 */}
-            <Reveal
-              delay={0.2}
-              className="order-5 flex flex-col gap-3 lg:order-none lg:col-start-1 lg:row-start-2"
-            >
-              <span className="font-body text-[12px] font-semibold uppercase tracking-[2px] text-purple-2">
-                Die Geschichte hinter dem Buch
-              </span>
-              <div className="w-full max-w-[380px] overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.02] p-1.5">
-                <YouTubeLite
-                  videoId="ccaBJffUv0s"
-                  title="Mit 3.500 Euro Kredit zum Millionen-Business — Selmir Suljkanovic bei Maurice Bork"
-                  className="rounded-lg"
-                />
-              </div>
-            </Reveal>
+              {/* 1. BOOK COVER — mobile order-1 (very first), desktop stack bottom */}
+              <Reveal className="order-1 lg:order-none">
+                <div className="relative mx-auto w-full max-w-[520px] sm:max-w-[560px] lg:mx-0 lg:max-w-[720px]">
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute -inset-10 rounded-full bg-purple-1/30 blur-[100px]"
+                  />
+                  <div className="relative overflow-hidden rounded-2xl border border-purple-2/40 shadow-[0_30px_80px_-20px_rgba(116,84,243,0.55)]">
+                    <Image
+                      src="/figma/buch/buchcover-v3.png"
+                      alt="SEIN. TUN. HABEN. — Buchumschlag von Selmir Suljkanovic"
+                      width={1125}
+                      height={804}
+                      priority
+                      sizes="(max-width: 1024px) 90vw, 640px"
+                      className="h-auto w-full"
+                    />
+                  </div>
+                </div>
+              </Reveal>
+            </div>
           </div>
         </section>
       </main>
