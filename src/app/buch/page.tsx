@@ -5,6 +5,7 @@ import Navbar from "@/components/sections/Navbar";
 import FooterSection from "@/components/sections/FooterSection";
 import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
+import { YouTubeLite } from "@/components/ui/YouTubeLite";
 
 export const metadata: Metadata = {
   title: "SEIN. TUN. HABEN. — Das Buch von Selmir Suljkanovic",
@@ -92,6 +93,23 @@ export default function BuchPage() {
                 >
                   Jetzt Buch sichern
                 </Button>
+              </div>
+
+              {/* Compact video — Selmir's story behind the book, from
+                  the Maurice Bork podcast. Capped at ~360px on desktop
+                  so it sits alongside the CTA without competing with
+                  the book cover below. */}
+              <div className="flex flex-col gap-3">
+                <span className="font-body text-[12px] font-semibold uppercase tracking-[2px] text-purple-2">
+                  Die Geschichte hinter dem Buch
+                </span>
+                <div className="w-full max-w-[360px] overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.02] p-1.5">
+                  <YouTubeLite
+                    videoId="ccaBJffUv0s"
+                    title="Mit 3.500 Euro Kredit zum Millionen-Business — Selmir Suljkanovic bei Maurice Bork"
+                    className="rounded-lg"
+                  />
+                </div>
               </div>
 
               {/* Full wrap image (back + spine + front) — landscape 1125x804,
