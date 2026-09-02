@@ -37,6 +37,15 @@ export type PodcastEpisode = {
 export const PODCASTS: PodcastEpisode[] = [
   /* ─────────── Als Gast (external shows) ─────────── */
   {
+    // 2026-09-01 — newest
+    id: "ccaBJffUv0s",
+    title:
+      "Mit 3.500 Euro Kredit zum Millionen-Business! Selmir Suljkanovic & Maurice Bork",
+    show: "Maurice Bork",
+    role: "guest",
+    counterpart: "Maurice Bork",
+  },
+  {
     // 2026-08-16
     id: "x4BukHX8arA",
     title: "„ICH WOLLTE NICHT MEHR LEBEN“",
