@@ -20,15 +20,21 @@ export const WP_HUBSPOT_LIST_ID = "823";
 /** Landingpage column value in the Google Sheet + segment label. */
 export const WP_SOURCE_LABEL = "Whitepaper Angebotsprozess";
 
-/** Copy — from the mock the client shared. */
+/** Copy — from the mock the client shared. The H1 renders in three
+ *  explicit lines on desktop; each `line*` chunk is a hard-break, so
+ *  the balance stays predictable regardless of viewport width.
+ *  Mobile is allowed to wrap further if the accent chunk overflows,
+ *  which is fine (better to wrap than clip). */
 export const HERO = {
   eyebrow: "Whitepaper für Entscheider",
   headline: {
-    // "Der Angebotsprozess, der 2,1 Mio. € Umsatz pro Woche macht."
-    part1: "Der Angebotsprozess, der",
-    // Highlighted number
+    line1: "Der Angebotsprozess,",
+    // Line 2 wraps around the highlighted number — the accent
+    // fragment stays contiguous so "2,1 Mio. €" is never broken.
+    line2Pre: "der",
     accent: "2,1 Mio. €",
-    part2: "Umsatz pro Woche macht.",
+    line2Post: "Umsatz",
+    line3: "pro Woche macht.",
   },
   lead:
     "Wie die Hörmann Haustechnik mit nur zwei Vertrieblern monatlich 33 Wärmepumpen verkauft – der komplette Angebotsprozess Schritt für Schritt. Von der Anfrage bis zum Abschluss in 3–5 Tagen. Sofort per E-Mail als PDF.",

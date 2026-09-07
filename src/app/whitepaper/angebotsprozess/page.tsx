@@ -111,11 +111,20 @@ export default function WhitepaperAngebotsprozessPage() {
                 />
                 {HERO.eyebrow}
               </span>
-              <h1 className="font-serif text-[34px] leading-[1.12] tracking-[-1px] text-white sm:text-[42px] md:text-[48px] lg:text-[50px] lg:leading-[1.15] lg:tracking-[-1.8px]">
-                {HERO.headline.part1}
+              {/* H1 in three explicit lines — forced breaks so the
+                  balance stays predictable at every viewport width.
+                  Mobile font drops so each line fits inside ~327 px
+                  before wrapping to a 4th line. */}
+              <h1 className="text-balance font-serif text-[28px] leading-[1.08] tracking-[-0.8px] text-white sm:text-[36px] md:text-[42px] lg:text-[46px] lg:leading-[1.12] lg:tracking-[-1.6px]">
+                {HERO.headline.line1}
                 <br />
-                <span className="font-display">{HERO.headline.accent}</span>{" "}
-                {HERO.headline.part2}
+                {HERO.headline.line2Pre}{" "}
+                <span className="whitespace-nowrap font-display">
+                  {HERO.headline.accent}
+                </span>{" "}
+                {HERO.headline.line2Post}
+                <br />
+                {HERO.headline.line3}
               </h1>
               <p className="max-w-[560px] font-body text-[15px] leading-[1.62] text-white/60 lg:text-[16.5px]">
                 {HERO.lead}
