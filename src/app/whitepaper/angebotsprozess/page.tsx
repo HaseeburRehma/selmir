@@ -111,15 +111,17 @@ export default function WhitepaperAngebotsprozessPage() {
                 />
                 {HERO.eyebrow}
               </span>
-              {/* H1 in three explicit lines — forced breaks so the
-                  balance stays predictable at every viewport width.
-                  Mobile font drops so each line fits inside ~327 px
-                  before wrapping to a 4th line. */}
-              <h1 className="text-balance font-serif text-[28px] leading-[1.08] tracking-[-0.8px] text-white sm:text-[36px] md:text-[42px] lg:text-[46px] lg:leading-[1.12] lg:tracking-[-1.6px]">
+              {/* H1 in three explicit lines — matches the client mock:
+                  base copy in italic serif, only the price accent
+                  '2,1 Mio. €' switches to an upright purple extrabold
+                  sans. Forced breaks so the balance stays predictable
+                  at every viewport; mobile font drops so each line
+                  fits inside its column. */}
+              <h1 className="font-serif italic text-[26px] leading-[1.08] tracking-[-0.4px] text-white sm:text-[32px] md:text-[38px] lg:text-[44px] lg:leading-[1.08] lg:tracking-[-1.2px]">
                 {HERO.headline.line1}
                 <br />
                 {HERO.headline.line2Pre}{" "}
-                <span className="whitespace-nowrap font-display">
+                <span className="whitespace-nowrap font-body not-italic font-extrabold tracking-[-1px] text-purple-2">
                   {HERO.headline.accent}
                 </span>{" "}
                 {HERO.headline.line2Post}
