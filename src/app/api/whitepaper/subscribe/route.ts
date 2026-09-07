@@ -50,6 +50,20 @@ const SHEET_URL =
   process.env.GOOGLE_SHEET_WEBHOOK_URL ??
   "";
 
+/**
+ * Default HubSpot owner assigned to every new whitepaper lead so
+ * contacts don't sit in "no owner" limbo. Env-overridable so a
+ * proper round-robin workflow can take over later without a code
+ * change — just clear the env var and the field is left empty for
+ * the workflow to fill in.
+ *
+ * Current fallback: Mikail Turgut (id 30347534) — matches the owner
+ * the existing lead-magnet contacts (Sezer, Simon, Damir…) are
+ * assigned to.
+ */
+const WP_DEFAULT_OWNER_ID =
+  process.env.WP_DEFAULT_OWNER_ID ?? "30347534";
+
 function esc(s: string): string {
   return s
     .replace(/&/g, "&amp;")
@@ -267,6 +281,10 @@ async function pushHubspot({
   if (firstName) properties.firstname = firstName;
   if (lastName) properties.lastname = lastName;
   if (phone) properties.phone = phone;
+  // Auto-assign an owner so the lead never sits in "no owner" limbo.
+  // Skip only when the env override is explicitly empty (a real
+  // round-robin workflow will pick it up in that case).
+  if (WP_DEFAULT_OWNER_ID) properties.hubspot_owner_id = WP_DEFAULT_OWNER_ID;
 
   let contactId: string | undefined;
   const create = await hsCreateOrUpdate({ email, properties, headers });
@@ -419,7 +437,7 @@ export async function POST(req: NextRequest) {
 
   if (!RESEND_KEY) {
     // No mail credentials — return ok anyway so the client shows success.
-    // HubSpot workflow can pick up delivery once Ili configures it.
+    // HubSpot workflow can pick up delivery once configured.
     return NextResponse.json(
       { ok: true, mailSkipped: "RESEND_API_KEY not set" },
       { status: 200 },
@@ -428,14 +446,55 @@ export async function POST(req: NextRequest) {
   const pdfBase64 = await loadPdfBase64();
   const resend = new Resend(RESEND_KEY);
 
+  // ────────────────────────────────────────────────────────────
+  //  ADMIN NOTIFICATION — sent as its own transaction so a failed
+  //  user-side delivery (bad e-mail, attachment rejected by their
+  //  inbox, etc.) can't silently drop the internal alert too.
+  //  Previously admin was on BCC of the user mail; if that mail
+  //  bounced/failed, admin never learned about the lead.
+  // ────────────────────────────────────────────────────────────
+  const displayName = lastName ? `${firstName} ${lastName}` : firstName;
+  const adminHtml = `<!doctype html><html><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:#f5f5f7;margin:0;padding:24px;">
+  <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e5ea;">
+    <tr><td style="padding:20px 24px 8px 24px;font-weight:600;color:#7C5CFF;font-size:12px;letter-spacing:2px;text-transform:uppercase">Neuer Whitepaper-Lead</td></tr>
+    <tr><td style="padding:0 24px 20px 24px;font-weight:700;font-size:22px;color:#111;">${esc(displayName)}</td></tr>
+    <tr><td style="padding:0 24px 24px 24px;"><table cellspacing="0" cellpadding="0" style="width:100%;font-size:14px;border-collapse:collapse;">
+      <tr><td style="padding:6px 10px;color:#666;">E-Mail</td><td style="padding:6px 10px;color:#111;"><b>${esc(email)}</b></td></tr>
+      <tr><td style="padding:6px 10px;color:#666;">Telefon</td><td style="padding:6px 10px;color:#111;"><b>${esc(phone)}</b></td></tr>
+      <tr><td style="padding:6px 10px;color:#666;">Landingpage</td><td style="padding:6px 10px;color:#111;">${esc(pageUrl || WP_SOURCE_LABEL)}</td></tr>
+      <tr><td style="padding:6px 10px;color:#666;">HubSpot-ID</td><td style="padding:6px 10px;color:#111;">${hs.ok ? esc(hs.contactId ?? "") : "<i style='color:#F0556B'>FEHLGESCHLAGEN — " + esc(hs.reason ?? "unknown") + "</i>"}</td></tr>
+    </table></td></tr>
+  </table></body></html>`;
+
+  // Fire the admin notification first (independent of user-mail success).
+  if (CC_TO.length > 0) {
+    void resend.emails
+      .send({
+        from: FROM,
+        to: CC_TO,
+        subject: `Neuer Whitepaper-Lead: ${displayName}`,
+        html: adminHtml,
+        replyTo: email,
+      })
+      .catch((err) =>
+        console.error("[whitepaper] admin notify failed:", (err as Error).message),
+      );
+  }
+
+  // ────────────────────────────────────────────────────────────
+  //  USER MAIL — Whitepaper PDF as attachment + inline download
+  //  link fallback. NOTE: keep the PDF under ~5MB (Ghostscript
+  //  /ebook preset) so the base64-encoded attachment stays
+  //  well below Gmail's 25MB per-message cap.
+  // ────────────────────────────────────────────────────────────
   try {
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: [email],
-      bcc: CC_TO,
       subject: WP_EMAIL.subject,
       html: renderEmailHtml({ firstName, downloadUrl }),
       text: renderEmailText({ firstName, downloadUrl }),
+      replyTo: CC_TO[0],
       attachments: pdfBase64
         ? [{ filename: WP_PDF_FILENAME, content: pdfBase64 }]
         : undefined,
@@ -461,6 +520,8 @@ export async function POST(req: NextRequest) {
     return jsonRes;
   } catch (err) {
     console.error("[whitepaper] resend error:", (err as Error).message);
+    // Return ok: false to the client but the admin already got the
+    // notification, and the lead is safe in HubSpot + Google Sheet.
     return NextResponse.json(
       { ok: false, reason: (err as Error).message },
       { status: 200 },
