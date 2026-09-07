@@ -303,7 +303,7 @@ async function appendToSheet(row: {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        formType: "leitfaden", // reuse router — Sheet2
+        formType: "ebook", // → E-Book tab
         name: row.name,
         phone: row.phone ? `'${row.phone}` : "",
         email: row.email,

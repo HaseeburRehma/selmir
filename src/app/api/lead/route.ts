@@ -28,6 +28,7 @@ async function appendToSheet(row: {
       headers: { "Content-Type": "application/json" },
       // Prefix the phone with ' so Sheets stores "+49…" as text, not a formula.
       body: JSON.stringify({
+        formType: "lp", // → Sheet1 (Potenzialanalyse / LP forms)
         ...row,
         phone: row.phone ? `'${row.phone}` : "",
       }),

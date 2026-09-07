@@ -157,10 +157,11 @@ async function pushHubspot(
 }
 
 // ────────────────────────────────────────────────────────────────
-//  Google Sheet (reuses the Sheet2 router so BR rows sit next to the
-//  Rollenspiel-Leitfaden rows in the operational tab). We flag them
-//  as landingPage="Betriebs-Röntgen" so a column filter still splits
-//  the two.
+//  Google Sheet — dedicated 'Betriebs-Roentgen' tab (v2 router).
+//  Every wizard answer travels alongside contact info so Sales
+//  can read the full qualifying picture without pivoting into
+//  HubSpot. The Apps Script routes by `formType` and builds the
+//  BR-specific 18-column row via lib/apps-script-router.
 // ────────────────────────────────────────────────────────────────
 
 async function appendToSheet(b: BetriebsRoentgenSubmit): Promise<void> {
@@ -170,11 +171,28 @@ async function appendToSheet(b: BetriebsRoentgenSubmit): Promise<void> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        formType: "leitfaden", // reuse the router → Sheet2
+        formType: "betriebs-roentgen",
+        // Contact
         name: b.lastName ? `${b.firstName} ${b.lastName}` : b.firstName,
-        phone: b.phone ? `'${b.phone}` : "",
         email: b.email,
-        landingPage: "Betriebs-Röntgen",
+        phone: b.phone ? `'${b.phone}` : "",
+        // Full wizard payload — column names match the tab's headers.
+        industry:
+          b.industry === "Sonstiges" && b.industryOther
+            ? `Sonstiges — ${b.industryOther}`
+            : b.industry,
+        umsatz: b.umsatz ?? "",
+        mitarbeiter: b.mitarbeiter ?? "",
+        anfragenMonat: b.anfragenMonat ?? "",
+        auftragWert: b.auftragWert ?? "",
+        abschlussquote: b.abschlussquote,
+        reaktionszeit: b.reaktionszeit,
+        wochenstunden: b.wochenstunden,
+        coreVertrieb: b.coreVertrieb,
+        coreProzess: b.coreProzess,
+        coreNachfassen: b.coreNachfassen,
+        industryQ1: b.industryQ1,
+        industryQ2: b.industryQ2,
         pageUrl: b.pageUrl ?? "",
       }),
     });
