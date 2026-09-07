@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { Download, FileText } from "lucide-react";
+import { Download } from "lucide-react";
 import { Reveal } from "@/components/ui/Reveal";
 import { Button } from "@/components/ui/Button";
 import FooterSection from "@/components/sections/FooterSection";
 import WhitepaperForm from "@/components/whitepaper/WhitepaperForm";
-import { COVER, HERO } from "@/lib/whitepaper";
+import { HERO } from "@/lib/whitepaper";
 
 export const metadata: Metadata = {
   title:
@@ -147,18 +147,22 @@ export default function WhitepaperAngebotsprozessPage() {
               </div>
             </Reveal>
 
-            {/* Right on desktop, SECOND on mobile — PDF mockup stacks
-                below the form. Slightly smaller mobile max-width so it
-                feels proportional inside the section. */}
+            {/* Right on desktop, SECOND on mobile — real PDF cover
+                (extracted from page 1 of the redesigned whitepaper).
+                Layered back-sheets behind + a floating WHITEPAPER · GRATIS
+                badge keep the "stacked pages" impression the previous
+                synthetic mockup had, but the front cover is now the
+                actual artwork the visitor gets in the PDF — no more
+                mismatch between the teaser and the file. */}
             <Reveal
               delay={0.1}
               className="order-2 mx-auto flex w-full min-w-0 max-w-[320px] flex-col sm:max-w-[400px] lg:mx-0 lg:ml-auto lg:max-w-[560px]"
             >
               <div
                 className="relative w-full overflow-visible"
-                style={{ aspectRatio: "500 / 700" }}
+                style={{ aspectRatio: "2425 / 3430" }}
               >
-                {/* soft purple bloom directly behind the cover */}
+                {/* Soft purple bloom directly behind the cover */}
                 <div
                   aria-hidden
                   className="pointer-events-none absolute left-1/2 top-[30%] size-[70%] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(176,137,255,0.50)_0%,rgba(116,84,243,0.22)_45%,rgba(10,8,18,0)_75%)] blur-[28px]"
@@ -167,83 +171,35 @@ export default function WhitepaperAngebotsprozessPage() {
                 {/* Back sheet 2 */}
                 <div
                   aria-hidden
-                  className="absolute right-[2%] top-[18%] h-[74%] w-[70%] rounded-[14px] border border-white/[0.06] bg-[#161127] opacity-80"
+                  className="absolute right-[2%] top-[8%] h-[86%] w-[70%] rounded-[14px] border border-white/[0.06] bg-[#161127] opacity-80"
                 />
                 {/* Back sheet 1 */}
                 <div
                   aria-hidden
-                  className="absolute right-[8%] top-[13%] h-[80%] w-[78%] rounded-[15px] border border-white/[0.08] bg-[#19132d]"
+                  className="absolute right-[8%] top-[5%] h-[92%] w-[78%] rounded-[15px] border border-white/[0.08] bg-[#19132d]"
                 />
 
-                {/* Main PDF cover */}
+                {/* Real PDF cover — front of the stack */}
                 <div
-                  className="absolute left-0 top-[6%] flex h-[92%] w-[86%] flex-col justify-between overflow-hidden rounded-[18px] border border-purple-2/30 px-[8%] py-[7%]"
+                  className="absolute left-0 top-0 h-full w-[92%] overflow-hidden rounded-[18px] border border-purple-2/30"
                   style={{
-                    background:
-                      "linear-gradient(117deg, #21183d 14%, #140e25 54%, #0b0816 86%)",
                     boxShadow: "0 40px 100px 0 rgba(112,77,255,0.42)",
                   }}
                 >
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-x-0 top-0 h-[22%]"
-                    style={{
-                      background:
-                        "linear-gradient(180deg, rgba(176,137,255,0.20) 0%, rgba(176,137,255,0) 100%)",
-                    }}
+                  <Image
+                    src="/pdf/whitepaper-cover.jpg"
+                    alt="Whitepaper: Der Angebotsprozess für 2,1 Mio. € / Woche — Cover"
+                    width={2425}
+                    height={3430}
+                    priority
+                    sizes="(max-width: 640px) 90vw, (max-width: 1024px) 400px, 560px"
+                    className="h-full w-full object-cover"
                   />
-                  <div className="relative flex flex-col gap-3.5 sm:gap-5 lg:gap-6">
-                    <Image
-                      src="/logo-red-dark.svg"
-                      alt="Selmir"
-                      width={130}
-                      height={42}
-                      className="h-[30px] w-auto sm:h-[36px] lg:h-[42px]"
-                    />
-                    {/* Badge chip inside the cover */}
-                    <div className="inline-flex w-fit items-center gap-2.5 rounded-[10px] border border-white/[0.10] bg-white/[0.05] px-2.5 py-2">
-                      <span className="grid size-[30px] shrink-0 place-items-center rounded-[8px] bg-purple-2/[0.16] lg:size-[34px]">
-                        <FileText
-                          className="size-[15px] text-purple-2 lg:size-[17px]"
-                          strokeWidth={1.75}
-                        />
-                      </span>
-                      <div className="flex min-w-0 flex-col leading-tight">
-                        <span className="whitespace-nowrap font-body text-[11.5px] font-semibold tracking-[-0.2px] text-white lg:text-[13px]">
-                          {COVER.eyebrow}
-                        </span>
-                        <span className="whitespace-nowrap font-body text-[10.5px] tracking-[-0.1px] text-white/50 lg:text-[11.5px]">
-                          {HERO.formTag.subtitle}
-                        </span>
-                      </div>
-                    </div>
-                    <p className="font-serif text-[20px] leading-[1.15] tracking-[-0.7px] text-white sm:text-[24px] sm:tracking-[-0.9px] lg:text-[30px] lg:tracking-[-1.2px]">
-                      {COVER.titleSerif}{" "}
-                      <span className="font-display">{COVER.titleDisplay}</span>
-                    </p>
-                    <p className="font-body text-[12.5px] leading-[1.45] tracking-[-0.15px] text-white/72 sm:text-[14px] lg:text-[16px]">
-                      {COVER.subtitleHigh}{" "}
-                      <span className="font-bold text-purple-2">
-                        {COVER.subtitleLow}
-                      </span>
-                    </p>
-                  </div>
-                  <div className="relative flex flex-col gap-2 sm:gap-3">
-                    <div aria-hidden className="h-px w-full bg-white/[0.14]" />
-                    <div className="flex items-center justify-between font-body text-[10px] uppercase tracking-[1.2px] sm:text-[11.5px] sm:tracking-[1.5px] lg:text-[12px]">
-                      <span className="font-semibold text-white/70">
-                        {COVER.footerL}
-                      </span>
-                      <span className="font-medium text-white/45">
-                        {COVER.footerR}
-                      </span>
-                    </div>
-                  </div>
                 </div>
 
                 {/* Floating WHITEPAPER · GRATIS badge */}
                 <span
-                  className="absolute right-[2%] top-[1%] rounded-full bg-purple-2 px-4 py-2.5 font-body text-[12px] font-bold uppercase tracking-[0.8px] text-bg lg:text-[13px]"
+                  className="absolute right-[-2%] top-[-2%] rounded-full bg-purple-2 px-4 py-2.5 font-body text-[12px] font-bold uppercase tracking-[0.8px] text-bg lg:text-[13px]"
                   style={{ boxShadow: "0 8px 30px 0 rgba(112,77,255,0.55)" }}
                 >
                   Whitepaper · Gratis
