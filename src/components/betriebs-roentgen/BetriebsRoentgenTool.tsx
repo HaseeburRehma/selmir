@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Check, Lock } from "lucide-react";
+import { Logo } from "@/components/ui/Logo";
 import {
   CORE_QUESTIONS,
   INDUSTRIES,
@@ -242,15 +243,10 @@ export default function BetriebsRoentgenTool() {
 
   return (
     <div className="min-h-screen bg-bg text-white">
-      {/* Sub-nav — brand + step indicator */}
+      {/* Sub-nav — real site logo + step indicator */}
       <div className="border-b border-white/10 bg-[#140C24]">
-        <div className="mx-auto flex max-w-[760px] items-center justify-between px-5 py-4">
-          <div className="font-serif text-[19px] font-semibold text-white">
-            Selmir
-            <span className="ml-1 font-body text-[9px] font-semibold uppercase tracking-[3px] text-white/60">
-              Suljkanovic
-            </span>
-          </div>
+        <div className="mx-auto flex max-w-[760px] items-center justify-between px-5 py-2.5">
+          <Logo />
           <div className="font-body text-[12px] font-medium text-white/70">
             {stepLabels[step]}
           </div>
