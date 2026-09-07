@@ -98,7 +98,8 @@ export default function BuchPage() {
                 </div>
               </Reveal>
 
-              {/* 5. VIDEO — mobile order-5 (very last), desktop stack bottom */}
+              {/* 5. VIDEO A — "Geschichte hinter dem Buch". Mobile
+                  order-5, desktop stack bottom of LEFT column. */}
               <Reveal
                 delay={0.2}
                 className="order-5 flex flex-col gap-3 lg:order-none"
@@ -110,6 +111,24 @@ export default function BuchPage() {
                   <YouTubeLite
                     videoId="ccaBJffUv0s"
                     title="Mit 3.500 Euro Kredit zum Millionen-Business — Selmir Suljkanovic bei Maurice Bork"
+                    className="rounded-lg"
+                  />
+                </div>
+              </Reveal>
+
+              {/* 6. VIDEO B — "Selmir liest Kapitel aus dem Buch".
+                  Sits directly under video A on both viewports. */}
+              <Reveal
+                delay={0.25}
+                className="order-6 flex flex-col gap-3 lg:order-none"
+              >
+                <span className="font-body text-[12px] font-semibold uppercase tracking-[2px] text-purple-2">
+                  Selmir liest Kapitel aus dem Buch
+                </span>
+                <div className="w-full max-w-[380px] overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.02] p-1.5">
+                  <YouTubeLite
+                    videoId="YUe6Knf-WXE"
+                    title="Selmir liest Kapitel aus dem Buch — SEIN. TUN. HABEN."
                     className="rounded-lg"
                   />
                 </div>
@@ -127,10 +146,12 @@ export default function BuchPage() {
                 </p>
               </Reveal>
 
-              {/* 4. BUTTON — mobile order-4, desktop stack middle */}
+              {/* 4. BUTTON — mobile order-4, desktop stack middle.
+                  Full Amazon affiliate URL (tag=selmirsuljkan-21) so
+                  each sale from the site attributes back to Selmir. */}
               <Reveal delay={0.15} className="order-4 lg:order-none">
                 <Button
-                  href="https://www.amazon.de/dp/3982560667"
+                  href="https://www.amazon.de/SEIN-TUN-HABEN-Unaufhaltsam-gewonnen/dp/3982560667?crid=3VAHR0UD2080G&dib=eyJ2IjoiMSJ9.X_feodgob67tWJd68caS606ldozddHCJ1sCecskDUxueIhkaTp0ZNVGrTk8jRbbEjehkY0UA2jvc2ESU7QO8rc3_Piqao3emEphnXUJYtjoTTxsUc6FZHqeuPn11Qjexs1kwQhvV6ML7us5Txmz2QmN3wu5aTzNBDuxyL8krmZMatzCpAOwXmF-BxLUuqkhVPGKC7STlQVrzeTddUMhR2MXqB11NaVofhCrnem7vp20.Mt0gFfN7rCBYCXttRIf7s8Eb6BW0inHaMV2bP8hf7yE&dib_tag=se&keywords=sein+tun+haben&qid=1788345276&sprefix=sein+tun+habe%2Caps%2C151&sr=8-1&linkCode=ll2&tag=selmirsuljkan-21&linkId=7e6ba7450ef6a42a34d152567812de44&ref_=as_li_ss_tl"
                   icon={<ShoppingBag className="size-5" />}
                 >
                   Jetzt Buch sichern
