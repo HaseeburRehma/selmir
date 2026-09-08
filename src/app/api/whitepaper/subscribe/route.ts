@@ -13,6 +13,12 @@ import {
   WP_SOURCE_LABEL,
   HERO as WP_HERO,
 } from "@/lib/whitepaper";
+import {
+  magnetFrom,
+  magnetReplyTo,
+  renderMagnetEmailHtml,
+  renderMagnetEmailText,
+} from "@/lib/email-branding";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -38,8 +44,13 @@ const HS_BASE = "https://api.hubapi.com";
 const HS_TOKEN = process.env.HUBSPOT_TOKEN;
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
-const FROM =
-  process.env.NOTIFY_FROM ?? "Selmir Suljkanovic <noreply@sh-wachstum.de>";
+/**
+ * Sender name = "Selmir Suljkanovic · Whitepaper" so the recipient's
+ * inbox row identifies WHICH form they submitted, not the site-wide
+ * NOTIFY_FROM default (which used to say "Sales Mastery Days" for
+ * every mail). Address stays the verified domain.
+ */
+const FROM = magnetFrom("whitepaper");
 const CC_TO = (process.env.NOTIFY_TO ?? "info@sh-wachstum.de,info@tylotech.de")
   .split(",")
   .map((s) => s.trim())
@@ -64,6 +75,9 @@ const SHEET_URL =
 const WP_DEFAULT_OWNER_ID =
   process.env.WP_DEFAULT_OWNER_ID ?? "30347534";
 
+/** Basic HTML-escape for user-supplied strings that end up in the admin
+ *  notification below. Route-scoped so we don't pull the branding lib
+ *  helper across a module boundary just for one call. */
 function esc(s: string): string {
   return s
     .replace(/&/g, "&amp;")
@@ -72,90 +86,24 @@ function esc(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
-function renderEmailHtml({
-  firstName,
-  downloadUrl,
-}: {
-  firstName: string;
-  downloadUrl: string;
-}) {
-  const greet = firstName ? `Hallo ${esc(firstName)},` : "Hallo,";
-  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>${esc(WP_EMAIL.subject)}</title></head>
-<body style="margin:0;padding:0;background:#f5f5f7;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f5f5f7;padding:32px 12px;">
-    <tr><td align="center">
-      <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e5ea;">
-        <tr>
-          <td style="padding:24px 24px 8px 24px;font:600 16px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#7454f3;letter-spacing:0.2px;">
-            Selmir Suljkanovic
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:0 24px 8px 24px;font:600 22px/1.3 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#111111;">
-            ${esc(WP_EMAIL.heading)}
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:12px 24px 4px 24px;font:15px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#333333;">
-            ${greet}
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:8px 24px 8px 24px;font:15px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#333333;">
-            ${esc(WP_EMAIL.intro)}
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:8px 24px 8px 24px;font:15px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#333333;">
-            Falls der Anhang bei dir gefiltert wurde, kannst du das Whitepaper auch hier laden:
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:12px 24px 20px 24px;">
-            <a href="${esc(downloadUrl)}" style="display:inline-block;background:#7454f3;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:10px;font:600 14px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">${esc(WP_EMAIL.buttonLabel)}</a>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:0 24px 20px 24px;font:14px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#555555;">
-            ${esc(WP_EMAIL.closingNote)}
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:0 24px 24px 24px;font:14px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#333333;">
-            Viel Erfolg,<br>
-            <strong>Selmir Suljkanovic</strong>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:0 24px 24px 24px;font:12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#999999;">
-            Diese Nachricht wurde automatisch von selmir-suljkanovic.de gesendet. Antworten landen direkt bei Selmir.
-          </td>
-        </tr>
-      </table>
-    </td></tr>
-  </table>
-</body></html>`;
-}
-
-function renderEmailText({
-  firstName,
-  downloadUrl,
-}: {
-  firstName: string;
-  downloadUrl: string;
-}) {
-  const greet = firstName ? `Hallo ${firstName},` : "Hallo,";
-  return `${greet}
-
-${WP_EMAIL.intro}
-
-Falls der Anhang bei dir gefiltert wurde, kannst du das Whitepaper hier laden:
-${downloadUrl}
-
-Viel Erfolg,
-Selmir Suljkanovic
-
-— selmir-suljkanovic.de`;
+/** Per-magnet user email — shared branded template with the whitepaper
+ *  copy from src/lib/whitepaper.ts. */
+function buildUserEmail(firstName: string, downloadUrl: string) {
+  const content = {
+    firstName,
+    subject: WP_EMAIL.subject,
+    heading: WP_EMAIL.heading,
+    intro: WP_EMAIL.intro,
+    closingNote: WP_EMAIL.closingNote,
+    buttonLabel: WP_EMAIL.buttonLabel,
+    downloadUrl,
+    attachmentHint:
+      "Falls der Anhang bei dir gefiltert wurde, kannst du das Whitepaper auch hier laden:",
+  };
+  return {
+    html: renderMagnetEmailHtml("whitepaper", content),
+    text: renderMagnetEmailText(content),
+  };
 }
 
 async function loadPdfBase64(): Promise<string | null> {
@@ -488,13 +436,14 @@ export async function POST(req: NextRequest) {
   //  well below Gmail's 25MB per-message cap.
   // ────────────────────────────────────────────────────────────
   try {
+    const { html, text } = buildUserEmail(firstName, downloadUrl);
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: [email],
       subject: WP_EMAIL.subject,
-      html: renderEmailHtml({ firstName, downloadUrl }),
-      text: renderEmailText({ firstName, downloadUrl }),
-      replyTo: CC_TO[0],
+      html,
+      text,
+      replyTo: magnetReplyTo(),
       attachments: pdfBase64
         ? [{ filename: WP_PDF_FILENAME, content: pdfBase64 }]
         : undefined,

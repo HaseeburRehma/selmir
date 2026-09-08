@@ -13,6 +13,12 @@ import {
   EBOOK_SOURCE_LABEL,
   HERO as EBOOK_HERO,
 } from "@/lib/ebook";
+import {
+  magnetFrom,
+  magnetReplyTo,
+  renderMagnetEmailHtml,
+  renderMagnetEmailText,
+} from "@/lib/email-branding";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -38,8 +44,9 @@ const HS_BASE = "https://api.hubapi.com";
 const HS_TOKEN = process.env.HUBSPOT_TOKEN;
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
-const FROM =
-  process.env.NOTIFY_FROM ?? "Selmir Suljkanovic <noreply@sh-wachstum.de>";
+/** Sender name = "Selmir Suljkanovic · E-Book" so the inbox row
+ *  identifies the form. Address stays on the verified domain. */
+const FROM = magnetFrom("ebook");
 const CC_TO = (process.env.NOTIFY_TO ?? "info@sh-wachstum.de,info@tylotech.de")
   .split(",")
   .map((s) => s.trim())
@@ -50,98 +57,24 @@ const SHEET_URL =
   process.env.GOOGLE_SHEET_WEBHOOK_URL ??
   "";
 
-function esc(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function renderEmailHtml({
-  firstName,
-  downloadUrl,
-}: {
-  firstName: string;
-  downloadUrl: string;
-}) {
-  const greet = firstName ? `Hallo ${esc(firstName)},` : "Hallo,";
-  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>${esc(EBOOK_EMAIL.subject)}</title></head>
-<body style="margin:0;padding:0;background:#f5f5f7;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f5f5f7;padding:32px 12px;">
-    <tr><td align="center">
-      <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e5ea;">
-        <tr>
-          <td style="padding:24px 24px 8px 24px;font:600 16px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#7454f3;letter-spacing:0.2px;">
-            Selmir Suljkanovic
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:0 24px 8px 24px;font:600 22px/1.3 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#111111;">
-            ${esc(EBOOK_EMAIL.heading)}
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:12px 24px 4px 24px;font:15px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#333333;">
-            ${greet}
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:8px 24px 8px 24px;font:15px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#333333;">
-            ${esc(EBOOK_EMAIL.intro)}
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:8px 24px 8px 24px;font:15px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#333333;">
-            Falls der Anhang bei dir gefiltert wurde, kannst du das E-Book auch hier laden:
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:12px 24px 20px 24px;">
-            <a href="${esc(downloadUrl)}" style="display:inline-block;background:#7454f3;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:10px;font:600 14px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">${esc(EBOOK_EMAIL.buttonLabel)}</a>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:0 24px 20px 24px;font:14px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#555555;">
-            ${esc(EBOOK_EMAIL.closingNote)}
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:0 24px 24px 24px;font:14px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#333333;">
-            Viel Erfolg,<br>
-            <strong>Selmir Suljkanovic</strong>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:0 24px 24px 24px;font:12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#999999;">
-            Diese Nachricht wurde automatisch von selmir-suljkanovic.de gesendet. Antworten landen direkt bei Selmir.
-          </td>
-        </tr>
-      </table>
-    </td></tr>
-  </table>
-</body></html>`;
-}
-
-function renderEmailText({
-  firstName,
-  downloadUrl,
-}: {
-  firstName: string;
-  downloadUrl: string;
-}) {
-  const greet = firstName ? `Hallo ${firstName},` : "Hallo,";
-  return `${greet}
-
-${EBOOK_EMAIL.intro}
-
-Falls der Anhang bei dir gefiltert wurde, kannst du das E-Book hier laden:
-${downloadUrl}
-
-Viel Erfolg,
-Selmir Suljkanovic
-
-— selmir-suljkanovic.de`;
+/** User-side confirmation email — shared branded template with the
+ *  E-Book copy from src/lib/ebook.ts. */
+function buildUserEmail(firstName: string, downloadUrl: string) {
+  const content = {
+    firstName,
+    subject: EBOOK_EMAIL.subject,
+    heading: EBOOK_EMAIL.heading,
+    intro: EBOOK_EMAIL.intro,
+    closingNote: EBOOK_EMAIL.closingNote,
+    buttonLabel: EBOOK_EMAIL.buttonLabel,
+    downloadUrl,
+    attachmentHint:
+      "Falls der Anhang bei dir gefiltert wurde, kannst du das E-Book auch hier laden:",
+  };
+  return {
+    html: renderMagnetEmailHtml("ebook", content),
+    text: renderMagnetEmailText(content),
+  };
 }
 
 async function loadPdfBase64(): Promise<string | null> {
@@ -429,13 +362,15 @@ export async function POST(req: NextRequest) {
   const resend = new Resend(RESEND_KEY);
 
   try {
+    const { html, text } = buildUserEmail(firstName, downloadUrl);
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: [email],
       bcc: CC_TO,
       subject: EBOOK_EMAIL.subject,
-      html: renderEmailHtml({ firstName, downloadUrl }),
-      text: renderEmailText({ firstName, downloadUrl }),
+      html,
+      text,
+      replyTo: magnetReplyTo(),
       attachments: pdfBase64
         ? [{ filename: EBOOK_PDF_FILENAME, content: pdfBase64 }]
         : undefined,

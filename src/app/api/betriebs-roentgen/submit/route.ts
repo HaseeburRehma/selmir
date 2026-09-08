@@ -4,6 +4,12 @@ import {
   BR_HUBSPOT_LIST_ID,
   type BetriebsRoentgenSubmit,
 } from "@/lib/betriebs-roentgen";
+import {
+  magnetFrom,
+  magnetReplyTo,
+  renderMagnetEmailHtml,
+  renderMagnetEmailText,
+} from "@/lib/email-branding";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,8 +36,9 @@ const HS_BASE = "https://api.hubapi.com";
 const HS_TOKEN = process.env.HUBSPOT_TOKEN;
 
 const RESEND_KEY = process.env.RESEND_API_KEY;
-const FROM =
-  process.env.NOTIFY_FROM ?? "Selmir Suljkanovic <noreply@sh-wachstum.de>";
+/** Sender name = "Selmir Suljkanovic · Betriebs-Röntgen" so the
+ *  admin notification's From header identifies the source form. */
+const FROM = magnetFrom("betriebs-roentgen");
 const NOTIFY_TO = (
   process.env.NOTIFY_TO ?? "info@sh-wachstum.de,info@tylotech.de"
 )
@@ -260,6 +267,38 @@ async function sendNotify(b: BetriebsRoentgenSubmit): Promise<void> {
   }
 }
 
+/**
+ * User-side confirmation email — matches the on-screen Stage 5 copy
+ * so the visitor has proof-in-inbox that their submission arrived and
+ * knows the team will call back. No auto-report, no PDF — per client
+ * brief, this tool is a lead qualifier, not a report generator.
+ */
+async function sendUserConfirmation(b: BetriebsRoentgenSubmit): Promise<void> {
+  if (!RESEND_KEY) return;
+  try {
+    const resend = new Resend(RESEND_KEY);
+    const content = {
+      firstName: b.firstName,
+      subject: "Danke — wir bereiten dein Röntgenbild vor",
+      heading: `Danke, ${b.firstName}! Wir bereiten dein Röntgenbild vor.`,
+      intro:
+        "wir haben deine Antworten erhalten. Unser Team analysiert sie jetzt persönlich — kein Autopilot, kein Standard-PDF. Wir melden uns in Kürze telefonisch bei dir.",
+      closingNote:
+        "In der Zwischenzeit kannst du dir überlegen, wo dein Betrieb aktuell am meisten Zeit verliert — Vertrieb, Struktur, Führung oder Auslastung. Genau dort setzen wir im Gespräch an.",
+    };
+    await resend.emails.send({
+      from: FROM,
+      to: [b.email],
+      subject: content.subject,
+      html: renderMagnetEmailHtml("betriebs-roentgen", content),
+      text: renderMagnetEmailText(content),
+      replyTo: magnetReplyTo(),
+    });
+  } catch (err) {
+    console.error("[br] user confirmation email failed:", (err as Error).message);
+  }
+}
+
 // ────────────────────────────────────────────────────────────────
 //  Route
 // ────────────────────────────────────────────────────────────────
@@ -324,6 +363,7 @@ export async function POST(req: NextRequest) {
   // response the visitor sees. Any failure ends up in the logs.
   void appendToSheet(normalized);
   void sendNotify(normalized);
+  void sendUserConfirmation(normalized);
 
   return NextResponse.json({
     ok: true,
