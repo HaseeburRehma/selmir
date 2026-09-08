@@ -122,7 +122,7 @@ export default function BetriebsRoentgenTool() {
   const [auftrag, setAuftrag] = useState<number | undefined>();
   const [quote, setQuote] = useState(3); // 0–10
   const [reaktion, setReaktion] = useState<string>(""); // one of REAKTIONSZEIT_OPTIONS labels
-  const [stunden, setStunden] = useState(55); // 20–80
+  // Wochenstunden slider dropped per v2 brief — no longer collected.
 
   // Step 2 — core
   const [coreAns, setCoreAns] = useState<CoreAnswers>({});
@@ -183,7 +183,6 @@ export default function BetriebsRoentgenTool() {
       auftragWert: auftrag,
       abschlussquote: quote,
       reaktionszeit: reaktion,
-      wochenstunden: stunden,
       coreVertrieb:
         CORE_QUESTIONS[0].opts[coreAns[CORE_QUESTIONS[0].key] ?? 0].label,
       coreProzess:
@@ -398,13 +397,17 @@ export default function BetriebsRoentgenTool() {
               </div>
             </div>
 
-            {/* Reaktionszeit */}
+            {/* Reaktionszeit — heading + sub-line both come from the
+                industry wording map so Immobilien reads "Interessenten"
+                everywhere (previously the heading said "Interessenten"
+                but the sub-line still said "Anfrage"). */}
             <div className="mt-4 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6">
               <h3 className="font-body text-[17px] font-semibold text-white">
                 {wording.reaktion ?? "Reaktionszeit auf neue Anfragen"}
               </h3>
               <p className="mb-4 mt-1 font-body text-[13.5px] text-white/55">
-                Wie schnell meldet sich jemand bei einer neuen Anfrage?
+                {wording.reaktionSub ??
+                  "Wie schnell meldet sich jemand bei einer neuen Anfrage?"}
               </p>
               <div className="flex flex-col gap-2">
                 {REAKTIONSZEIT_OPTIONS.map((opt) => {
@@ -436,28 +439,9 @@ export default function BetriebsRoentgenTool() {
               </div>
             </div>
 
-            {/* Wochenstunden */}
-            <div className="mt-4 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6">
-              <h3 className="font-body text-[17px] font-semibold text-white">
-                Deine Wochenstunden im Betrieb
-              </h3>
-              <p className="mb-4 mt-1 font-body text-[13.5px] text-white/55">
-                Wie viele Stunden steckst du selbst pro Woche rein?
-              </p>
-              <div className="flex items-center gap-4">
-                <input
-                  type="range"
-                  min={20}
-                  max={80}
-                  value={stunden}
-                  onChange={(e) => setStunden(Number(e.target.value))}
-                  className="flex-1 accent-purple-2"
-                />
-                <span className="min-w-[80px] text-right font-serif text-[22px] font-semibold text-[#A78BFA]">
-                  {stunden} h
-                </span>
-              </div>
-            </div>
+            {/* Wochenstunden slider removed per v2 brief — it wasn't
+                core to the diagnosis and inflated the perceived length
+                of Step 1. Result-logic doesn't reference it anymore. */}
 
             <div className="mt-8 flex justify-between gap-4">
               <GhostBtn onClick={() => setStep(0)}>← Zurück</GhostBtn>

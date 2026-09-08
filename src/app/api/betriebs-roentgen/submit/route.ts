@@ -77,7 +77,6 @@ async function pushHubspot(
     br_industry: b.industry,
     br_reaktionszeit: b.reaktionszeit,
     br_abschlussquote: String(b.abschlussquote),
-    br_wochenstunden: String(b.wochenstunden),
     br_core_vertrieb: b.coreVertrieb,
     br_core_prozess: b.coreProzess,
     br_core_nachfassen: b.coreNachfassen,
@@ -93,6 +92,10 @@ async function pushHubspot(
     properties.br_anfragen_monat = String(b.anfragenMonat);
   if (b.auftragWert !== undefined)
     properties.br_auftrag_wert = String(b.auftragWert);
+  // Wochenstunden slider removed in v2 UI, but keep passthrough so
+  // any legacy submitter (cached client bundle) doesn't drop data.
+  if (b.wochenstunden !== undefined)
+    properties.br_wochenstunden = String(b.wochenstunden);
 
   // Same defensive create-or-patch pattern the other routes use:
   // if a custom property doesn't exist yet (portal setup lag), strip
@@ -194,7 +197,7 @@ async function appendToSheet(b: BetriebsRoentgenSubmit): Promise<void> {
         auftragWert: b.auftragWert ?? "",
         abschlussquote: b.abschlussquote,
         reaktionszeit: b.reaktionszeit,
-        wochenstunden: b.wochenstunden,
+        wochenstunden: b.wochenstunden ?? "",
         coreVertrieb: b.coreVertrieb,
         coreProzess: b.coreProzess,
         coreNachfassen: b.coreNachfassen,
@@ -239,7 +242,7 @@ function renderNotifyHtml(b: BetriebsRoentgenSubmit): string {
         ${row("Ø Auftragswert", b.auftragWert !== undefined ? b.auftragWert.toLocaleString("de-DE") + " €" : undefined)}
         ${row("Abschlussquote", `${b.abschlussquote} von 10`)}
         ${row("Reaktionszeit", b.reaktionszeit)}
-        ${row("Wochenstunden Inhaber", b.wochenstunden + " h")}
+        ${row("Wochenstunden Inhaber", b.wochenstunden !== undefined ? b.wochenstunden + " h" : undefined)}
         ${row("Vertrieb ohne dich", b.coreVertrieb)}
         ${row("Vertriebsprozess", b.coreProzess)}
         ${row("Nachfassen", b.coreNachfassen)}

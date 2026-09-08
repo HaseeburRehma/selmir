@@ -104,6 +104,17 @@ export const CORE_QUESTIONS: Question[] = [
  * Industry-specific questions — ONLY the 2 for the picked industry
  * are shown (Step 3). Same 5 industries + Sonstiges fallback that
  * appear on Step 0.
+ *
+ * v2 (2026-09-08) — de-duplicated per client Dev-Briefing:
+ *   · Every "Reaktionszeit / wie schnell reagierst du" question is
+ *     removed here (it's already Step 2's Reaktionszeit slot).
+ *   · Every "depends-on-you" question is removed here (Step 3 F1
+ *     "Läuft dein Vertrieb ohne dich?" is the single core version).
+ *   · Coaching's second Abschlussquote is reframed to LTV — the
+ *     slider in Step 2 already asked Abschlussquote.
+ *   · Each industry now has ONE planbar/pipeline flavour question
+ *     max, and each replacement is a genuinely industry-specific
+ *     diagnostic — not a re-phrased duplicate.
  */
 export const INDUSTRY_QUESTIONS: Record<Industry, Question[]> = {
   Handwerk: [
@@ -118,25 +129,30 @@ export const INDUSTRY_QUESTIONS: Record<Industry, Question[]> = {
       ],
     },
     {
+      // Replaced the old "Läuft die Baustellenplanung ohne dich?"
+      // (duplicate of Step-3 depends-on-you) with a capacity metric.
       key: "br_industry_q2",
-      q: "Läuft die Baustellen-/Auftragsplanung ohne dich?",
-      hint: "Disposition und Koordination",
+      q: "Wie ausgelastet sind eure Kapazitäten / Kolonnen?",
+      hint: "Auslastung der Ausführung",
       opts: [
-        { label: "Ja, mein Team regelt das" },
-        { label: "Teilweise" },
-        { label: "Nein, ich plane fast alles selbst" },
+        { label: "Fast immer voll ausgelastet" },
+        { label: "Meistens gut, mit Puffer" },
+        { label: "Immer wieder Leerlauf" },
       ],
     },
   ],
   Agentur: [
     {
+      // Replaced the old "Bist du operativ in jedem Kundenprojekt drin?"
+      // (duplicate of Step-3 depends-on-you) with a concentration-risk
+      // question — a genuine agency-specific pain point.
       key: "br_industry_q1",
-      q: "Bist du operativ in jedem Kundenprojekt drin?",
-      hint: "Delegation der Umsetzung",
+      q: "Wie stark hängt dein Umsatz von 1–2 Großkunden ab?",
+      hint: "Konzentrationsrisiko im Kundenstamm",
       opts: [
-        { label: "Nein, Team liefert eigenständig" },
-        { label: "Bei den großen schon" },
-        { label: "Ja, überall" },
+        { label: "Breit gestreut, keiner > 20 %" },
+        { label: "Ausgewogen, aber Top-Kunden dominieren" },
+        { label: "Stark abhängig von 1–2 Kunden" },
       ],
     },
     {
@@ -152,6 +168,7 @@ export const INDUSTRY_QUESTIONS: Record<Industry, Question[]> = {
   ],
   Immobilien: [
     {
+      // Kept as the single planbar/pipeline question for Immobilien.
       key: "br_industry_q1",
       q: "Wie systematisch läuft eure Objekt-Akquise?",
       hint: "Kommen neue Objekte planbar rein?",
@@ -162,18 +179,22 @@ export const INDUSTRY_QUESTIONS: Record<Industry, Question[]> = {
       ],
     },
     {
+      // Replaced the old "Wie schnell reagiert ihr auf neue
+      // Interessenten?" (duplicate of Step-2 Reaktionszeit) with a
+      // process-length metric that captures deal-cycle efficiency.
       key: "br_industry_q2",
-      q: "Wie schnell reagiert ihr auf neue Interessenten?",
-      hint: "Reaktionsgeschwindigkeit",
+      q: "Wie lang ist eure Ø Zeit vom Erstgespräch bis Notartermin?",
+      hint: "Dauer eines Deals",
       opts: [
-        { label: "Sofort" },
-        { label: "Am selben Tag" },
-        { label: "Oft zu spät – Objekt schon weg" },
+        { label: "≤ 30 Tage" },
+        { label: "1–3 Monate" },
+        { label: "Länger / unplanbar" },
       ],
     },
   ],
   Coaching: [
     {
+      // Kept as the single planbar/pipeline question for Coaching.
       key: "br_industry_q1",
       q: "Wie planbar füllst du deine Termine / Programme?",
       hint: "Auslastung",
@@ -184,13 +205,16 @@ export const INDUSTRY_QUESTIONS: Record<Industry, Question[]> = {
       ],
     },
     {
+      // Replaced the old "Abschlussquote im Erstgespräch?" (duplicate
+      // of Step-2 Abschlussquote slider) with LTV — non-overlapping
+      // and a real coaching KPI.
       key: "br_industry_q2",
-      q: "Wie hoch ist deine Abschlussquote im Erstgespräch?",
-      hint: "Sales-Skill",
+      q: "Wie hoch ist dein Ø Kundenwert (LTV)?",
+      hint: "Umsatz pro Kunde über die gesamte Laufzeit",
       opts: [
-        { label: "Hoch (>40 %)" },
-        { label: "Mittel" },
-        { label: "Niedrig / unklar" },
+        { label: "Hoch (> 10.000 €)" },
+        { label: "Mittel (2.000 – 10.000 €)" },
+        { label: "Niedrig (< 2.000 €)" },
       ],
     },
   ],
@@ -206,6 +230,7 @@ export const INDUSTRY_QUESTIONS: Record<Industry, Question[]> = {
       ],
     },
     {
+      // Single planbar/pipeline question for IT.
       key: "br_industry_q2",
       q: "Wie planbar kommen neue Projekte / Kunden rein?",
       hint: "Pipeline",
@@ -218,6 +243,8 @@ export const INDUSTRY_QUESTIONS: Record<Industry, Question[]> = {
   ],
   Sonstiges: [
     {
+      // Kept as the single planbar/pipeline question for the generic
+      // fallback bucket.
       key: "br_industry_q1",
       q: "Wie planbar ist deine Auftragslage?",
       hint: "Pipeline",
@@ -228,13 +255,16 @@ export const INDUSTRY_QUESTIONS: Record<Industry, Question[]> = {
       ],
     },
     {
+      // Replaced the old "Wie schnell reagierst du auf neue Anfragen?"
+      // (duplicate of Step-2 Reaktionszeit) with recurring-revenue
+      // share — non-overlapping, works across most industries.
       key: "br_industry_q2",
-      q: "Wie schnell reagierst du auf neue Anfragen?",
-      hint: "Reaktionszeit",
+      q: "Wie hoch ist dein Anteil an Wiederholungs-/Bestandskunden?",
+      hint: "Recurring-Anteil im Umsatz",
       opts: [
-        { label: "Sofort / am selben Tag" },
-        { label: "Nach ein paar Tagen" },
-        { label: "Unregelmäßig" },
+        { label: "Hoch (> 50 %)" },
+        { label: "Mittel" },
+        { label: "Niedrig — überwiegend Neukunden" },
       ],
     },
   ],
@@ -245,14 +275,29 @@ export const INDUSTRY_QUESTIONS: Record<Industry, Question[]> = {
  * z. B. sagt "Interessenten" statt "Anfragen", "Provision" statt
  * "Auftragswert". Nur Overrides listen; alles andere fällt auf die
  * generischen Labels zurück.
+ *
+ * `reaktionSub` overrides the sub-line under the Reaktionszeit card
+ * so it matches the industry-specific heading — fixes the client-
+ * flagged inconsistency where Immobilien said "Interessenten" in
+ * the heading but still "Anfrage" in the sub-line.
  */
 export const KEY_FIGURE_WORDING: Partial<
-  Record<Industry, { anfragen?: string; auftrag?: string; reaktion?: string }>
+  Record<
+    Industry,
+    {
+      anfragen?: string;
+      auftrag?: string;
+      reaktion?: string;
+      reaktionSub?: string;
+    }
+  >
 > = {
   Immobilien: {
     anfragen: "Interessenten pro Monat",
     auftrag: "Ø Provision pro Abschluss (€)",
     reaktion: "Reaktionszeit auf neue Interessenten",
+    reaktionSub:
+      "Wie schnell reagiert ihr, wenn sich ein neuer Interessent meldet?",
   },
 };
 
@@ -269,14 +314,16 @@ export interface BetriebsRoentgenSubmit {
   industry: Industry;
   industryOther?: string;
 
-  // Step 1 — key figures
+  // Step 1 — key figures. Wochenstunden dropped per v2 brief to
+  // tighten the flow; field kept optional here so older callers still
+  // typecheck.
   umsatz?: number;
   mitarbeiter?: number;
   anfragenMonat?: number;
   auftragWert?: number;
   abschlussquote: number; // 0-10 slider
   reaktionszeit: string; // one of REAKTIONSZEIT_OPTIONS labels
-  wochenstunden: number; // 20-80 slider
+  wochenstunden?: number; // legacy; wizard no longer collects this
 
   // Step 2 — core (three labels)
   coreVertrieb: string;
