@@ -339,6 +339,13 @@ export interface BetriebsRoentgenSubmit {
   lastName?: string;
   email: string;
   phone: string;
+  /**
+   * 6-digit Twilio Verify code the visitor typed after receiving the
+   * SMS. Optional here because a returning visitor with a valid
+   * `sh_pv` cookie skips the SMS dance entirely — the submit route
+   * uses the cookie path in that case.
+   */
+  code?: string;
 
   // Attribution (optional; captured from URL when present)
   utmSource?: string;

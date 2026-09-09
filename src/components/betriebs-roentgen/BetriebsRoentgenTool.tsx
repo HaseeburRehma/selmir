@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Script from "next/script";
 import { Check, Lock } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
+import { TURNSTILE_SITE_KEY } from "@/lib/turnstile";
 import {
   CORE_QUESTIONS,
   INDUSTRIES,
@@ -13,6 +15,31 @@ import {
   type Industry,
   type Question,
 } from "@/lib/betriebs-roentgen";
+
+// Cloudflare Turnstile global — matches the shape declared by every
+// other form component (must stay compatible; TS merges these).
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (
+        selector: string | HTMLElement,
+        options: {
+          sitekey: string;
+          callback?: (token: string) => void;
+          "error-callback"?: () => void;
+          "expired-callback"?: () => void;
+          size?: "normal" | "compact" | "flexible" | "invisible";
+          theme?: "auto" | "light" | "dark";
+          appearance?: "always" | "execute" | "interaction-only";
+        },
+      ) => string;
+      reset: (widgetId?: string) => void;
+      remove: (widgetId?: string) => void;
+    };
+    __turnstileOnLoad?: () => void;
+    fbq?: (...args: unknown[]) => void;
+  }
+}
 
 /**
  * Der Betriebs-Röntgen — 6-stage client wizard.
@@ -136,6 +163,26 @@ export default function BetriebsRoentgenTool() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
 
+  // SMS verification state — mirrors LeitfadenForm's pattern.
+  const [code, setCode] = useState("");
+  const [sendingCode, setSendingCode] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
+  const [codeErr, setCodeErr] = useState<string | null>(null);
+  const [normalizedPhone, setNormalizedPhone] = useState<string | null>(null);
+  const [resendIn, setResendIn] = useState(0);
+
+  // "This browser already verified this number" — server rechecks the
+  // HMAC on every submit, so this is purely for UX (skip the SMS card
+  // entirely for returning visitors, pre-populate their phone).
+  const cachedPhone = useReadVerifiedPhoneCookie();
+  const [skipSms, setSkipSms] = useState(false);
+
+  // Cloudflare Turnstile — invisible bot check gating the send-code
+  // call so a script can't burn our Twilio budget.
+  const [tsToken, setTsToken] = useState<string | null>(null);
+  const tsContainer = useRef<HTMLDivElement | null>(null);
+  const tsWidgetId = useRef<string | null>(null);
+
   // Submit
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -154,6 +201,122 @@ export default function BetriebsRoentgenTool() {
     }
   }, [step]);
 
+  // Render the Turnstile widget once its script has loaded. Only
+  // matters on Stage 4 (contact gate) — but mounting it here keeps
+  // the flow identical whether the visitor lingers on other stages
+  // first. `size: invisible` means CF auto-solves in the background
+  // and only escalates to a visible challenge if it really has to.
+  useEffect(() => {
+    if (step !== 4 || skipSms) return;
+    let cancelled = false;
+    let tries = 0;
+    const tryRender = () => {
+      if (cancelled || tsWidgetId.current) return;
+      if (window.turnstile && tsContainer.current) {
+        tsWidgetId.current = window.turnstile.render(tsContainer.current, {
+          sitekey: TURNSTILE_SITE_KEY,
+          callback: (token: string) => setTsToken(token),
+          "error-callback": () => setTsToken(null),
+          "expired-callback": () => setTsToken(null),
+          size: "invisible",
+          theme: "dark",
+        });
+        return;
+      }
+      if (tries++ < 40) setTimeout(tryRender, 250);
+    };
+    tryRender();
+    return () => {
+      cancelled = true;
+      if (tsWidgetId.current && window.turnstile) {
+        try {
+          window.turnstile.remove(tsWidgetId.current);
+        } catch {
+          /* noop */
+        }
+        tsWidgetId.current = null;
+      }
+    };
+  }, [step, skipSms]);
+
+  // Resend cooldown: after send-code we lock the button for 60s so a
+  // user can't spam Twilio (which would rack up real €).
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const t = setTimeout(() => setResendIn((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendIn]);
+
+  // Returning visitor with a valid `sh_pv` cookie for a phone — pre-
+  // populate the field and enable the skip path so the SMS UI never
+  // renders. Server still re-verifies the HMAC before honouring it.
+  useEffect(() => {
+    if (cachedPhone && !phone) {
+      setPhone(cachedPhone);
+      setNormalizedPhone(cachedPhone);
+      setSkipSms(true);
+    }
+  }, [cachedPhone, phone]);
+
+  // If the visitor edits the phone away from the verified one, we
+  // must re-verify — drop the skip path and clear any prior code
+  // state so the user is walked through the SMS dance again.
+  useEffect(() => {
+    if (!skipSms) return;
+    if (phone.trim() !== (normalizedPhone ?? "").trim()) {
+      setSkipSms(false);
+      setCode("");
+      setCodeSent(false);
+      setNormalizedPhone(null);
+    }
+  }, [phone, normalizedPhone, skipSms]);
+
+  function resetTurnstile() {
+    if (tsWidgetId.current && window.turnstile) {
+      try {
+        window.turnstile.reset(tsWidgetId.current);
+      } catch {
+        /* noop */
+      }
+    }
+    setTsToken(null);
+  }
+
+  async function onSendCode() {
+    if (sendingCode) return;
+    setCodeErr(null);
+    if (!phone || phone.trim().length < 5) {
+      setCodeErr("Bitte gib zuerst deine Telefonnummer ein.");
+      return;
+    }
+    if (!tsToken) {
+      setCodeErr(
+        "Bitte warte einen Moment — die Sicherheitsprüfung läuft noch.",
+      );
+      return;
+    }
+    setSendingCode(true);
+    try {
+      const res = await fetch("/api/betriebs-roentgen/phone/send-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, turnstileToken: tsToken }),
+      }).then((r) => r.json());
+      if (res?.ok) {
+        setCodeSent(true);
+        setNormalizedPhone(res.phone ?? phone);
+        setResendIn(60);
+      } else {
+        setCodeErr(res?.reason ?? "SMS konnte nicht gesendet werden.");
+        resetTurnstile();
+      }
+    } catch {
+      setCodeErr("Netzwerkfehler. Bitte versuche es später erneut.");
+    } finally {
+      setSendingCode(false);
+    }
+  }
+
   // ───── stage guards ─────
   const canLeaveStage0 =
     industry !== null &&
@@ -162,10 +325,12 @@ export default function BetriebsRoentgenTool() {
     (q) => coreAns[q.key] !== undefined,
   );
   const canLeaveStage3 = industryQ.every((q) => indAns[q.key] !== undefined);
+  const hasPhoneProof = skipSms || (codeSent && /^\d{4,10}$/.test(code));
   const canSubmit =
     firstName.trim().length > 1 &&
     /^\S+@\S+\.\S+$/.test(email) &&
-    phone.trim().length >= 5;
+    phone.trim().length >= 5 &&
+    hasPhoneProof;
 
   // ───── submit ─────
   const submit = async () => {
@@ -194,7 +359,12 @@ export default function BetriebsRoentgenTool() {
       firstName: firstName.trim(),
       lastName: lastName.trim() || undefined,
       email: email.trim().toLowerCase(),
-      phone: phone.trim(),
+      // Prefer the E.164 form Twilio approved on `send`; falls back
+      // to the raw input for returning visitors whose cookie carried
+      // the phone directly.
+      phone: (normalizedPhone ?? phone).trim(),
+      // Server ignores `code` when the cookie path succeeds.
+      code: skipSms ? undefined : code.trim(),
       pageUrl: typeof window !== "undefined" ? window.location.href : undefined,
     };
 
@@ -221,6 +391,12 @@ export default function BetriebsRoentgenTool() {
         setSubmitError(
           res?.reason ?? "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
         );
+        // Cookie may have expired or been tampered with — drop the
+        // skip path so the SMS card renders on the next attempt.
+        if (skipSms) {
+          setSkipSms(false);
+          setNormalizedPhone(null);
+        }
       }
     } catch {
       setSubmitError("Netzwerkfehler. Bitte versuche es später erneut.");
@@ -607,6 +783,70 @@ export default function BetriebsRoentgenTool() {
                 />
               </div>
 
+              {/* SMS-Verifikation — nur wenn der Besucher nicht schon
+                  auf einem anderen Lead-Magnet verifiziert ist. Der
+                  Cookie-Skip lässt „skipSms=true" die Karte komplett
+                  überspringen. */}
+              {!skipSms && (
+                <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+                  <p className="font-body text-[13px] leading-[1.5] text-white/70">
+                    Zur Sicherheit prüfen wir deine Nummer per SMS-Code —
+                    so vermeiden wir Fake-Anfragen und rufen dich
+                    wirklich zurück.
+                  </p>
+                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-[1fr,auto]">
+                    <TextField
+                      label="SMS-Code *"
+                      placeholder="6-stelliger Code"
+                      value={code}
+                      onChange={setCode}
+                      type="tel"
+                      autoComplete="one-time-code"
+                    />
+                    <div className="flex items-end">
+                      <button
+                        type="button"
+                        onClick={onSendCode}
+                        disabled={
+                          sendingCode ||
+                          resendIn > 0 ||
+                          phone.trim().length < 5
+                        }
+                        className="h-[46px] rounded-[10px] border border-purple-2/40 bg-purple-2/[0.12] px-4 font-body text-[13.5px] font-semibold text-white transition-colors hover:bg-purple-2/[0.20] disabled:pointer-events-none disabled:opacity-50"
+                      >
+                        {sendingCode
+                          ? "Wird gesendet …"
+                          : resendIn > 0
+                            ? `Erneut in ${resendIn}s`
+                            : codeSent
+                              ? "Code erneut senden"
+                              : "SMS-Code senden"}
+                      </button>
+                    </div>
+                  </div>
+                  {codeSent && !codeErr && (
+                    <p className="mt-2 font-body text-[12.5px] text-emerald-300/90">
+                      Code gesendet an {normalizedPhone ?? phone}. Bitte
+                      hier eintragen.
+                    </p>
+                  )}
+                  {codeErr && (
+                    <p className="mt-2 font-body text-[12.5px] text-red-300">
+                      {codeErr}
+                    </p>
+                  )}
+                  {/* Invisible Turnstile — Cloudflare mounts here and
+                      auto-solves in the background. */}
+                  <Script
+                    src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+                    strategy="afterInteractive"
+                    async
+                    defer
+                  />
+                  <div ref={tsContainer} aria-hidden className="hidden" />
+                </div>
+              )}
+
               {submitError && (
                 <p className="mt-3 rounded-lg border border-red-500/40 bg-red-500/[0.06] px-3 py-2 font-body text-[13.5px] text-red-200">
                   {submitError}
@@ -810,4 +1050,41 @@ function TeaserFinding({
       </span>
     </div>
   );
+}
+
+/**
+ * Read the `sh_pv` cookie the server sets on a successful verify,
+ * decode just the phone hint, and expose it to the wizard. Server
+ * rechecks the HMAC on every submit — this hook is purely for UX
+ * (pre-populate the field, skip the SMS card).
+ *
+ * Mirrors the same hook in LeitfadenForm/EbookForm/WhitepaperForm so
+ * a visitor who verified on any of them skips SMS here too.
+ */
+function useReadVerifiedPhoneCookie(): string | null {
+  const [phone, setPhone] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const raw = document.cookie
+      .split(/;\s*/)
+      .find((c) => c.startsWith("sh_pv="));
+    if (!raw) return;
+    const value = raw.slice("sh_pv=".length);
+    const parts = value.split(".");
+    if (parts.length !== 3) return;
+    const [phoneB64, expiresStr] = parts;
+    const expires = Number(expiresStr);
+    if (!Number.isFinite(expires) || expires < Date.now()) return;
+    try {
+      const pad =
+        phoneB64.length % 4 === 0 ? "" : "=".repeat(4 - (phoneB64.length % 4));
+      const decoded = atob(
+        (phoneB64 + pad).replace(/-/g, "+").replace(/_/g, "/"),
+      );
+      setPhone(decoded);
+    } catch {
+      /* ignore malformed cookie */
+    }
+  }, []);
+  return phone;
 }

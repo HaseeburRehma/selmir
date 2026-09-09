@@ -4,6 +4,8 @@ import {
   BR_HUBSPOT_LIST_ID,
   type BetriebsRoentgenSubmit,
 } from "@/lib/betriebs-roentgen";
+import { checkVerificationCode, normalizeE164 } from "@/lib/twilio";
+import { buildVerifiedCookie, readVerifiedPhone } from "@/lib/phoneVerify";
 import {
   magnetFrom,
   magnetReplyTo,
@@ -347,13 +349,60 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Normalize the payload so downstream sees the trimmed values.
+  // ─── SMS phone verification ──────────────────────────────────────
+  // Path A: this browser already verified the same number on any
+  // magnet in the last 30 days. The `sh_pv` cookie carries an HMAC-
+  // signed proof of that — we re-compute the HMAC server-side so a
+  // tampered cookie is rejected. If the cookie's phone matches the
+  // submitted phone (both normalized to E.164), skip Twilio entirely.
+  //
+  // Path B: fresh Twilio Verify check on the 6-digit code the visitor
+  // typed. Twilio only approves codes against the exact E.164 form
+  // used on `send`, which is why the client posts the normalized
+  // phone it got back from /phone/send-code.
+  const cookieHeader = req.headers.get("cookie");
+  const cookiePhone = readVerifiedPhone(cookieHeader);
+  const normalizedFromInput = normalizeE164(phone);
+  const canUseCookie =
+    !!cookiePhone &&
+    !!normalizedFromInput &&
+    cookiePhone === normalizedFromInput;
+
+  let verifiedPhone: string;
+  if (canUseCookie) {
+    verifiedPhone = cookiePhone;
+  } else {
+    const code = (body.code ?? "").trim();
+    if (!code) {
+      return NextResponse.json(
+        {
+          ok: false,
+          reason:
+            "Bitte gib den SMS-Code ein, den wir an deine Nummer geschickt haben.",
+        },
+        { status: 400 },
+      );
+    }
+    const twilio = await checkVerificationCode(phone, code);
+    if (!twilio.ok) {
+      console.warn("[br] twilio check failed:", twilio.reason);
+      return NextResponse.json(
+        { ok: false, reason: twilio.reason },
+        { status: 400 },
+      );
+    }
+    verifiedPhone = twilio.phone;
+  }
+
+  // Normalize the payload so downstream sees the trimmed values and
+  // the verified E.164 phone (not the raw client input). HubSpot,
+  // Sheet, and both e-mails should all get the canonical form.
   const normalized: BetriebsRoentgenSubmit = {
     ...body,
     firstName,
     lastName: (body.lastName ?? "").trim() || undefined,
     email,
-    phone,
+    phone: verifiedPhone,
   };
 
   const hs = await pushHubspot(normalized).catch((err) => ({
@@ -368,8 +417,16 @@ export async function POST(req: NextRequest) {
   void sendNotify(normalized);
   void sendUserConfirmation(normalized);
 
-  return NextResponse.json({
+  // Issue / refresh the "verified phone" cookie so the same browser
+  // skips the SMS dance on future magnet submissions (30-day TTL).
+  // Works whether we used the fresh Twilio check or an existing
+  // cookie — both refresh the expiry.
+  const cookie = buildVerifiedCookie(verifiedPhone);
+  const res = NextResponse.json({
     ok: true,
     hubspotContactId: hs.ok ? hs.contactId : null,
+    verifiedPhone,
   });
+  if (cookie) res.headers.set("Set-Cookie", cookie.header);
+  return res;
 }
