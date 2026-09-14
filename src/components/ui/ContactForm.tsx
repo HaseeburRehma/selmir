@@ -65,6 +65,8 @@ export function ContactForm() {
           telefon: data.telefon,
           betreff: data.betreff,
           nachricht: data.nachricht,
+          pageUrl:
+            typeof window !== "undefined" ? window.location.href : "",
         }),
       })
         .then((r) => r.json())

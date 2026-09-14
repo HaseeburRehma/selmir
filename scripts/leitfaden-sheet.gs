@@ -7,39 +7,37 @@
  *
  *   • Potenzialanalyse / LP forms  → Sheet1  (the existing tab)
  *       (payload has `company` and `decisionMaker`, no `email`)
- *   • Leitfaden lead magnet        → Sheet2  (new tab)
- *       (payload has `email`, or `formType: "leitfaden"`)
+ *   • Leitfaden lead magnet        → Sheet2
+ *       (payload has `formType: "leitfaden"`)
+ *   • Site-wide Kontaktformular    → Sheet3  (new tab)
+ *       (payload has `formType: "kontakt"`)
  *
- * Both tabs share the same 7-column header so downstream reports stay
- * consistent:
- *
+ * Sheet1 + Sheet2 share the same 7-column header:
  *   A Zeitstempel   B Name   C Telefonnummer   D Firma / Betrieb
  *   E Inhaber / Entscheider   F Landingpage   G Seiten-URL
  *
- * Leitfaden rows do not have "Firma" or "Inhaber" data, so:
- *   - Firma / Betrieb          → the E-Mail address (Leitfaden's key identifier)
- *   - Inhaber / Entscheider    → left blank
- *   - Landingpage              → "Leitfaden Rollenspiel" (marks the row's origin)
+ * Sheet3 (Kontakt) uses a different header because the form collects
+ * different fields (email + subject + free-text message, no company):
+ *   A Zeitstempel   B Name   C Telefonnummer   D E-Mail
+ *   E Betreff       F Nachricht                G Seiten-URL
  *
  * DEPLOYMENT (~2 minutes):
  *   1. Open the "Meta Ads Leads" sheet.
  *   2. Extensions → Apps Script.
  *   3. Replace Code.gs with this file.
- *   4. If the existing deployment is at
- *        https://script.google.com/macros/s/AKfycbzyCReYrLxFN95sNd5hmHtHl8Uk4XVpPzwR5g4CJgj6y673LtsKKFe2lzRQwaM_QtM2/exec
- *      then: Deploy → Manage deployments → pencil-edit that deployment →
- *      Version: "New version" → Deploy. The URL stays the same, so no
- *      env-var update needed.
- *   5. If you want a brand-new URL: Deploy → New deployment → Web app →
- *      Execute as "Me", Access "Anyone" → Deploy. Paste the new /exec URL
- *      into Vercel as GOOGLE_SHEET_WEBHOOK_URL and redeploy.
+ *   4. Deploy → Manage deployments → pencil-edit the existing deployment →
+ *      Version: "New version" → Deploy. The /exec URL stays the same, so
+ *      no env-var update is needed. (First-time deploy: New deployment →
+ *      Web app → Execute as "Me", Access "Anyone" → paste the URL into
+ *      Vercel as GOOGLE_SHEET_WEBHOOK_URL.)
  */
 
 // Tab names — change here if you rename the tabs in the sheet.
 var TAB_LP = 'Sheet1';        // potenzialanalyse / meta-ads / LP forms
 var TAB_LEITFADEN = 'Sheet2'; // leitfaden lead magnet
+var TAB_KONTAKT = 'Sheet3';   // site-wide Kontaktformular
 
-var HEADERS = [
+var HEADERS_LP = [
   'Zeitstempel',
   'Name',
   'Telefonnummer',
@@ -49,18 +47,37 @@ var HEADERS = [
   'Seiten-URL',
 ];
 
+var HEADERS_KONTAKT = [
+  'Zeitstempel',
+  'Name',
+  'Telefonnummer',
+  'E-Mail',
+  'Betreff',
+  'Nachricht',
+  'Seiten-URL',
+];
+
 /** HTTP entry point. */
 function doPost(e) {
   try {
     var body = JSON.parse((e.postData && e.postData.contents) || '{}');
-    var isLeitfaden =
-      body.formType === 'leitfaden' ||
-      body.landingPage === 'Leitfaden Rollenspiel' ||
-      (body.email && !body.company);
+    var formType = body.formType || '';
 
-    var tabName = isLeitfaden ? TAB_LEITFADEN : TAB_LP;
+    var isKontakt = formType === 'kontakt';
+    var isLeitfaden =
+      !isKontakt &&
+      (formType === 'leitfaden' ||
+        body.landingPage === 'Leitfaden Rollenspiel' ||
+        (body.email && !body.company));
+
+    var tabName = isKontakt
+      ? TAB_KONTAKT
+      : isLeitfaden
+      ? TAB_LEITFADEN
+      : TAB_LP;
+    var headers = isKontakt ? HEADERS_KONTAKT : HEADERS_LP;
     var sheet = getOrCreateTab_(tabName);
-    ensureHeader_(sheet);
+    ensureHeader_(sheet, headers);
 
     // Sheets treats a leading + as a formula, so the server prefixes the
     // phone with ' — strip it back off for display.
@@ -69,7 +86,17 @@ function doPost(e) {
 
     // Column mapping depends on the source form.
     var row;
-    if (isLeitfaden) {
+    if (isKontakt) {
+      row = [
+        new Date(),                        // Zeitstempel
+        body.name || '',                   // Name
+        phone,                             // Telefonnummer
+        body.email || '',                  // E-Mail
+        body.betreff || '',                // Betreff
+        body.nachricht || '',              // Nachricht
+        body.pageUrl || '',                // Seiten-URL
+      ];
+    } else if (isLeitfaden) {
       row = [
         new Date(),                                    // Zeitstempel
         body.name || '',                               // Name
@@ -110,18 +137,20 @@ function getOrCreateTab_(name) {
   return s;
 }
 
-function ensureHeader_(sheet) {
+function ensureHeader_(sheet, headers) {
   if (sheet.getLastRow() === 0) {
-    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
-    sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight('bold');
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
     sheet.setFrozenRows(1);
-    sheet.setColumnWidth(1, 160); // Zeitstempel
-    sheet.setColumnWidth(2, 160); // Name
-    sheet.setColumnWidth(3, 160); // Telefonnummer
-    sheet.setColumnWidth(4, 260); // Firma / Betrieb
-    sheet.setColumnWidth(5, 180); // Inhaber / Entscheider
-    sheet.setColumnWidth(6, 260); // Landingpage
-    sheet.setColumnWidth(7, 340); // Seiten-URL
+    // Best-effort column widths — different tabs have different content, so
+    // we just apply the LP defaults (they look fine for Kontakt too).
+    sheet.setColumnWidth(1, 160); // Zeitstempel / Name
+    sheet.setColumnWidth(2, 160);
+    sheet.setColumnWidth(3, 160);
+    sheet.setColumnWidth(4, 260);
+    sheet.setColumnWidth(5, 200);
+    sheet.setColumnWidth(6, 400);
+    sheet.setColumnWidth(7, 340);
   }
 }
 
