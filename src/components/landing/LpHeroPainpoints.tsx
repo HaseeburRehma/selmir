@@ -1,15 +1,15 @@
-import { Check } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Marquee } from "@/components/ui/Marquee";
 import { TRUST_LINE, TRUST_LOGOS } from "@/lib/landing-pages";
 import { LpLeadFormPainpoints } from "./LpLeadFormPainpoints";
 
-/** The four value-props from the campaign brief — what the visitor gets
- *  out of the Potenzialanalyse. Sits directly under the hero micro-text. */
+/** The three value-props from the campaign owner — tightened for scanability.
+ *  Rendered with a small purple arrow icon instead of a checkmark so the
+ *  eye tracks left → right along the promise. */
 const ANALYSIS_TAKEAWAYS = [
-  "Wo in deinem Angebotsprozess Aufträge verloren gehen — konkret benannt",
-  "Wie viel Umsatz dich deine aktuelle Abschlussquote pro Jahr kostet, in Euro",
-  "Welche 3 Stellschrauben bei deiner Betriebsgröße am schnellsten wirken",
-  "Wie dein Betrieb im Vergleich zu ähnlichen Handwerksbetrieben dasteht",
+  "Wo dein Angebotsprozess Aufträge verliert",
+  "Was dich deine Abschlussquote im Jahr kostet",
+  "Die 3 Hebel, die bei dir am schnellsten greifen",
 ];
 
 /**
@@ -46,9 +46,14 @@ export default function LpHeroPainpoints() {
       </div>
 
       <div className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col px-6 pt-[120px] md:px-10 md:pt-[150px] lg:px-[120px] lg:pt-[160px]">
+        {/* Form column trimmed 460 → 380 so at xl (2-col) the compound word
+            "Handwerksunternehmer." has room to sit on one line without
+            hyphenating — the campaign owner asked for a single-line
+            headline. Below xl the form still stacks below the copy at
+            full width. */}
         <div
           lang="de"
-          className="grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,1fr)_460px] xl:gap-[72px]"
+          className="grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,1fr)_380px] xl:gap-[64px]"
         >
           {/* Left column — copy. The 2-col split only kicks in at xl
               (1280px+) so the long word "Handwerksunternehmer." never
@@ -73,26 +78,33 @@ export default function LpHeroPainpoints() {
               between "Handwerks" and "unternehmer" — invisible unless the
               browser actually breaks there.
             */}
-            <h1 className="mt-1 max-w-full [hyphens:auto] break-words font-display font-bold leading-[1.04] tracking-[-0.03em] text-white text-[clamp(34px,6.2vw,56px)] xl:mt-2 xl:text-[clamp(44px,3.8vw,56px)] xl:leading-[1.06]">
-              Handwerks{"­"}unternehmer.
+            {/* Below xl the form stacks below, so the h1 has full column
+                width and hyphens:auto lets the compound word break
+                gracefully on narrow phones. At xl+ the 2-col grid kicks
+                in with a 380px form → left col at capped 1440 container
+                is 748px, plenty for a single-line 50px heading.
+                `xl:whitespace-nowrap` guarantees the campaign owner's
+                "one line" ask; `xl:[hyphens:none]` prevents the German
+                UA hyphenation from splitting anyway. */}
+            <h1 className="mt-1 max-w-full [hyphens:auto] break-words font-display font-bold leading-[1.04] tracking-[-0.03em] text-white text-[clamp(32px,7vw,54px)] xl:mt-2 xl:whitespace-nowrap xl:break-normal xl:[hyphens:none] xl:text-[clamp(40px,3.5vw,50px)] xl:leading-[1.08]">
+              Handwerksunternehmer.
             </h1>
 
-            <p className="mt-6 max-w-[600px] text-pretty font-serif text-[20px] leading-[1.32] tracking-[-0.3px] text-white sm:text-[24px] md:text-[28px] xl:mt-8 xl:text-[28px] xl:leading-[36px]">
-              Zu wenig Aufträge trotz genug Anfragen? Alles hängt an dir?
-              Voll ausgelastet – und trotzdem bleibt zu wenig?
+            <p className="mt-6 max-w-[640px] text-pretty font-serif text-[19px] leading-[1.32] tracking-[-0.3px] text-white sm:text-[22px] md:text-[26px] xl:mt-8 xl:text-[26px] xl:leading-[34px]">
+              Anfragen ohne Aufträge. Alles hängt an dir. Voll, aber wenig
+              Marge. Werbung, die nichts bringt.
             </p>
 
-            <p className="mt-5 max-w-[600px] text-pretty font-body text-[14px] leading-[1.6] text-white/55 xl:mt-7 xl:text-[16px] xl:leading-[26px]">
-              Der Grund ist fast immer derselbe: dir fehlt ein Vertrieb, der
-              aus Anfragen planbar Aufträge macht. In einer kostenlosen
-              Potenzialanalyse zeige ich dir schwarz auf weiß, wo Umsatz
-              liegen bleibt.
+            <p className="mt-5 max-w-[640px] text-pretty font-body text-[14px] leading-[1.6] text-white/55 xl:mt-6 xl:text-[16px] xl:leading-[26px]">
+              Der Grund ist fast immer derselbe.
             </p>
 
-            {/* Value preview — the four takeaways from the campaign brief.
-                Sits under the micro-text on the left column so the visitor
-                sees what they get before they reach the form on the right. */}
-            <div className="mt-7 max-w-[600px] xl:mt-9">
+            {/* Value preview — the three takeaways the campaign owner
+                asked for. Rendered with a small purple arrow so the eye
+                tracks left → right along the promise. Sits under the
+                micro-text so the visitor sees what they get before their
+                eye reaches the form on the right. */}
+            <div className="mt-7 max-w-[640px] xl:mt-9">
               <p className="font-body text-[13px] font-semibold uppercase leading-[16px] tracking-[1.6px] text-purple-2">
                 Was du aus der Analyse mitnimmst
               </p>
@@ -101,11 +113,14 @@ export default function LpHeroPainpoints() {
                   <li key={item} className="flex items-start gap-3">
                     <span
                       aria-hidden
-                      className="mt-[3px] grid size-[22px] shrink-0 place-items-center rounded-full bg-purple-1/25 ring-1 ring-purple-2/40"
+                      className="mt-[2px] grid size-[24px] shrink-0 place-items-center rounded-full bg-purple-1/25 ring-1 ring-purple-2/40"
                     >
-                      <Check className="size-[13px] text-purple-2" strokeWidth={2.6} />
+                      <ArrowRight
+                        className="size-[14px] text-purple-2"
+                        strokeWidth={2.4}
+                      />
                     </span>
-                    <span className="font-body text-[14px] leading-[22px] text-white/75 xl:text-[15px] xl:leading-[24px]">
+                    <span className="font-body text-[15px] leading-[24px] text-white/80 xl:text-[16px] xl:leading-[26px]">
                       {item}
                     </span>
                   </li>
