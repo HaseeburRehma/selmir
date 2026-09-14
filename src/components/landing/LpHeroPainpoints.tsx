@@ -87,16 +87,20 @@ export default function LpHeroPainpoints() {
                 `xl:whitespace-nowrap` guarantees the campaign owner's
                 "one line" ask; `xl:[hyphens:none]` prevents the German
                 UA hyphenation from splitting anyway. */}
-            {/* Mobile: `[hyphens:manual]` + a `­` soft hyphen between
-                "Handwerks" and "unternehmer" forces the break at the
-                natural 10/12-char split instead of the browser's default
-                "unterneh-/mer" which leaves a 4-char widow. `break-words`
-                stays as a last-resort safety net for narrower viewports.
-                xl+: `whitespace-nowrap` + `[hyphens:none]` guarantees the
-                single-line campaign owner asked for; the soft hyphen is
-                inert in that mode. */}
-            <h1 className="mt-1 max-w-full [hyphens:manual] break-words font-display font-bold leading-[1.04] tracking-[-0.03em] text-white text-[clamp(32px,7vw,54px)] xl:mt-2 xl:whitespace-nowrap xl:break-normal xl:[hyphens:none] xl:text-[clamp(40px,3.5vw,50px)] xl:leading-[1.08]">
-              Handwerks{"­"}unternehmer.
+            {/* Single-line at every breakpoint — the campaign owner asked
+                for one line even on mobile. `whitespace-nowrap` forbids
+                wrapping, and the fluid clamp shrinks the font just enough
+                to fit "Handwerksunternehmer." (~21 chars × ~0.71em in Days
+                One) inside the available column width at each viewport:
+                  320: 5.4vw≈17.3 → clamped to 18px min (~268px word ≤ 272 col)
+                  375: 5.4vw≈20.25 → fits comfortably
+                  430: 5.4vw≈23.2  → fits with room
+                  ≥815: capped at 44px so the mobile treatment doesn't grow
+                        unbounded into the tablet range.
+                xl+ then re-caps to a bigger 40–50px because the 2-col hero
+                has plenty of room on desktop. */}
+            <h1 className="mt-1 max-w-full whitespace-nowrap font-display font-bold leading-[1.04] tracking-[-0.03em] text-white text-[clamp(18px,5.4vw,44px)] xl:mt-2 xl:text-[clamp(40px,3.5vw,50px)] xl:leading-[1.08]">
+              Handwerksunternehmer.
             </h1>
 
             <p className="mt-6 max-w-[640px] text-pretty font-serif text-[19px] leading-[1.32] tracking-[-0.3px] text-white sm:text-[22px] md:text-[26px] xl:mt-8 xl:text-[26px] xl:leading-[34px]">
