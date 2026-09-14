@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { AlertCircle, CalendarDays, CheckCircle2 } from "lucide-react";
 import { captureAttribution, readAttribution } from "@/lib/attribution";
 
-type WebsiteRating = "Ja" | "Nein";
+type Entscheider = "Ja" | "Nein";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -43,11 +43,11 @@ export function LpLeadFormPainpoints({
 }: LpLeadFormPainpointsProps) {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
-  // Website rating — same Ja/Nein toggle pattern as the LP form's
-  // "Bist du Inhaber / Entscheider?" question. Default "Ja" so a
-  // submit without the visitor touching the toggle still carries a
-  // sensible answer.
-  const [websiteLiked, setWebsiteLiked] = useState<WebsiteRating>("Ja");
+  // Same "Bist du Inhaber/Entscheider?" question as the other LP form
+  // so the sales team's downstream routing works on both surfaces.
+  // Default "Ja" so a submit without touching the toggle still carries
+  // a sensible answer.
+  const [entscheider, setEntscheider] = useState<Entscheider>("Ja");
 
   // Remember the ad click that brought this visitor here.
   useEffect(() => {
@@ -76,7 +76,7 @@ export function LpLeadFormPainpoints({
           nachname: data.nachname,
           telefon: data.telefon,
           email: data.email,
-          websiteLiked,
+          entscheider,
           pageUrl,
           attribution: readAttribution(),
         }),
@@ -209,20 +209,21 @@ export function LpLeadFormPainpoints({
           />
         </label>
 
-        {/* Website-Feedback — same Ja/Nein toggle shape as the LP form's
-            "Bist du Inhaber / Entscheider?" question, so both forms feel
-            like they come from one system. */}
+        {/* Inhaber/Entscheider — same Ja/Nein toggle shape as the LP
+            form's identical question, so both forms feel like they come
+            from one system and downstream routing runs on the same
+            attribute. */}
         <fieldset className="flex flex-col gap-2">
-          <legend className={labelClass}>Gefällt dir die Website?</legend>
+          <legend className={labelClass}>Bist du Inhaber/Entscheider?</legend>
           <div className="mt-2 grid grid-cols-2 gap-3">
             {(["Ja", "Nein"] as const).map((v) => (
               <button
                 key={v}
                 type="button"
-                onClick={() => setWebsiteLiked(v)}
-                aria-pressed={websiteLiked === v}
+                onClick={() => setEntscheider(v)}
+                aria-pressed={entscheider === v}
                 className={`h-[50px] rounded-[12px] border font-body text-[15px] transition-colors ${
-                  websiteLiked === v
+                  entscheider === v
                     ? "border-purple-2/60 bg-purple-1/20 text-white"
                     : "border-white/10 bg-white/[0.03] text-white/60 hover:border-white/20"
                 }`}

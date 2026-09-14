@@ -25,11 +25,12 @@
  *
  * Sheet4 (Handwerker-Painpoints) uses its own 10-column header — the
  * form collects Vorname + Nachname + Telefon + E-Mail + the Ja/Nein
- * "Gefällt dir die Website?" answer, plus the campaign's UTM source /
- * campaign so ad-spend attribution stays in the same tab as the lead:
- *   A Zeitstempel   B Vorname          C Nachname   D Telefonnummer
- *   E E-Mail        F Website gefällt  G Landingpage
- *   H Seiten-URL    I UTM Source       J UTM Campaign
+ * "Bist du Inhaber/Entscheider?" answer, plus the campaign's UTM
+ * source / campaign so ad-spend attribution stays in the same tab as
+ * the lead:
+ *   A Zeitstempel   B Vorname               C Nachname   D Telefonnummer
+ *   E E-Mail        F Inhaber / Entscheider  G Landingpage
+ *   H Seiten-URL    I UTM Source            J UTM Campaign
  *
  * DEPLOYMENT (~2 minutes):
  *   1. Open the "Meta Ads Leads" sheet.
@@ -74,7 +75,7 @@ var HEADERS_PAINPOINTS = [
   'Nachname',
   'Telefonnummer',
   'E-Mail',
-  'Website gefällt',
+  'Inhaber / Entscheider',
   'Landingpage',
   'Seiten-URL',
   'UTM Source',
@@ -125,7 +126,7 @@ function doPost(e) {
         body.nachname || '',                   // Nachname
         phone,                                 // Telefonnummer
         body.email || '',                      // E-Mail
-        body.websiteLiked || '',               // Website gefällt (Ja/Nein)
+        body.entscheider || '',                // Inhaber / Entscheider (Ja/Nein)
         body.landingPage || 'Handwerker-Painpoints', // Landingpage
         body.pageUrl || '',                    // Seiten-URL
         body.utmSource || '',                  // UTM Source

@@ -1,6 +1,16 @@
+import { Check } from "lucide-react";
 import { Marquee } from "@/components/ui/Marquee";
 import { TRUST_LINE, TRUST_LOGOS } from "@/lib/landing-pages";
 import { LpLeadFormPainpoints } from "./LpLeadFormPainpoints";
+
+/** The four value-props from the campaign brief — what the visitor gets
+ *  out of the Potenzialanalyse. Sits directly under the hero micro-text. */
+const ANALYSIS_TAKEAWAYS = [
+  "Wo in deinem Angebotsprozess Aufträge verloren gehen — konkret benannt",
+  "Wie viel Umsatz dich deine aktuelle Abschlussquote pro Jahr kostet, in Euro",
+  "Welche 3 Stellschrauben bei deiner Betriebsgröße am schnellsten wirken",
+  "Wie dein Betrieb im Vergleich zu ähnlichen Handwerksbetrieben dasteht",
+];
 
 /**
  * Handwerker-Painpoints Hero — two-column layout.
@@ -78,6 +88,30 @@ export default function LpHeroPainpoints() {
               Potenzialanalyse zeige ich dir schwarz auf weiß, wo Umsatz
               liegen bleibt.
             </p>
+
+            {/* Value preview — the four takeaways from the campaign brief.
+                Sits under the micro-text on the left column so the visitor
+                sees what they get before they reach the form on the right. */}
+            <div className="mt-7 max-w-[600px] xl:mt-9">
+              <p className="font-body text-[13px] font-semibold uppercase leading-[16px] tracking-[1.6px] text-purple-2">
+                Was du aus der Analyse mitnimmst
+              </p>
+              <ul className="mt-4 flex flex-col gap-3 xl:mt-5 xl:gap-[14px]">
+                {ANALYSIS_TAKEAWAYS.map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <span
+                      aria-hidden
+                      className="mt-[3px] grid size-[22px] shrink-0 place-items-center rounded-full bg-purple-1/25 ring-1 ring-purple-2/40"
+                    >
+                      <Check className="size-[13px] text-purple-2" strokeWidth={2.6} />
+                    </span>
+                    <span className="font-body text-[14px] leading-[22px] text-white/75 xl:text-[15px] xl:leading-[24px]">
+                      {item}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
 
           {/* Right column — form. Stacks below the copy on <xl. */}
