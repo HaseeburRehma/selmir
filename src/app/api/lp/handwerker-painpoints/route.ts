@@ -36,6 +36,13 @@ const SEGMENT_LIST_ID = process.env.HANDWERKER_PAINPOINTS_LIST_ID;
 const META_CAPI_TOKEN = process.env.META_CAPI_ACCESS_TOKEN;
 const META_PIXEL_ID = process.env.META_PIXEL_ID ?? "1677666316641507";
 
+// Google Sheet Apps Script webhook — same public endpoint the other LP
+// forms use. `formType: "painpoints"` tells the router
+// (scripts/leitfaden-sheet.gs) to write to the Handwerker-Painpoints tab.
+const SHEET_URL =
+  process.env.GOOGLE_SHEET_WEBHOOK_URL ??
+  "https://script.google.com/macros/s/AKfycbzyCReYrLxFN95sNd5hmHtHl8Uk4XVpPzwR5g4CJgj6y673LtsKKFe2lzRQwaM_QtM2/exec";
+
 interface PainpointsSubmit {
   vorname: string;
   nachname: string;
@@ -171,6 +178,44 @@ async function pushHubspot(
   return { ok: true, contactId };
 }
 
+/**
+ * Append the lead as a row to the shared "Meta Ads Leads" sheet via the
+ * Apps Script webhook. `formType: "painpoints"` tells the router to
+ * write to the Handwerker-Painpoints tab. The '+ prefix keeps Sheets
+ * from turning +49… into a formula. Fire-and-forget — sheet errors
+ * never block HubSpot or the email.
+ */
+async function appendToSheet(b: PainpointsSubmit): Promise<void> {
+  if (!SHEET_URL) {
+    console.warn(
+      "[lp/handwerker-painpoints] no sheet webhook configured — set GOOGLE_SHEET_WEBHOOK_URL",
+    );
+    return;
+  }
+  try {
+    await fetch(SHEET_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        formType: "painpoints",
+        vorname: b.vorname,
+        nachname: b.nachname,
+        phone: b.telefon ? `'${b.telefon}` : "",
+        email: b.email,
+        landingPage: "Handwerker-Painpoints",
+        pageUrl: b.pageUrl || "",
+        utmSource: b.attribution?.utmSource || "",
+        utmCampaign: b.attribution?.utmCampaign || "",
+      }),
+    });
+  } catch (err) {
+    console.error(
+      "[lp/handwerker-painpoints] sheet append failed:",
+      (err as Error).message,
+    );
+  }
+}
+
 /** Server-side Meta CAPI Lead event — no-op if env not configured. */
 async function pushMetaCapi(
   b: PainpointsSubmit,
@@ -289,6 +334,7 @@ export async function POST(req: NextRequest) {
     reason: (err as Error).message,
   }));
   void pushMetaCapi(submit, req);
+  void appendToSheet(submit);
 
   const rows: NotifyRow[] = [
     { label: "Vorname", value: vorname },
