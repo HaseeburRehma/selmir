@@ -44,11 +44,27 @@ export default function LpHeroPainpoints() {
               (1280px+) so the long word "Handwerksunternehmer." never
               gets squeezed against the form on mid-size viewports. */}
           <div className="flex flex-col">
-            <p className="font-serif text-[22px] leading-[1.15] tracking-[-0.3px] text-white/70 sm:text-[26px] xl:text-[30px]">
+            <p className="font-serif text-[20px] leading-[1.15] tracking-[-0.3px] text-white/70 sm:text-[24px] xl:text-[28px]">
               Achtung
             </p>
-            <h1 className="mt-1 font-display text-[44px] font-bold leading-[1.02] tracking-[-1.2px] text-white sm:text-[64px] md:text-[80px] lg:text-[96px] xl:mt-2 xl:text-[72px] xl:leading-[76px] xl:tracking-[-2.5px]">
-              Handwerksunternehmer.
+            {/*
+              "Handwerksunternehmer." is one long compound word (21 chars) —
+              it cannot fit on one line alongside a 460px form on any normal
+              desktop viewport. Two things make it safe at every width:
+                1. `text-[clamp(...)]` scales the font fluidly — grows with
+                   the viewport, capped so it never blows past the layout.
+                2. `[hyphens:auto] break-words` on `lang="de"` lets the
+                   browser split "Handwerks-/unternehmer." at valid German
+                   hyphenation points when the column is narrower than the
+                   word. Below xl the form stacks under the copy so the
+                   word usually fits on one line; at xl (2-col) it wraps
+                   to a dramatic two-line block instead of overflowing.
+              The soft hyphen (`­`) marks the preferred break point
+              between "Handwerks" and "unternehmer" — invisible unless the
+              browser actually breaks there.
+            */}
+            <h1 className="mt-1 max-w-full [hyphens:auto] break-words font-display font-bold leading-[1.02] tracking-[-0.03em] text-white text-[clamp(40px,8vw,72px)] xl:mt-2 xl:text-[clamp(54px,4.8vw,72px)] xl:leading-[1.05]">
+              Handwerks{"­"}unternehmer.
             </h1>
 
             <p className="mt-6 max-w-[600px] text-pretty font-serif text-[20px] leading-[1.32] tracking-[-0.3px] text-white sm:text-[24px] md:text-[28px] xl:mt-8 xl:text-[28px] xl:leading-[36px]">
