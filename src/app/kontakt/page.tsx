@@ -8,7 +8,7 @@ import { ContactForm } from "@/components/ui/ContactForm";
 export const metadata: Metadata = {
   title: "Kontakt — Selmir Suljkanovic",
   description:
-    "Nimm Kontakt auf zu den Sales Mastery Days. Wir freuen uns auf deine Nachricht.",
+    "Kontakt zu Selmir Suljkanovic — Fragen zu unseren Seminaren, Vertriebs­beratung oder Zusammen­arbeit. Wir freuen uns auf deine Nachricht.",
 };
 
 const DETAILS = [
@@ -66,7 +66,7 @@ export default function KontaktPage() {
                 Sprich <span className="font-display">mit uns</span>
               </h1>
               <p className="max-w-[560px] font-body text-[16px] leading-[1.6] tracking-[-0.3px] text-white/65 md:text-[17px]">
-                Du hast eine Frage zu den Sales Mastery Days oder möchtest mit uns
+                Du hast Fragen zu unseren Seminaren oder möchtest mit uns
                 zusammenarbeiten? Schreib uns über das Formular – wir melden uns
                 schnellstmöglich zurück.
               </p>

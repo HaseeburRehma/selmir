@@ -42,11 +42,12 @@ export function ContactForm() {
     // is not yet configured (RESEND_API_KEY missing).
     const web3Payload = {
       subject: `Neue Kontaktanfrage von ${data.name || "Website"}`,
-      from_name: "Sales Mastery Days — Kontaktformular",
+      from_name: "Selmir Suljkanovic — Kontaktformular",
       replyto: data.email,
       Kurzhinweis: `Neue Kontaktanfrage über die Website. Details unten.`,
       Name: data.name,
       "E-Mail": data.email,
+      Telefon: data.telefon,
       Betreff: data.betreff,
       Nachricht: data.nachricht,
     };
@@ -61,6 +62,7 @@ export function ContactForm() {
         body: JSON.stringify({
           name: data.name,
           email: data.email,
+          telefon: data.telefon,
           betreff: data.betreff,
           nachricht: data.nachricht,
         }),
@@ -170,18 +172,32 @@ export function ContactForm() {
         </label>
       </div>
 
-      <label className="flex flex-col gap-2">
-        <span className="font-body text-[13px] font-semibold text-white/70">
-          Betreff
-        </span>
-        <input
-          name="betreff"
-          type="text"
-          required
-          placeholder="Worum geht es?"
-          className={inputClass}
-        />
-      </label>
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <label className="flex flex-col gap-2">
+          <span className="font-body text-[13px] font-semibold text-white/70">
+            Telefon
+          </span>
+          <input
+            name="telefon"
+            type="tel"
+            autoComplete="tel"
+            placeholder="+49 …"
+            className={inputClass}
+          />
+        </label>
+        <label className="flex flex-col gap-2">
+          <span className="font-body text-[13px] font-semibold text-white/70">
+            Betreff
+          </span>
+          <input
+            name="betreff"
+            type="text"
+            required
+            placeholder="Worum geht es?"
+            className={inputClass}
+          />
+        </label>
+      </div>
 
       <label className="flex flex-col gap-2">
         <span className="font-body text-[13px] font-semibold text-white/70">

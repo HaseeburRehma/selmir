@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
   let body: {
     name?: string;
     email?: string;
+    telefon?: string;
     betreff?: string;
     nachricht?: string;
   };
@@ -23,6 +24,7 @@ export async function POST(req: NextRequest) {
 
   const name = body.name?.trim() ?? "";
   const email = body.email?.trim() ?? "";
+  const telefon = body.telefon?.trim() ?? "";
   const betreff = body.betreff?.trim() ?? "";
   const nachricht = body.nachricht?.trim() ?? "";
 
@@ -37,6 +39,7 @@ export async function POST(req: NextRequest) {
     { label: "Name", value: name },
     { label: "E-Mail", value: email },
   ];
+  if (telefon) rows.push({ label: "Telefon", value: telefon });
   if (betreff) rows.push({ label: "Betreff", value: betreff });
   rows.push({ label: "Nachricht", value: nachricht });
 
