@@ -48,6 +48,8 @@ interface PainpointsSubmit {
   nachname: string;
   telefon: string;
   email: string;
+  /** Answer to "Gefällt dir die Website?" — Ja | Nein. */
+  websiteLiked?: "Ja" | "Nein";
   pageUrl?: string;
   attribution?: LeadAttribution;
 }
@@ -84,6 +86,14 @@ async function pushHubspot(
     // Landingpage properties (same group the /api/lead route writes to).
     lp_landing_page: "Handwerker-Painpoints",
     lp_submitted_at: new Date().toISOString(),
+    // Free-text body so the sales team sees the website-rating answer
+    // without opening the sheet. Same convention the LP form uses.
+    message: [
+      "Handwerker-Painpoints Kampagne",
+      b.websiteLiked ? `Website gefällt: ${b.websiteLiked}` : "",
+    ]
+      .filter(Boolean)
+      .join(" · "),
   };
 
   // Ad attribution — only write non-empty values so a later direct visit
@@ -204,6 +214,7 @@ async function appendToSheet(b: PainpointsSubmit): Promise<void> {
         email: b.email,
         landingPage: "Handwerker-Painpoints",
         pageUrl: b.pageUrl || "",
+        websiteLiked: b.websiteLiked || "",
         utmSource: b.attribution?.utmSource || "",
         utmCampaign: b.attribution?.utmCampaign || "",
       }),
@@ -305,6 +316,8 @@ export async function POST(req: NextRequest) {
   const email = body.email?.trim().toLowerCase() ?? "";
   const pageUrl = body.pageUrl?.trim() ?? "";
   const attribution = body.attribution;
+  const websiteLiked: "Ja" | "Nein" | undefined =
+    body.websiteLiked === "Nein" ? "Nein" : body.websiteLiked === "Ja" ? "Ja" : undefined;
 
   if (!vorname || !nachname || !telefon || !email) {
     return NextResponse.json(
@@ -324,6 +337,7 @@ export async function POST(req: NextRequest) {
     nachname,
     telefon,
     email,
+    websiteLiked,
     pageUrl,
     attribution,
   };
@@ -344,6 +358,7 @@ export async function POST(req: NextRequest) {
     { label: "Kampagne", value: "Handwerk Erstgespräch – Potenzialanalyse" },
     { label: "Landingpage", value: "/lp/handwerker-painpoints" },
   ];
+  if (websiteLiked) rows.push({ label: "Website gefällt", value: websiteLiked });
   if (pageUrl) rows.push({ label: "Seiten-URL", value: pageUrl });
 
   try {

@@ -23,13 +23,13 @@
  *   A Zeitstempel   B Name   C Telefonnummer   D E-Mail
  *   E Betreff       F Nachricht                G Seiten-URL
  *
- * Sheet4 (Handwerker-Painpoints) uses its own 9-column header — the
- * form collects Vorname + Nachname + Telefon + E-Mail, plus the
- * campaign's UTM source / campaign so ad-spend attribution stays in
- * the same tab as the lead:
- *   A Zeitstempel   B Vorname   C Nachname   D Telefonnummer
- *   E E-Mail        F Landingpage            G Seiten-URL
- *   H UTM Source    I UTM Campaign
+ * Sheet4 (Handwerker-Painpoints) uses its own 10-column header — the
+ * form collects Vorname + Nachname + Telefon + E-Mail + the Ja/Nein
+ * "Gefällt dir die Website?" answer, plus the campaign's UTM source /
+ * campaign so ad-spend attribution stays in the same tab as the lead:
+ *   A Zeitstempel   B Vorname          C Nachname   D Telefonnummer
+ *   E E-Mail        F Website gefällt  G Landingpage
+ *   H Seiten-URL    I UTM Source       J UTM Campaign
  *
  * DEPLOYMENT (~2 minutes):
  *   1. Open the "Meta Ads Leads" sheet.
@@ -74,6 +74,7 @@ var HEADERS_PAINPOINTS = [
   'Nachname',
   'Telefonnummer',
   'E-Mail',
+  'Website gefällt',
   'Landingpage',
   'Seiten-URL',
   'UTM Source',
@@ -124,6 +125,7 @@ function doPost(e) {
         body.nachname || '',                   // Nachname
         phone,                                 // Telefonnummer
         body.email || '',                      // E-Mail
+        body.websiteLiked || '',               // Website gefällt (Ja/Nein)
         body.landingPage || 'Handwerker-Painpoints', // Landingpage
         body.pageUrl || '',                    // Seiten-URL
         body.utmSource || '',                  // UTM Source
@@ -197,6 +199,7 @@ function ensureHeader_(sheet, headers) {
     sheet.setColumnWidth(7, 340);
     if (headers.length >= 8) sheet.setColumnWidth(8, 160);
     if (headers.length >= 9) sheet.setColumnWidth(9, 220);
+    if (headers.length >= 10) sheet.setColumnWidth(10, 220);
   }
 }
 

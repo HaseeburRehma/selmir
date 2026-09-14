@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { AlertCircle, CalendarDays, CheckCircle2 } from "lucide-react";
 import { captureAttribution, readAttribution } from "@/lib/attribution";
 
+type WebsiteRating = "Ja" | "Nein";
+
 type Status = "idle" | "submitting" | "success" | "error";
 
 // Same visual language as LpLeadForm — 54px inputs, 12px radius,
@@ -41,6 +43,11 @@ export function LpLeadFormPainpoints({
 }: LpLeadFormPainpointsProps) {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
+  // Website rating — same Ja/Nein toggle pattern as the LP form's
+  // "Bist du Inhaber / Entscheider?" question. Default "Ja" so a
+  // submit without the visitor touching the toggle still carries a
+  // sensible answer.
+  const [websiteLiked, setWebsiteLiked] = useState<WebsiteRating>("Ja");
 
   // Remember the ad click that brought this visitor here.
   useEffect(() => {
@@ -69,6 +76,7 @@ export function LpLeadFormPainpoints({
           nachname: data.nachname,
           telefon: data.telefon,
           email: data.email,
+          websiteLiked,
           pageUrl,
           attribution: readAttribution(),
         }),
@@ -200,6 +208,30 @@ export function LpLeadFormPainpoints({
             className={inputClass}
           />
         </label>
+
+        {/* Website-Feedback — same Ja/Nein toggle shape as the LP form's
+            "Bist du Inhaber / Entscheider?" question, so both forms feel
+            like they come from one system. */}
+        <fieldset className="flex flex-col gap-2">
+          <legend className={labelClass}>Gefällt dir die Website?</legend>
+          <div className="mt-2 grid grid-cols-2 gap-3">
+            {(["Ja", "Nein"] as const).map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setWebsiteLiked(v)}
+                aria-pressed={websiteLiked === v}
+                className={`h-[50px] rounded-[12px] border font-body text-[15px] transition-colors ${
+                  websiteLiked === v
+                    ? "border-purple-2/60 bg-purple-1/20 text-white"
+                    : "border-white/10 bg-white/[0.03] text-white/60 hover:border-white/20"
+                }`}
+              >
+                {v}
+              </button>
+            ))}
+          </div>
+        </fieldset>
 
         {status === "error" && (
           <p className="flex items-center gap-2 font-body text-[14px] text-red-400">

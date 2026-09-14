@@ -63,7 +63,7 @@ export default function LpHeroPainpoints() {
               between "Handwerks" and "unternehmer" — invisible unless the
               browser actually breaks there.
             */}
-            <h1 className="mt-1 max-w-full [hyphens:auto] break-words font-display font-bold leading-[1.02] tracking-[-0.03em] text-white text-[clamp(40px,8vw,72px)] xl:mt-2 xl:text-[clamp(54px,4.8vw,72px)] xl:leading-[1.05]">
+            <h1 className="mt-1 max-w-full [hyphens:auto] break-words font-display font-bold leading-[1.04] tracking-[-0.03em] text-white text-[clamp(34px,6.2vw,56px)] xl:mt-2 xl:text-[clamp(44px,3.8vw,56px)] xl:leading-[1.06]">
               Handwerks{"­"}unternehmer.
             </h1>
 
