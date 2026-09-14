@@ -1,4 +1,5 @@
-import { ArrowRight } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, Star } from "lucide-react";
 import { Marquee } from "@/components/ui/Marquee";
 import { TRUST_LINE, TRUST_LOGOS } from "@/lib/landing-pages";
 import { LpLeadFormPainpoints } from "./LpLeadFormPainpoints";
@@ -159,6 +160,47 @@ export default function LpHeroPainpoints() {
               </div>
             ))}
           </Marquee>
+
+          {/* Star testimonial — anchors the bottom of the hero with the
+              Hörmann quote (the same case study the LP already spotlights
+              in "Der Beweis" + LpCaseStudy). Profile swap point:
+              replace the src below with the specific portrait the
+              campaign owner attached — hoermann-team.webp is the
+              existing team photo used as a safe fallback so the block
+              never renders empty. */}
+          <div className="mx-auto mt-10 flex w-full max-w-[720px] items-center gap-4 px-2 md:mt-12 md:gap-5 lg:mt-14">
+            <div className="size-14 shrink-0 overflow-hidden rounded-full ring-1 ring-white/20 md:size-[60px]">
+              <Image
+                src="/figma/lp/cases/hoermann-team.webp"
+                alt="Hörmann Geschäftsführer, Wärmepumpen-Betrieb"
+                width={64}
+                height={64}
+                className="size-full object-cover"
+              />
+            </div>
+            <div className="flex flex-col gap-[6px]">
+              <div
+                className="flex items-center gap-[3px]"
+                aria-label="5 von 5 Sternen"
+              >
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star
+                    key={i}
+                    aria-hidden
+                    className="size-[15px] fill-amber-400 text-amber-400"
+                    strokeWidth={0}
+                  />
+                ))}
+              </div>
+              <blockquote className="font-body text-[14px] italic leading-[21px] text-white/85 md:text-[15px] md:leading-[23px]">
+                „Von 4 auf 18 Millionen in zwei Jahren — ohne einen Euro
+                mehr Werbebudget."
+              </blockquote>
+              <cite className="font-body text-[12px] not-italic leading-[16px] text-white/50 md:text-[13px]">
+                Hörmann Geschäftsführer, Wärmepumpen-Betrieb
+              </cite>
+            </div>
+          </div>
         </div>
       </div>
     </section>
