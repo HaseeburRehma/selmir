@@ -6,6 +6,15 @@ import "./globals.css";
 const GTM_ID = "GTM-NDNHKBX9";
 const META_PIXEL_ID = "1677666316641507";
 
+// Microsoft Clarity — click / scroll / rage-click heatmaps + session
+// recordings for EVERY page on the site (root layout wraps them all).
+// The project id lives in NEXT_PUBLIC_CLARITY_PROJECT_ID so no rebuild
+// is needed to swap projects, and if the env var isn't set we render
+// nothing (no console spam, no dead requests). Sign up at
+// clarity.microsoft.com — the project id is the short alnum slug in
+// the tracking snippet Clarity gives you (e.g. "abc123xyz").
+const CLARITY_PROJECT_ID = process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID;
+
 const prata = Prata({
   weight: "400",
   subsets: ["latin"],
@@ -113,6 +122,22 @@ fbq('init', '${META_PIXEL_ID}');
 fbq('track', 'PageView');`}
         </Script>
         {/* End Meta Pixel */}
+
+        {/* Microsoft Clarity — heatmaps + session recordings on every
+            page. Only rendered when NEXT_PUBLIC_CLARITY_PROJECT_ID is
+            configured, so local dev + preview branches without the env
+            var stay clean. `strategy="lazyOnload"` keeps ~40KB of
+            Clarity JS out of the LCP critical path. */}
+        {CLARITY_PROJECT_ID && (
+          <Script id="ms-clarity" strategy="lazyOnload">
+            {`(function(c,l,a,r,i,t,y){
+c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window, document, "clarity", "script", "${CLARITY_PROJECT_ID}");`}
+          </Script>
+        )}
+        {/* End Microsoft Clarity */}
       </head>
       <body className="antialiased">
         {/* Google Tag Manager (noscript) */}

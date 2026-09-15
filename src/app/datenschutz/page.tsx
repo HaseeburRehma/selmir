@@ -523,6 +523,40 @@ export default function DatenschutzPage() {
 
       <h2>Analyse-Tools und Werbung</h2>
 
+      <h3>Microsoft Clarity</h3>
+      <p>
+        Wir nutzen den Analysedienst Microsoft Clarity. Anbieter ist die
+        Microsoft Ireland Operations Limited, One Microsoft Place, South County
+        Business Park, Leopardstown, Dublin 18, Irland
+        („Microsoft"). Microsoft Clarity liefert uns anonymisierte
+        Heatmaps und aggregierte Sitzungsaufzeichnungen und hilft uns dabei,
+        das Nutzungserlebnis auf dieser Website zu analysieren und zu
+        verbessern.
+      </p>
+      <p>
+        Erfasst werden dabei u. a. Klick- und Scroll-Verhalten, Mausbewegungen,
+        die verwendeten Endgeräte- und Browserdaten sowie die aufgerufenen
+        Seiten. Formulareingaben, personenbezogene Daten und die
+        IP-Adresse werden von Microsoft Clarity automatisch maskiert bzw.
+        gekürzt und nicht in unverschlüsselter Form gespeichert.
+      </p>
+      <p>
+        Die Nutzung von Microsoft Clarity erfolgt auf Grundlage deiner
+        Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TDDDG.
+        Die Einwilligung ist jederzeit mit Wirkung für die Zukunft
+        widerrufbar. Weitere Informationen zum Umgang mit Nutzerdaten bei
+        Microsoft Clarity findest du in der Datenschutzerklärung von
+        Microsoft:{" "}
+        <a
+          href="https://privacy.microsoft.com/de-de/privacystatement"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          privacy.microsoft.com/de-de/privacystatement
+        </a>
+        .
+      </p>
+
       <h3>Google Analytics</h3>
       <p>
         Diese Website nutzt Funktionen des Webanalysedienstes Google Analytics.
