@@ -13,6 +13,10 @@
  *       (payload has `formType: "kontakt"`)
  *   • Handwerker-Painpoints (LP form)   → Sheet4
  *       (payload has `formType: "painpoints"`)
+ *   • Betriebs-Röntgen wizard           → "Betriebs-Roentgen"
+ *       (payload has `formType: "betriebs-roentgen"` — the top-right
+ *        "Potenzialanalyse sichern" CTA on the site; 18-col tab with
+ *        contact + full wizard answers)
  *   • Meta Instant Form (Handwerker)    → "Handwerker Erstgespräch"
  *       (payload has a top-level `properties` object — HubSpot workflow
  *        4921990350 sends this via its Send-Webhook action after HubSpot's
@@ -75,6 +79,7 @@ var TAB_KONTAKT = 'Sheet3';                  // site-wide Kontaktformular
 var TAB_PAINPOINTS = 'Sheet4';               // Handwerker-Painpoints WEBSITE form
 var TAB_META_HANDWERKER = 'Handwerker Erstgespräch'; // Meta Instant Form leads (HubSpot -> sheet)
 var TAB_SMS_VERIFIED = 'Verifiziert – nicht abgeschickt'; // SMS code approved but form not submitted
+var TAB_BR = 'Betriebs-Roentgen';            // Betriebs-Röntgen wizard submissions (18-col tab)
 
 var HEADERS_LP = [
   'Zeitstempel',
@@ -107,6 +112,31 @@ var HEADERS_PAINPOINTS = [
   'Seiten-URL',
   'UTM Source',
   'UTM Campaign',
+];
+
+// Betriebs-Röntgen wizard — the 18-column tab the client set up by hand
+// in the "Meta Ads Leads" spreadsheet. Column A is intentionally left
+// as a plain timestamp so Sheets orders newest-last naturally; every
+// other column matches the wizard payload built by /api/betriebs-roentgen/submit.
+var HEADERS_BR = [
+  'Zeitstempel',
+  'Name',
+  'E-Mail',
+  'Telefonnummer',
+  'Branche',
+  'Jahresumsatz (EUR)',
+  'Mitarbeiter',
+  'Anfragen / Monat',
+  'Ø Auftragswert (EUR)',
+  'Abschlussquote (0-10)',
+  'Reaktionszeit',
+  'Wochenstunden Inhaber',
+  'Vertrieb ohne dich',
+  'Vertriebsprozess',
+  'Nachfassen',
+  'Branchen-Frage 1',
+  'Branchen-Frage 2',
+  'Seiten-URL',
 ];
 
 // Abandoned SMS-verified visitors — the 8-column tab tracks the phone
@@ -167,11 +197,16 @@ function doPost(e) {
 
     var isMetaHandwerker = formType === 'meta-handwerker';
     var isSmsVerified = !isMetaHandwerker && formType === 'sms-verified';
-    var isPainpoints = !isMetaHandwerker && !isSmsVerified && formType === 'painpoints';
-    var isKontakt = !isMetaHandwerker && !isSmsVerified && !isPainpoints && formType === 'kontakt';
+    var isBetriebsRoentgen =
+      !isMetaHandwerker && !isSmsVerified && formType === 'betriebs-roentgen';
+    var isPainpoints =
+      !isMetaHandwerker && !isSmsVerified && !isBetriebsRoentgen && formType === 'painpoints';
+    var isKontakt =
+      !isMetaHandwerker && !isSmsVerified && !isBetriebsRoentgen && !isPainpoints && formType === 'kontakt';
     var isLeitfaden =
       !isMetaHandwerker &&
       !isSmsVerified &&
+      !isBetriebsRoentgen &&
       !isPainpoints &&
       !isKontakt &&
       (formType === 'leitfaden' ||
@@ -182,6 +217,8 @@ function doPost(e) {
       ? TAB_META_HANDWERKER
       : isSmsVerified
       ? TAB_SMS_VERIFIED
+      : isBetriebsRoentgen
+      ? TAB_BR
       : isPainpoints
       ? TAB_PAINPOINTS
       : isKontakt
@@ -193,6 +230,8 @@ function doPost(e) {
       ? HEADERS_META_HANDWERKER
       : isSmsVerified
       ? HEADERS_SMS_VERIFIED
+      : isBetriebsRoentgen
+      ? HEADERS_BR
       : isPainpoints
       ? HEADERS_PAINPOINTS
       : isKontakt
@@ -256,6 +295,32 @@ function doPost(e) {
         hsPhone,                                                       // telefonnummer
         pv('company') || pv('name_des_unternehmens'),                  // company
         pv('email'),                                                   // e-mail-adresse
+      ];
+    } else if (isBetriebsRoentgen) {
+      // Betriebs-Röntgen wizard — the full qualifying picture (contact
+      // block + 5 core answers + industry-specific pair) so Sales can
+      // read the whole diagnosis without pivoting to HubSpot. Column
+      // order MUST match the tab the client set up by hand (see
+      // HEADERS_BR above).
+      row = [
+        new Date(),                            // A Zeitstempel
+        body.name || '',                       // B Name (already "First Last")
+        body.email || '',                      // C E-Mail
+        phone,                                 // D Telefonnummer (verified E.164)
+        body.industry || '',                   // E Branche (incl. "Sonstiges — <text>")
+        body.umsatz || '',                     // F Jahresumsatz (EUR)
+        body.mitarbeiter || '',                // G Mitarbeiter
+        body.anfragenMonat || '',              // H Anfragen / Monat
+        body.auftragWert || '',                // I Ø Auftragswert (EUR)
+        body.abschlussquote != null ? body.abschlussquote : '', // J Abschlussquote (0-10)
+        body.reaktionszeit || '',              // K Reaktionszeit
+        body.wochenstunden || '',              // L Wochenstunden Inhaber
+        body.coreVertrieb || '',               // M Vertrieb ohne dich
+        body.coreProzess || '',                // N Vertriebsprozess
+        body.coreNachfassen || '',             // O Nachfassen
+        body.industryQ1 || '',                 // P Branchen-Frage 1
+        body.industryQ2 || '',                 // Q Branchen-Frage 2
+        body.pageUrl || '',                    // R Seiten-URL
       ];
     } else if (isSmsVerified) {
       // SMS was verified but the visitor never clicked Submit. Only the
@@ -383,6 +448,7 @@ function listTabs() {
   known[TAB_PAINPOINTS] = 1;
   known[TAB_META_HANDWERKER] = 1;
   known[TAB_SMS_VERIFIED] = 1;
+  known[TAB_BR] = 1;
   var lines = ['name | rows | status'];
   for (var i = 0; i < sheets.length; i++) {
     var s = sheets[i];
@@ -412,6 +478,7 @@ function cleanupUnusedTabs() {
   known[TAB_PAINPOINTS] = 1;
   known[TAB_META_HANDWERKER] = 1;
   known[TAB_SMS_VERIFIED] = 1;
+  known[TAB_BR] = 1;
 
   var deleted = [];
   var keptWithData = [];
