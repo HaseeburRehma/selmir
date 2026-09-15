@@ -177,6 +177,13 @@ export default function BetriebsRoentgenTool() {
   const cachedPhone = useReadVerifiedPhoneCookie();
   const [skipSms, setSkipSms] = useState(false);
 
+  // Verify-only capture: the moment Twilio approves the code, we push
+  // the phone into HubSpot + sheet — even if the visitor never clicks
+  // Submit. Guards prevent hammering Twilio (the code is one-shot).
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [verifyingCode, setVerifyingCode] = useState(false);
+  const lastVerifiedCode = useRef<string | null>(null);
+
   // Cloudflare Turnstile — invisible bot check gating the send-code
   // call so a script can't burn our Twilio budget.
   const [tsToken, setTsToken] = useState<string | null>(null);
@@ -268,8 +275,65 @@ export default function BetriebsRoentgenTool() {
       setCode("");
       setCodeSent(false);
       setNormalizedPhone(null);
+      setPhoneVerified(false);
+      lastVerifiedCode.current = null;
     }
   }, [phone, normalizedPhone, skipSms]);
+
+  // Auto-fire /api/phone/verify-only the moment the visitor types the
+  // full 6-digit code. Betriebs-Röntgen is the highest-intent form on
+  // the site, so capturing the verified phone even when the visitor
+  // bounces from step 4 is the biggest lift here.
+  useEffect(() => {
+    if (skipSms || !codeSent || phoneVerified || verifyingCode) return;
+    if (!/^\d{6}$/.test(code)) return;
+    if (lastVerifiedCode.current === code) return;
+    lastVerifiedCode.current = code;
+    setVerifyingCode(true);
+    const ac = new AbortController();
+    (async () => {
+      try {
+        const res = await fetch("/api/phone/verify-only", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            phone: normalizedPhone ?? phone,
+            code,
+            source: "betriebs-roentgen",
+            firstName,
+            lastName,
+            email,
+            pageUrl:
+              typeof window !== "undefined" ? window.location.href : "",
+          }),
+          signal: ac.signal,
+        }).then((r) => r.json());
+        if (res?.ok) {
+          setPhoneVerified(true);
+          setSkipSms(true);
+          setCodeErr(null);
+        } else {
+          lastVerifiedCode.current = null;
+        }
+      } catch {
+        lastVerifiedCode.current = null;
+      } finally {
+        setVerifyingCode(false);
+      }
+    })();
+    return () => ac.abort();
+  }, [
+    code,
+    codeSent,
+    email,
+    firstName,
+    lastName,
+    normalizedPhone,
+    phone,
+    phoneVerified,
+    skipSms,
+    verifyingCode,
+  ]);
 
   function resetTurnstile() {
     if (tsWidgetId.current && window.turnstile) {

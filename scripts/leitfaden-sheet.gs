@@ -19,6 +19,11 @@
  *        native Meta Ads sync creates the contact. The workflow uses
  *        "Include all triggered contact properties" as its request body,
  *        so we auto-detect that shape and route to this tab.)
+ *   • SMS verified, form not submitted  → "Verifiziert – nicht abgeschickt"
+ *       (payload has `formType: "sms-verified"` — POSTed by
+ *        /api/phone/verify-only the moment the visitor's Twilio code is
+ *        approved. Same person completing the form later still lands in
+ *        their normal tab; this row stays as the abandonment marker.)
  *
  * Sheet1 + Sheet2 share the same 7-column header:
  *   A Zeitstempel   B Name   C Telefonnummer   D Firma / Betrieb
@@ -69,6 +74,7 @@ var TAB_LEITFADEN = 'Sheet2';                // leitfaden lead magnet
 var TAB_KONTAKT = 'Sheet3';                  // site-wide Kontaktformular
 var TAB_PAINPOINTS = 'Sheet4';               // Handwerker-Painpoints WEBSITE form
 var TAB_META_HANDWERKER = 'Handwerker Erstgespräch'; // Meta Instant Form leads (HubSpot -> sheet)
+var TAB_SMS_VERIFIED = 'Verifiziert – nicht abgeschickt'; // SMS code approved but form not submitted
 
 var HEADERS_LP = [
   'Zeitstempel',
@@ -101,6 +107,21 @@ var HEADERS_PAINPOINTS = [
   'Seiten-URL',
   'UTM Source',
   'UTM Campaign',
+];
+
+// Abandoned SMS-verified visitors — the 8-column tab tracks the phone
+// they proved they own plus whatever else they had already typed. The
+// LP / Meta enrichment lives on the contact's proper row when they later
+// come back and finish; this row stays as the abandonment audit trail.
+var HEADERS_SMS_VERIFIED = [
+  'Zeitstempel',
+  'Telefonnummer',
+  'Vorname',
+  'Nachname',
+  'E-Mail',
+  'Quelle',
+  'Seiten-URL',
+  'Status',
 ];
 
 // Matches Meta's native Google-Sheets connector column layout so this
@@ -145,10 +166,12 @@ function doPost(e) {
     }
 
     var isMetaHandwerker = formType === 'meta-handwerker';
-    var isPainpoints = !isMetaHandwerker && formType === 'painpoints';
-    var isKontakt = !isMetaHandwerker && !isPainpoints && formType === 'kontakt';
+    var isSmsVerified = !isMetaHandwerker && formType === 'sms-verified';
+    var isPainpoints = !isMetaHandwerker && !isSmsVerified && formType === 'painpoints';
+    var isKontakt = !isMetaHandwerker && !isSmsVerified && !isPainpoints && formType === 'kontakt';
     var isLeitfaden =
       !isMetaHandwerker &&
+      !isSmsVerified &&
       !isPainpoints &&
       !isKontakt &&
       (formType === 'leitfaden' ||
@@ -157,6 +180,8 @@ function doPost(e) {
 
     var tabName = isMetaHandwerker
       ? TAB_META_HANDWERKER
+      : isSmsVerified
+      ? TAB_SMS_VERIFIED
       : isPainpoints
       ? TAB_PAINPOINTS
       : isKontakt
@@ -166,6 +191,8 @@ function doPost(e) {
       : TAB_LP;
     var headers = isMetaHandwerker
       ? HEADERS_META_HANDWERKER
+      : isSmsVerified
+      ? HEADERS_SMS_VERIFIED
       : isPainpoints
       ? HEADERS_PAINPOINTS
       : isKontakt
@@ -229,6 +256,20 @@ function doPost(e) {
         hsPhone,                                                       // telefonnummer
         pv('company') || pv('name_des_unternehmens'),                  // company
         pv('email'),                                                   // e-mail-adresse
+      ];
+    } else if (isSmsVerified) {
+      // SMS was verified but the visitor never clicked Submit. Only the
+      // phone is guaranteed; every other field is best-effort — the row
+      // still gives sales a callable number.
+      row = [
+        new Date(),                            // Zeitstempel
+        phone,                                 // Telefonnummer (verified)
+        body.firstName || body.vorname || '',  // Vorname
+        body.lastName || body.nachname || '',  // Nachname
+        body.email || '',                      // E-Mail (may be empty)
+        body.source || body.landingPage || '', // Quelle (page slug)
+        body.pageUrl || '',                    // Seiten-URL
+        'Verifiziert – nicht abgeschickt',     // Status
       ];
     } else if (isPainpoints) {
       row = [
@@ -323,4 +364,74 @@ function ensureHeader_(sheet, headers) {
 function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * ONE-TIME CLEANUP — list every tab in this spreadsheet.
+ *
+ * Run manually from the Apps Script editor (Run → listTabs). The output
+ * lands in View → Execution log so you can see which tabs are legacy
+ * and worth removing.
+ */
+function listTabs() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheets = ss.getSheets();
+  var known = {};
+  known[TAB_LP] = 1;
+  known[TAB_LEITFADEN] = 1;
+  known[TAB_KONTAKT] = 1;
+  known[TAB_PAINPOINTS] = 1;
+  known[TAB_META_HANDWERKER] = 1;
+  known[TAB_SMS_VERIFIED] = 1;
+  var lines = ['name | rows | status'];
+  for (var i = 0; i < sheets.length; i++) {
+    var s = sheets[i];
+    var name = s.getName();
+    var rows = Math.max(0, s.getLastRow() - 1); // minus header
+    lines.push(name + ' | ' + rows + ' | ' + (known[name] ? 'KEEP' : 'LEGACY?'));
+  }
+  Logger.log(lines.join('\n'));
+  return lines.join('\n');
+}
+
+/**
+ * ONE-TIME CLEANUP — delete every tab that is NOT in the router allowlist
+ * AND has zero data rows. Legacy empty tabs are removed silently; legacy
+ * tabs with data are logged and LEFT ALONE so nothing is ever lost
+ * without a human decision.
+ *
+ * Run from the Apps Script editor (Run → cleanupUnusedTabs). Re-run is safe.
+ */
+function cleanupUnusedTabs() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheets = ss.getSheets();
+  var known = {};
+  known[TAB_LP] = 1;
+  known[TAB_LEITFADEN] = 1;
+  known[TAB_KONTAKT] = 1;
+  known[TAB_PAINPOINTS] = 1;
+  known[TAB_META_HANDWERKER] = 1;
+  known[TAB_SMS_VERIFIED] = 1;
+
+  var deleted = [];
+  var keptWithData = [];
+  for (var i = 0; i < sheets.length; i++) {
+    var s = sheets[i];
+    var name = s.getName();
+    if (known[name]) continue;
+    var rows = Math.max(0, s.getLastRow() - 1);
+    if (rows === 0 && sheets.length - deleted.length > 1) {
+      ss.deleteSheet(s);
+      deleted.push(name);
+    } else {
+      keptWithData.push(name + ' (' + rows + ' rows)');
+    }
+  }
+  var summary =
+    'Deleted (empty legacy): ' +
+    (deleted.length ? deleted.join(', ') : '(none)') +
+    '\nKept (legacy with data — decide manually): ' +
+    (keptWithData.length ? keptWithData.join(', ') : '(none)');
+  Logger.log(summary);
+  return summary;
 }

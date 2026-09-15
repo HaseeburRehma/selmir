@@ -303,6 +303,125 @@ async function findContactIdByPhone(phone: string): Promise<string | null> {
   return found.results?.[0]?.id ?? null;
 }
 
+/* ------------------------------------------------------------------ */
+/* "SMS verified, form not submitted" — abandonment capture             */
+/* ------------------------------------------------------------------ */
+
+export interface SmsVerifiedContact {
+  /** Verified E.164 phone. Dedup key for the contact. */
+  phone: string;
+  /** Which source form / page (e.g. "leitfaden", "betriebs-roentgen"). */
+  source: string;
+  /** Optional identifier bits the user may already have typed. */
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  /** Full URL of the page the user was on. */
+  pageUrl?: string;
+}
+
+/**
+ * Upsert a contact when the phone was verified via Twilio SMS but the
+ * user hasn't submitted the actual lead form yet. Keyed on phone (matches
+ * findContactIdByPhone) so a later successful submit updates the SAME
+ * contact instead of duplicating.
+ *
+ * The status property `hs_lead_status="OPEN"` and a marker note in
+ * `message` make abandoners identifiable in HubSpot without needing a
+ * new custom property. If SMS_VERIFIED_HUBSPOT_LIST_ID is configured,
+ * the contact is also added to that list for easy retargeting.
+ */
+export async function submitSmsVerifiedToHubSpot(
+  contact: SmsVerifiedContact,
+): Promise<string> {
+  const properties: Record<string, string> = {
+    phone: contact.phone,
+    lifecyclestage: "lead",
+    // "Neu" — this is a brand-new lead that hasn't finished the form.
+    hs_lead_status: "NEW",
+    message: [
+      "SMS verifiziert – Formular nicht abgeschickt",
+      `Quelle: ${contact.source}`,
+    ].join(" · "),
+    lead_source: "SMS-Verifizierung (Abbruch)",
+    lead_magnet: contact.source,
+    lp_landing_page: contact.source,
+    lp_submitted_at: new Date().toISOString(),
+  };
+  if (contact.firstName) properties.firstname = contact.firstName;
+  if (contact.lastName) properties.lastname = contact.lastName;
+  if (contact.email) properties.email = contact.email;
+
+  const existingId = await findContactIdByPhone(contact.phone);
+
+  const patchOrCreate = async (
+    id: string | null,
+    props: Record<string, string>,
+  ): Promise<{ id: string } | { failedStatus: number; failedText: string }> => {
+    if (id) {
+      // PATCH: only overwrite the abandonment flags. Never overwrite an
+      // already-set firstname / lastname / email with blanks — the user
+      // may have completed the form on an earlier visit.
+      const patchProps = { ...props };
+      if (!contact.firstName) delete patchProps.firstname;
+      if (!contact.lastName) delete patchProps.lastname;
+      if (!contact.email) delete patchProps.email;
+      const patchRes = await fetch(`${BASE}/crm/v3/objects/contacts/${id}`, {
+        method: "PATCH",
+        headers: authHeaders(),
+        body: JSON.stringify({ properties: patchProps }),
+      });
+      if (patchRes.ok) return { id };
+      return { failedStatus: patchRes.status, failedText: await patchRes.text() };
+    }
+    const createRes = await fetch(`${BASE}/crm/v3/objects/contacts`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ properties: props }),
+    });
+    if (createRes.ok) {
+      const created = (await createRes.json()) as { id: string };
+      return { id: created.id };
+    }
+    return { failedStatus: createRes.status, failedText: await createRes.text() };
+  };
+
+  const first = await patchOrCreate(existingId, properties);
+  if ("id" in first) {
+    // Optional: add to a segment list so the sales team can see abandoners
+    // separately from other lead sources.
+    const listId = process.env.SMS_VERIFIED_HUBSPOT_LIST_ID;
+    if (listId) {
+      await addToList(listId, first.id).catch((err) => {
+        console.warn(
+          "[hubspot] sms-verified list add failed:",
+          (err as Error).message,
+        );
+      });
+    }
+    return first.id;
+  }
+
+  // Same tolerance for portals missing the two-level tagging properties.
+  if (
+    first.failedStatus === 400 &&
+    /lead_source|lead_magnet/i.test(first.failedText)
+  ) {
+    const { lead_source: _s, lead_magnet: _m, ...rest } = properties;
+    void _s;
+    void _m;
+    const retry = await patchOrCreate(existingId, rest);
+    if ("id" in retry) return retry.id;
+    throw new Error(
+      `HubSpot sms-verified retry failed: ${retry.failedStatus} ${retry.failedText}`,
+    );
+  }
+
+  throw new Error(
+    `HubSpot sms-verified failed: ${first.failedStatus} ${first.failedText}`,
+  );
+}
+
 export async function trackSaleInHubSpot(sale: TicketSale): Promise<string> {
   const contactId = await upsertContact(sale);
 

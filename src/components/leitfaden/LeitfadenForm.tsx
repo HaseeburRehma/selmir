@@ -80,6 +80,14 @@ export default function LeitfadenForm({
   const [normalizedPhone, setNormalizedPhone] = useState<string | null>(null);
   const [resendIn, setResendIn] = useState(0); // seconds until user may re-send
 
+  // Verify-only state: once the SMS code is confirmed we mark the phone
+  // as verified in HubSpot + sheet even if the visitor never clicks
+  // Submit. Guards below prevent hammering Twilio if the auto-fire
+  // triggers multiple times for the same code.
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [verifyingCode, setVerifyingCode] = useState(false);
+  const lastVerifiedCode = useRef<string | null>(null);
+
   /**
    * "Verified phone" cookie. When the server issued `sh_pv` on a previous
    * successful subscribe, we skip the SMS step entirely — matching the
@@ -141,6 +149,60 @@ export default function LeitfadenForm({
     const t = setTimeout(() => setResendIn((s) => s - 1), 1000);
     return () => clearTimeout(t);
   }, [resendIn]);
+
+  // Auto-fire /api/phone/verify-only the moment the visitor types the
+  // full 6-digit code. Even if they abandon the form afterwards, we've
+  // already captured the verified phone in HubSpot + sheet. Guards keep
+  // us from double-firing (Twilio consumes the code on first check).
+  useEffect(() => {
+    if (skipSms || !codeSent || phoneVerified || verifyingCode) return;
+    if (!/^\d{6}$/.test(code)) return;
+    if (lastVerifiedCode.current === code) return;
+    lastVerifiedCode.current = code;
+    setVerifyingCode(true);
+    const ac = new AbortController();
+    (async () => {
+      try {
+        const res = await fetch("/api/phone/verify-only", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            phone: normalizedPhone ?? phone,
+            code,
+            source: "leitfaden",
+            firstName: name,
+            email,
+            pageUrl:
+              typeof window !== "undefined" ? window.location.href : "",
+          }),
+          signal: ac.signal,
+        }).then((r) => r.json());
+        if (res?.ok) {
+          setPhoneVerified(true);
+          // Cookie is set — subsequent submit uses the skip-SMS path.
+          setSkipSms(true);
+        } else {
+          // Wrong / expired code — let the user retry and try again.
+          lastVerifiedCode.current = null;
+        }
+      } catch {
+        lastVerifiedCode.current = null;
+      } finally {
+        setVerifyingCode(false);
+      }
+    })();
+    return () => ac.abort();
+  }, [
+    code,
+    codeSent,
+    email,
+    name,
+    normalizedPhone,
+    phone,
+    phoneVerified,
+    skipSms,
+    verifyingCode,
+  ]);
 
   // Pre-populate the phone field on return visits and enable the skip
   // path so the SMS button + code input never render.
