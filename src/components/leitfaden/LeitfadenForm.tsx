@@ -150,59 +150,60 @@ export default function LeitfadenForm({
     return () => clearTimeout(t);
   }, [resendIn]);
 
-  // Auto-fire /api/phone/verify-only the moment the visitor types the
-  // full 6-digit code. Even if they abandon the form afterwards, we've
-  // already captured the verified phone in HubSpot + sheet. Guards keep
-  // us from double-firing (Twilio consumes the code on first check).
-  useEffect(() => {
-    if (skipSms || !codeSent || phoneVerified || verifyingCode) return;
-    if (!/^\d{6}$/.test(code)) return;
+  // Explicit "Verifizieren" click handler: verifies the code with Twilio,
+  // captures the phone in HubSpot + sheet even if the visitor never
+  // clicks Submit, and unlocks the Submit button below. Twilio consumes
+  // the code on first check, so this MUST be gated behind a deliberate
+  // click — we do not auto-fire on typing (would burn the code before
+  // the visitor even had a chance to read it back).
+  async function onVerifyCode() {
+    if (skipSms || phoneVerified || verifyingCode) return;
+    if (!/^\d{6}$/.test(code)) {
+      setStatus("err");
+      setMsg("Bitte gib den 6-stelligen SMS-Code ein.");
+      return;
+    }
     if (lastVerifiedCode.current === code) return;
     lastVerifiedCode.current = code;
     setVerifyingCode(true);
-    const ac = new AbortController();
-    (async () => {
-      try {
-        const res = await fetch("/api/phone/verify-only", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            phone: normalizedPhone ?? phone,
-            code,
-            source: "leitfaden",
-            firstName: name,
-            email,
-            pageUrl:
-              typeof window !== "undefined" ? window.location.href : "",
-          }),
-          signal: ac.signal,
-        }).then((r) => r.json());
-        if (res?.ok) {
-          setPhoneVerified(true);
-          // Cookie is set — subsequent submit uses the skip-SMS path.
-          setSkipSms(true);
-        } else {
-          // Wrong / expired code — let the user retry and try again.
-          lastVerifiedCode.current = null;
-        }
-      } catch {
+    setStatus("idle");
+    setMsg(null);
+    try {
+      const res = await fetch("/api/phone/verify-only", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: normalizedPhone ?? phone,
+          code,
+          source: "leitfaden",
+          firstName: name,
+          email,
+          pageUrl:
+            typeof window !== "undefined" ? window.location.href : "",
+        }),
+      }).then((r) => r.json());
+      if (res?.ok) {
+        setPhoneVerified(true);
+        // Cookie is set — subsequent submit uses the skip-SMS path so
+        // Twilio isn't asked to check the (now-consumed) code again.
+        setSkipSms(true);
+      } else {
+        // Wrong / expired code — let the user retry with a fresh one.
         lastVerifiedCode.current = null;
-      } finally {
-        setVerifyingCode(false);
+        setStatus("err");
+        setMsg(
+          res?.reason ??
+            "Der Code konnte nicht verifiziert werden. Bitte fordere einen neuen an.",
+        );
       }
-    })();
-    return () => ac.abort();
-  }, [
-    code,
-    codeSent,
-    email,
-    name,
-    normalizedPhone,
-    phone,
-    phoneVerified,
-    skipSms,
-    verifyingCode,
-  ]);
+    } catch {
+      lastVerifiedCode.current = null;
+      setStatus("err");
+      setMsg("Netzwerkfehler bei der Code-Prüfung.");
+    } finally {
+      setVerifyingCode(false);
+    }
+  }
 
   // Pre-populate the phone field on return visits and enable the skip
   // path so the SMS button + code input never render.
@@ -272,6 +273,9 @@ export default function LeitfadenForm({
 
     // Skip path: returning visitor with a still-valid `sh_pv` cookie for
     // this phone. Server re-verifies the HMAC before honouring it.
+    // Fresh-visitor path: the "Nummer verifizieren" click must have set
+    // `phoneVerified` first — Twilio consumed the code there and set the
+    // sh_pv cookie, so this submit goes through the cookie skip-path.
     if (!skipSms) {
       if (!codeSent) {
         setStatus("err");
@@ -280,9 +284,11 @@ export default function LeitfadenForm({
         );
         return;
       }
-      if (!/^\d{4,10}$/.test(code)) {
+      if (!phoneVerified) {
         setStatus("err");
-        setMsg("Bitte gib den 6-stelligen SMS-Code ein.");
+        setMsg(
+          "Bitte klicke zuerst auf „Nummer verifizieren“, um deinen SMS-Code zu bestätigen.",
+        );
         return;
       }
     }
@@ -441,31 +447,69 @@ export default function LeitfadenForm({
           <label className="font-body text-[13px] font-semibold text-white/75">
             SMS-Code <span className="text-purple-2">*</span>
           </label>
-          <div className="relative">
-            <ShieldCheck className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-purple-2/80" />
-            <input
-              className={inputCls + " pl-10 tracking-[0.4em]"}
-              type="text"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              required
-              value={code}
-              onChange={(e) =>
-                setCode(e.target.value.replace(/\D/g, "").slice(0, 10))
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+            <div className="relative flex-1">
+              <ShieldCheck className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-purple-2/80" />
+              <input
+                className={inputCls + " pl-10 tracking-[0.4em]"}
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                required
+                value={code}
+                onChange={(e) => {
+                  const next = e.target.value.replace(/\D/g, "").slice(0, 10);
+                  setCode(next);
+                  // Editing the code drops any previous verification — we
+                  // want a fresh Twilio check when the user re-verifies.
+                  if (phoneVerified) {
+                    setPhoneVerified(false);
+                    setSkipSms(false);
+                    lastVerifiedCode.current = null;
+                  }
+                }}
+                placeholder="123456"
+                maxLength={10}
+                disabled={phoneVerified}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={onVerifyCode}
+              disabled={
+                phoneVerified || verifyingCode || !/^\d{6}$/.test(code)
               }
-              placeholder="123456"
-              maxLength={10}
-            />
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-[10px] border border-purple-2/40 bg-purple-2/[0.14] px-4 font-body text-[13.5px] font-semibold text-white transition-colors hover:bg-purple-2/[0.22] disabled:pointer-events-none disabled:opacity-50 sm:h-auto"
+            >
+              <ShieldCheck className="size-4" />
+              {verifyingCode
+                ? "Wird verifiziert…"
+                : phoneVerified
+                  ? "Verifiziert"
+                  : "Nummer verifizieren"}
+            </button>
           </div>
+          {phoneVerified ? (
+            <span className="inline-flex items-center gap-1.5 font-body text-[12px] text-purple-2">
+              <Check className="size-3.5" />
+              Nummer bestätigt — du kannst jetzt fortfahren.
+            </span>
+          ) : (
+            <span className="font-body text-[12px] text-white/50">
+              Klicke auf <b className="text-white/75">Nummer verifizieren</b>{" "}
+              nachdem du den 6-stelligen Code eingetragen hast.
+            </span>
+          )}
         </div>
       )}
     </>
   );
 
+  const canSubmit = skipSms || phoneVerified;
   const Submit = (
     <button
       type="submit"
-      disabled={status === "loading" || (!codeSent && !skipSms)}
+      disabled={status === "loading" || !canSubmit}
       className="btn-gradient group flex h-14 w-full items-center justify-center gap-2 rounded-[10px] px-5 text-center text-black transition-transform duration-300 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-70"
     >
       <span className="font-body text-[15px] font-bold uppercase tracking-[0.6px] lg:text-[16px]">

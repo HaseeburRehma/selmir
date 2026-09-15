@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Script from "next/script";
-import { Check, Lock } from "lucide-react";
+import { Check, Lock, ShieldCheck } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { TURNSTILE_SITE_KEY } from "@/lib/turnstile";
 import {
@@ -280,60 +280,53 @@ export default function BetriebsRoentgenTool() {
     }
   }, [phone, normalizedPhone, skipSms]);
 
-  // Auto-fire /api/phone/verify-only the moment the visitor types the
-  // full 6-digit code. Betriebs-Röntgen is the highest-intent form on
-  // the site, so capturing the verified phone even when the visitor
-  // bounces from step 4 is the biggest lift here.
-  useEffect(() => {
-    if (skipSms || !codeSent || phoneVerified || verifyingCode) return;
-    if (!/^\d{6}$/.test(code)) return;
+  // Explicit "Nummer verifizieren" click handler — gates Twilio's
+  // one-shot check behind a deliberate user click (never auto-fired on
+  // typing). Betriebs-Röntgen is the highest-intent form on the site,
+  // so this button is what unlocks the "Röntgenbild jetzt freischalten"
+  // Submit below.
+  async function onVerifyCode() {
+    if (skipSms || phoneVerified || verifyingCode) return;
+    if (!/^\d{6}$/.test(code)) {
+      setCodeErr("Bitte gib den 6-stelligen SMS-Code ein.");
+      return;
+    }
     if (lastVerifiedCode.current === code) return;
     lastVerifiedCode.current = code;
     setVerifyingCode(true);
-    const ac = new AbortController();
-    (async () => {
-      try {
-        const res = await fetch("/api/phone/verify-only", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            phone: normalizedPhone ?? phone,
-            code,
-            source: "betriebs-roentgen",
-            firstName,
-            lastName,
-            email,
-            pageUrl:
-              typeof window !== "undefined" ? window.location.href : "",
-          }),
-          signal: ac.signal,
-        }).then((r) => r.json());
-        if (res?.ok) {
-          setPhoneVerified(true);
-          setSkipSms(true);
-          setCodeErr(null);
-        } else {
-          lastVerifiedCode.current = null;
-        }
-      } catch {
+    setCodeErr(null);
+    try {
+      const res = await fetch("/api/phone/verify-only", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: normalizedPhone ?? phone,
+          code,
+          source: "betriebs-roentgen",
+          firstName,
+          lastName,
+          email,
+          pageUrl:
+            typeof window !== "undefined" ? window.location.href : "",
+        }),
+      }).then((r) => r.json());
+      if (res?.ok) {
+        setPhoneVerified(true);
+        setSkipSms(true);
+      } else {
         lastVerifiedCode.current = null;
-      } finally {
-        setVerifyingCode(false);
+        setCodeErr(
+          res?.reason ??
+            "Der Code konnte nicht verifiziert werden. Bitte fordere einen neuen an.",
+        );
       }
-    })();
-    return () => ac.abort();
-  }, [
-    code,
-    codeSent,
-    email,
-    firstName,
-    lastName,
-    normalizedPhone,
-    phone,
-    phoneVerified,
-    skipSms,
-    verifyingCode,
-  ]);
+    } catch {
+      lastVerifiedCode.current = null;
+      setCodeErr("Netzwerkfehler bei der Code-Prüfung.");
+    } finally {
+      setVerifyingCode(false);
+    }
+  }
 
   function resetTurnstile() {
     if (tsWidgetId.current && window.turnstile) {
@@ -389,7 +382,12 @@ export default function BetriebsRoentgenTool() {
     (q) => coreAns[q.key] !== undefined,
   );
   const canLeaveStage3 = industryQ.every((q) => indAns[q.key] !== undefined);
-  const hasPhoneProof = skipSms || (codeSent && /^\d{4,10}$/.test(code));
+  // Submit is only unlocked after the visitor clicked "Nummer
+  // verifizieren" and Twilio approved the code (or a returning-visitor
+  // sh_pv cookie let us skip Twilio entirely). The sms-verified capture
+  // fires inside onVerifyCode, so this guard also guarantees we've
+  // already captured the phone in HubSpot + sheet before Submit runs.
+  const hasPhoneProof = skipSms || phoneVerified;
   const canSubmit =
     firstName.trim().length > 1 &&
     /^\S+@\S+\.\S+$/.test(email) &&
@@ -863,7 +861,16 @@ export default function BetriebsRoentgenTool() {
                       label="SMS-Code *"
                       placeholder="6-stelliger Code"
                       value={code}
-                      onChange={setCode}
+                      onChange={(next) => {
+                        setCode(next);
+                        // Editing the code invalidates any previous
+                        // verification — force a fresh Twilio check.
+                        if (phoneVerified) {
+                          setPhoneVerified(false);
+                          setSkipSms(false);
+                          lastVerifiedCode.current = null;
+                        }
+                      }}
                       type="tel"
                       autoComplete="one-time-code"
                     />
@@ -888,16 +895,49 @@ export default function BetriebsRoentgenTool() {
                       </button>
                     </div>
                   </div>
-                  {codeSent && !codeErr && (
+                  {codeSent && !codeErr && !phoneVerified && (
                     <p className="mt-2 font-body text-[12.5px] text-emerald-300/90">
-                      Code gesendet an {normalizedPhone ?? phone}. Bitte
-                      hier eintragen.
+                      Code gesendet an {normalizedPhone ?? phone}. Trage
+                      ihn oben ein und klicke „Nummer verifizieren".
                     </p>
                   )}
                   {codeErr && (
                     <p className="mt-2 font-body text-[12.5px] text-red-300">
                       {codeErr}
                     </p>
+                  )}
+                  {/* Explicit verify button — user must click before the
+                      "Röntgenbild jetzt freischalten" Submit unlocks. */}
+                  {codeSent && (
+                    <button
+                      type="button"
+                      onClick={onVerifyCode}
+                      disabled={
+                        phoneVerified ||
+                        verifyingCode ||
+                        !/^\d{6}$/.test(code)
+                      }
+                      className={
+                        "mt-3 inline-flex h-[46px] w-full items-center justify-center gap-2 rounded-[10px] px-4 font-body text-[13.5px] font-semibold transition-colors disabled:pointer-events-none disabled:opacity-50 " +
+                        (phoneVerified
+                          ? "border border-emerald-400/50 bg-emerald-400/[0.14] text-emerald-200"
+                          : "border border-purple-2/40 bg-purple-2/[0.14] text-white hover:bg-purple-2/[0.22]")
+                      }
+                    >
+                      {phoneVerified ? (
+                        <>
+                          <ShieldCheck className="size-4" />
+                          Verifiziert — du kannst jetzt fortfahren
+                        </>
+                      ) : verifyingCode ? (
+                        "Wird verifiziert …"
+                      ) : (
+                        <>
+                          <ShieldCheck className="size-4" />
+                          Nummer verifizieren
+                        </>
+                      )}
+                    </button>
                   )}
                   {/* Invisible Turnstile — Cloudflare mounts here and
                       auto-solves in the background. */}

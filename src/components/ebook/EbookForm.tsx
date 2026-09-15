@@ -127,59 +127,55 @@ export default function EbookForm() {
     }
   }, [cachedPhone, phone]);
 
-  // Auto-fire /api/phone/verify-only when the 6-digit code lands so the
-  // phone is captured in HubSpot + sheet even if the visitor bounces
-  // without clicking Submit. Twilio consumes the code on first check,
-  // so the follow-up submit uses the sh_pv cookie skip-path.
-  useEffect(() => {
-    if (skipSms || !codeSent || phoneVerified || verifyingCode) return;
-    if (!/^\d{6}$/.test(code)) return;
+  // Explicit "Nummer verifizieren" click handler — see LeitfadenForm for
+  // the pattern. Twilio consumes the code on first check, so this is
+  // gated behind a deliberate click (never auto-fired on typing).
+  async function onVerifyCode() {
+    if (skipSms || phoneVerified || verifyingCode) return;
+    if (!/^\d{6}$/.test(code)) {
+      setStatus("err");
+      setMsg("Bitte gib den 6-stelligen SMS-Code ein.");
+      return;
+    }
     if (lastVerifiedCode.current === code) return;
     lastVerifiedCode.current = code;
     setVerifyingCode(true);
-    const ac = new AbortController();
-    (async () => {
-      try {
-        const res = await fetch("/api/phone/verify-only", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            phone: normalizedPhone ?? phone,
-            code,
-            source: "ebook",
-            firstName: name,
-            lastName,
-            email,
-            pageUrl:
-              typeof window !== "undefined" ? window.location.href : "",
-          }),
-          signal: ac.signal,
-        }).then((r) => r.json());
-        if (res?.ok) {
-          setPhoneVerified(true);
-          setSkipSms(true);
-        } else {
-          lastVerifiedCode.current = null;
-        }
-      } catch {
+    setStatus("idle");
+    setMsg(null);
+    try {
+      const res = await fetch("/api/phone/verify-only", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: normalizedPhone ?? phone,
+          code,
+          source: "ebook",
+          firstName: name,
+          lastName,
+          email,
+          pageUrl:
+            typeof window !== "undefined" ? window.location.href : "",
+        }),
+      }).then((r) => r.json());
+      if (res?.ok) {
+        setPhoneVerified(true);
+        setSkipSms(true);
+      } else {
         lastVerifiedCode.current = null;
-      } finally {
-        setVerifyingCode(false);
+        setStatus("err");
+        setMsg(
+          res?.reason ??
+            "Der Code konnte nicht verifiziert werden. Bitte fordere einen neuen an.",
+        );
       }
-    })();
-    return () => ac.abort();
-  }, [
-    code,
-    codeSent,
-    email,
-    lastName,
-    name,
-    normalizedPhone,
-    phone,
-    phoneVerified,
-    skipSms,
-    verifyingCode,
-  ]);
+    } catch {
+      lastVerifiedCode.current = null;
+      setStatus("err");
+      setMsg("Netzwerkfehler bei der Code-Prüfung.");
+    } finally {
+      setVerifyingCode(false);
+    }
+  }
 
   function resetTurnstile() {
     if (tsWidgetId.current && window.turnstile) {
@@ -244,9 +240,11 @@ export default function EbookForm() {
         );
         return;
       }
-      if (!/^\d{4,10}$/.test(code)) {
+      if (!phoneVerified) {
         setStatus("err");
-        setMsg("Bitte gib den 6-stelligen SMS-Code ein.");
+        setMsg(
+          "Bitte klicke zuerst auf „Nummer verifizieren“, um deinen SMS-Code zu bestätigen.",
+        );
         return;
       }
     }
@@ -438,28 +436,64 @@ export default function EbookForm() {
         />
       </div>
 
-      {/* SMS-Code input — only after send-code succeeds */}
+      {/* SMS-Code input — only after send-code succeeds. The user must
+          click "Nummer verifizieren" here before the Submit below unlocks. */}
       {codeSent && !skipSms && (
         <div className="flex flex-col gap-1.5">
           <label className="font-body text-[13px] font-semibold text-white/75">
             SMS-Code <span className="text-purple-2">*</span>
           </label>
-          <div className="relative">
-            <ShieldCheck className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-purple-2/80" />
-            <input
-              className={inputCls + " pl-10 tracking-[0.4em]"}
-              type="text"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              required
-              value={code}
-              onChange={(e) =>
-                setCode(e.target.value.replace(/\D/g, "").slice(0, 10))
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+            <div className="relative flex-1">
+              <ShieldCheck className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-purple-2/80" />
+              <input
+                className={inputCls + " pl-10 tracking-[0.4em]"}
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                required
+                value={code}
+                onChange={(e) => {
+                  const next = e.target.value.replace(/\D/g, "").slice(0, 10);
+                  setCode(next);
+                  if (phoneVerified) {
+                    setPhoneVerified(false);
+                    setSkipSms(false);
+                    lastVerifiedCode.current = null;
+                  }
+                }}
+                placeholder="123456"
+                maxLength={10}
+                disabled={phoneVerified}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={onVerifyCode}
+              disabled={
+                phoneVerified || verifyingCode || !/^\d{6}$/.test(code)
               }
-              placeholder="123456"
-              maxLength={10}
-            />
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-[10px] border border-purple-2/40 bg-purple-2/[0.14] px-4 font-body text-[13.5px] font-semibold text-white transition-colors hover:bg-purple-2/[0.22] disabled:pointer-events-none disabled:opacity-50 sm:h-auto"
+            >
+              <ShieldCheck className="size-4" />
+              {verifyingCode
+                ? "Wird verifiziert…"
+                : phoneVerified
+                  ? "Verifiziert"
+                  : "Nummer verifizieren"}
+            </button>
           </div>
+          {phoneVerified ? (
+            <span className="inline-flex items-center gap-1.5 font-body text-[12px] text-purple-2">
+              <Check className="size-3.5" />
+              Nummer bestätigt — du kannst jetzt fortfahren.
+            </span>
+          ) : (
+            <span className="font-body text-[12px] text-white/50">
+              Klicke auf <b className="text-white/75">Nummer verifizieren</b>{" "}
+              nachdem du den 6-stelligen Code eingetragen hast.
+            </span>
+          )}
         </div>
       )}
 
@@ -469,7 +503,9 @@ export default function EbookForm() {
 
       <button
         type="submit"
-        disabled={status === "loading" || (!codeSent && !skipSms)}
+        disabled={
+          status === "loading" || (!skipSms && !phoneVerified)
+        }
         className="btn-gradient group flex h-14 w-full items-center justify-center gap-2 rounded-[10px] px-5 text-center text-black transition-transform duration-300 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-70"
       >
         <span className="font-body text-[15px] font-bold uppercase tracking-[0.6px] lg:text-[16px]">
