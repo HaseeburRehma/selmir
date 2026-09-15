@@ -8,12 +8,14 @@ const META_PIXEL_ID = "1677666316641507";
 
 // Microsoft Clarity — click / scroll / rage-click heatmaps + session
 // recordings for EVERY page on the site (root layout wraps them all).
-// The project id lives in NEXT_PUBLIC_CLARITY_PROJECT_ID so no rebuild
-// is needed to swap projects, and if the env var isn't set we render
-// nothing (no console spam, no dead requests). Sign up at
-// clarity.microsoft.com — the project id is the short alnum slug in
-// the tracking snippet Clarity gives you (e.g. "abc123xyz").
-const CLARITY_PROJECT_ID = process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID;
+// The id is a public token (Clarity's snippet is shipped in every
+// page's HTML), so it's baked in here alongside GTM_ID / META_PIXEL_ID
+// — no separate env var to keep in sync across environments. To swap
+// projects, replace the string below (or set
+// NEXT_PUBLIC_CLARITY_PROJECT_ID in Vercel to override without a
+// code change).
+const CLARITY_PROJECT_ID =
+  process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID ?? "yiqkjah7vn";
 
 const prata = Prata({
   weight: "400",
