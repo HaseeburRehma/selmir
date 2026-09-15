@@ -145,7 +145,7 @@ export default function Navbar() {
 
         <div className="hidden lg:block">
           <Button href="/betriebs-roentgen" className="!h-12 !px-4 !text-[11px] xl:!px-6 xl:!text-[13px]">
-            Potenzialanalyse sichern
+            Betrieb röntgen
           </Button>
         </div>
 
@@ -211,7 +211,7 @@ export default function Navbar() {
             ))}
             <li className="pt-2">
               <Button href="/betriebs-roentgen" full icon={<CalendarDays className="size-5" />}>
-                Potenzialanalyse sichern
+                Betrieb röntgen
               </Button>
             </li>
           </ul>
