@@ -65,6 +65,11 @@ export default function WhitepaperForm() {
   const [normalizedPhone, setNormalizedPhone] = useState<string | null>(null);
   const [resendIn, setResendIn] = useState(0);
 
+  // Verify-only capture — see LeitfadenForm for the pattern.
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [verifyingCode, setVerifyingCode] = useState(false);
+  const lastVerifiedCode = useRef<string | null>(null);
+
   // Skip-SMS cookie — same helper used by LeitfadenForm.
   const cachedPhone = useReadVerifiedPhoneCookie();
   const [skipSms, setSkipSms] = useState(false);
@@ -121,6 +126,60 @@ export default function WhitepaperForm() {
       setSkipSms(true);
     }
   }, [cachedPhone, phone]);
+
+  // Auto-fire /api/phone/verify-only when the 6-digit code lands so the
+  // phone is captured in HubSpot + sheet even if the visitor bounces
+  // without clicking Submit. Twilio consumes the code on first check,
+  // so the follow-up submit uses the sh_pv cookie skip-path.
+  useEffect(() => {
+    if (skipSms || !codeSent || phoneVerified || verifyingCode) return;
+    if (!/^\d{6}$/.test(code)) return;
+    if (lastVerifiedCode.current === code) return;
+    lastVerifiedCode.current = code;
+    setVerifyingCode(true);
+    const ac = new AbortController();
+    (async () => {
+      try {
+        const res = await fetch("/api/phone/verify-only", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            phone: normalizedPhone ?? phone,
+            code,
+            source: "whitepaper",
+            firstName: name,
+            lastName,
+            email,
+            pageUrl:
+              typeof window !== "undefined" ? window.location.href : "",
+          }),
+          signal: ac.signal,
+        }).then((r) => r.json());
+        if (res?.ok) {
+          setPhoneVerified(true);
+          setSkipSms(true);
+        } else {
+          lastVerifiedCode.current = null;
+        }
+      } catch {
+        lastVerifiedCode.current = null;
+      } finally {
+        setVerifyingCode(false);
+      }
+    })();
+    return () => ac.abort();
+  }, [
+    code,
+    codeSent,
+    email,
+    lastName,
+    name,
+    normalizedPhone,
+    phone,
+    phoneVerified,
+    skipSms,
+    verifyingCode,
+  ]);
 
   function resetTurnstile() {
     if (tsWidgetId.current && window.turnstile) {
