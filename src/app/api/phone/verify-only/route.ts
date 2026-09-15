@@ -128,30 +128,39 @@ export async function POST(req: NextRequest) {
   }
   const phone = twilio.phone;
 
-  // 2. HubSpot upsert — never blocks the response.
-  void submitSmsVerifiedToHubSpot({
-    phone,
-    source,
-    firstName: firstName || undefined,
-    lastName: lastName || undefined,
-    email: email || undefined,
-    pageUrl,
-  }).catch((err) => {
-    console.warn(
-      "[verify-only] hubspot upsert failed:",
-      (err as Error).message,
-    );
-  });
-
-  // 3. Sheet append — fire-and-forget, same as HubSpot.
-  void appendToSheet({
-    phone,
-    firstName,
-    lastName,
-    email,
-    source,
-    pageUrl,
-  });
+  // 2 + 3. HubSpot upsert + sheet append. AWAITED — a plain fire-and-
+  // forget promise (`void ...`) can get cut short on Vercel serverless
+  // when the function shuts down after the response returns, and the
+  // multi-step HubSpot upsert (search → create → optional list add)
+  // then never finishes. Both must finish before we return.
+  //
+  // Each call catches its own errors so one failure never blocks the
+  // other, and the endpoint always returns 200 to the client (the code
+  // is already consumed by Twilio at this point — a client-visible
+  // error would be misleading).
+  await Promise.all([
+    submitSmsVerifiedToHubSpot({
+      phone,
+      source,
+      firstName: firstName || undefined,
+      lastName: lastName || undefined,
+      email: email || undefined,
+      pageUrl,
+    }).catch((err) => {
+      console.warn(
+        "[verify-only] hubspot upsert failed:",
+        (err as Error).message,
+      );
+    }),
+    appendToSheet({
+      phone,
+      firstName,
+      lastName,
+      email,
+      source,
+      pageUrl,
+    }),
+  ]);
 
   // 4. sh_pv cookie so the eventual form submit skips a second Twilio
   //    check (the verification has already been consumed above).
